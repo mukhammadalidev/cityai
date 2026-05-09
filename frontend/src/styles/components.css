@@ -1,0 +1,162 @@
+/* Page header gradient strip */
+.cs-page-header {
+  margin-bottom: 24px;
+  padding: 22px 24px;
+  border-radius: var(--cs-radius);
+  background: linear-gradient(120deg, rgba(22, 119, 255, 0.08), rgba(114, 46, 209, 0.06));
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--cs-shadow);
+}
+
+.cs-page-header__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cs-muted);
+  margin-bottom: 6px;
+}
+
+.cs-page-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.cs-page-header__desc {
+  margin: 8px 0 0;
+  color: var(--cs-muted);
+  max-width: 640px;
+  line-height: 1.5;
+}
+
+/* Stat cards */
+.cs-stat-card {
+  border-radius: var(--cs-radius) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: var(--cs-shadow) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cs-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cs-shadow-hover) !important;
+}
+
+.cs-stat-card .ant-statistic-title {
+  color: var(--cs-muted) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.cs-stat-card .ant-statistic-content {
+  font-weight: 800 !important;
+  font-size: 1.5rem !important;
+}
+
+/* Cards grid */
+.cs-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cs-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--cs-shadow-hover) !important;
+}
+
+/* Empty state */
+.cs-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--cs-muted);
+}
+
+/* Tables */
+.cs-table-wrap .ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Bronlar: tor ustunlarda matn harfma-harf vertikal bo‘lib ketmasin */
+.cs-bookings-table .ant-table-cell {
+  word-break: normal;
+  overflow-wrap: normal;
+  vertical-align: top;
+}
+
+.cs-bookings-table .ant-table-thead > tr > th {
+  white-space: nowrap;
+}
+
+/* Category / business cards */
+.cs-category-card {
+  border-radius: var(--cs-radius);
+  padding: 20px;
+  background: var(--cs-surface);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--cs-shadow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 100%;
+}
+
+.cs-category-card:hover {
+  border-color: rgba(22, 119, 255, 0.35);
+  box-shadow: var(--cs-shadow-hover);
+}
+
+.cs-business-card {
+  border-radius: var(--cs-radius);
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--cs-shadow);
+  background: var(--cs-surface);
+  transition: all 0.2s ease;
+}
+
+.cs-business-card:hover {
+  box-shadow: var(--cs-shadow-hover);
+}
+
+/* Kanban */
+.cs-kanban-col {
+  min-width: 260px;
+  background: rgba(15, 23, 42, 0.03);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.cs-kanban-card {
+  background: var(--cs-surface);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.cs-public-hero {
+  padding: 48px 24px 40px;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(120deg, #0b1220, #1d4ed8);
+}
+
+.cs-promo-slider {
+  margin-top: 18px;
+  max-width: 760px;
+}
+
+.cs-promo-slide {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-height: 148px;
+}
+
+.cs-promo-slide a {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 600;
+}

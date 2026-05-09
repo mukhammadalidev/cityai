@@ -1,0 +1,138 @@
+import { Menu, Space, Tag } from "antd";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  BookOpen,
+  Brain,
+  Calendar,
+  GraduationCap,
+  IdCard,
+  Layers,
+  LayoutDashboard,
+  Library,
+  Package,
+  Receipt,
+  Settings,
+  Sparkles,
+  Users,
+  UserCog,
+  Lock,
+} from "lucide-react";
+import { getBusinessTypeConfig } from "../../config/businessTypes";
+
+export default function BusinessSidebar({ collapsed, businessType, plan }) {
+  const cfg = getBusinessTypeConfig(businessType);
+  const nav = useNavigate();
+  const loc = useLocation();
+
+  const showKnowledge = !plan || plan.has_ai_chat;
+  const showAiUsage = !plan || plan.has_ai_chat;
+  const showMarketing = !plan || plan.has_marketing_generator;
+  const showEduMaterials = !plan || plan.has_edu_materials;
+
+  const isRestaurant = businessType === "restaurant";
+
+  const ordersLabel = cfg.ordersLabel || "Buyurtmalar";
+  const showOrders =
+    isRestaurant ||
+    businessType === "shop" ||
+    businessType === "repair_service" ||
+    businessType === "taxi_delivery" ||
+    businessType === "photo_video";
+
+  const withLock = (label, locked) =>
+    locked ? (
+      <Space size={6}>
+        <span>{label}</span>
+        <Lock size={13} />
+        <Tag color="gold" style={{ marginInlineEnd: 0 }}>
+          Premium
+        </Tag>
+      </Space>
+    ) : (
+      label
+    );
+
+  const items = isRestaurant
+    ? [
+        { key: "/business/dashboard", icon: LayoutDashboard, label: "Boshqaruv" },
+        { key: "/business/items", icon: Package, label: cfg.itemsLabel || "Menyu" },
+        { key: "/business/bookings", icon: Calendar, label: cfg.bookingsLabel || "Bronlar" },
+        { key: "/business/orders", icon: Receipt, label: ordersLabel },
+        {
+          key: "/business/knowledge",
+          icon: BookOpen,
+          label: withLock("AI bilim bazasi", !showKnowledge),
+          locked: !showKnowledge,
+        },
+        { key: "/business/settings", icon: Settings, label: "Sozlamalar" },
+      ]
+    : [
+        { key: "/business/dashboard", icon: LayoutDashboard, label: "Boshqaruv" },
+        { key: "/business/items", icon: Package, label: cfg.itemsLabel },
+        { key: "/business/leads", icon: Users, label: cfg.leadsLabel },
+        ...(businessType === "education_center"
+          ? [
+              { key: "/business/students", icon: GraduationCap, label: "O‘quvchilar va davomat" },
+              { key: "/business/student-groups", icon: Layers, label: "O‘quv guruhlari" },
+              { key: "/business/teachers", icon: IdCard, label: "Ustozlar" },
+              {
+                key: "/business/materials",
+                icon: Library,
+                label: withLock("Materiallar", !showEduMaterials),
+                locked: !showEduMaterials,
+              },
+            ]
+          : []),
+        { key: "/business/bookings", icon: Calendar, label: cfg.bookingsLabel || "Bronlar" },
+        ...(showOrders ? [{ key: "/business/orders", icon: Receipt, label: ordersLabel }] : []),
+        {
+          key: "/business/knowledge",
+          icon: BookOpen,
+          label: withLock("AI bilim bazasi", !showKnowledge),
+          locked: !showKnowledge,
+        },
+        { key: "/business/managers", icon: UserCog, label: "Menejerlar" },
+        {
+          key: "/business/ai-usage",
+          icon: Brain,
+          label: withLock("AI sarfi", !showAiUsage),
+          locked: !showAiUsage,
+        },
+        {
+          key: "/business/marketing",
+          icon: Sparkles,
+          label: withLock("Marketing", !showMarketing),
+          locked: !showMarketing,
+        },
+        { key: "/business/billing", icon: Receipt, label: "Billing" },
+        { key: "/business/settings", icon: Settings, label: "Sozlamalar" },
+      ];
+
+  const selected =
+    [...items].sort((a, b) => b.key.length - a.key.length).find((m) => loc.pathname.startsWith(m.key))?.key ||
+    "/business/dashboard";
+
+  return (
+    <Menu
+      theme="dark"
+      mode="inline"
+      selectedKeys={[selected]}
+      inlineCollapsed={collapsed}
+      className="cs-sider-menu"
+      style={{ border: "none", background: "transparent", flex: 1, overflow: "auto" }}
+      onClick={({ key }) => {
+        const target = items.find((m) => m.key === key);
+        if (target?.locked) {
+          nav("/business/billing");
+          return;
+        }
+        nav(key);
+      }}
+      items={items.map((m) => ({
+        key: m.key,
+        icon: <m.icon size={18} />,
+        label: m.label,
+      }))}
+    />
+  );
+}

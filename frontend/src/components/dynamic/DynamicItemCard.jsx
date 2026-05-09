@@ -1,0 +1,81 @@
+import { Card, Space, Tag } from "antd";
+import { formatPrice, mediaUrl } from "../../utils/formatters";
+
+export default function DynamicItemCard({ item, businessType, onClick }) {
+  const m = item.metadata || {};
+  const cover = item.image ? mediaUrl(item.image) : null;
+  let extra = null;
+  if (businessType === "auto_salon") {
+    extra = (
+      <Space wrap size={4}>
+        {[m.brand, m.model, m.year].filter(Boolean).join(" · ")}
+        {m.mileage != null && <Tag>{m.mileage} km</Tag>}
+        {m.fuel_type && <Tag>{m.fuel_type}</Tag>}
+        {m.has_credit && <Tag color="blue">Kredit</Tag>}
+        {m.has_trade_in && <Tag color="purple">Trade-in</Tag>}
+      </Space>
+    );
+  } else if (businessType === "education_center") {
+    extra = (
+      <Space direction="vertical" size={0}>
+        <span>{m.duration && `Davomiylik: ${m.duration}`}</span>
+        <span>{m.teacher && `O‘qituvchi: ${m.teacher}`}</span>
+        {m.level && <Tag>{m.level}</Tag>}
+      </Space>
+    );
+  } else if (businessType === "shop") {
+    extra = (
+      <Space>
+        {m.stock != null && <Tag>Ombor: {m.stock}</Tag>}
+        {m.discount && <Tag color="red">{m.discount}</Tag>}
+        {m.brand && <Tag>{m.brand}</Tag>}
+      </Space>
+    );
+  } else if (businessType === "restaurant") {
+    const available = m.available !== false;
+    extra = (
+      <Space direction="vertical" size={4} style={{ width: "100%" }}>
+        <Space wrap size={4}>
+          <Tag color={available ? "green" : "default"}>{available ? "Mavjud" : "Mavjud emas"}</Tag>
+          {m.is_spicy && <Tag color="red">Achchiq</Tag>}
+          {m.category && <Tag>{m.category}</Tag>}
+          {m.preparation_time && <Tag color="blue">{m.preparation_time} daq</Tag>}
+        </Space>
+        {m.ingredients && (
+          <span style={{ fontSize: 12, color: "var(--cs-muted)" }}>{m.ingredients}</span>
+        )}
+      </Space>
+    );
+  } else if (businessType === "clinic") {
+    extra = (
+      <Space direction="vertical" size={0}>
+        {m.doctor_name && <span>{m.doctor_name}</span>}
+        {m.specialty && <Tag>{m.specialty}</Tag>}
+        {m.consultation_price && <span>Narx: {m.consultation_price}</span>}
+      </Space>
+    );
+  } else {
+    extra = m.note ? <span style={{ fontSize: 12 }}>{m.note}</span> : null;
+  }
+
+  return (
+    <Card
+      className="cs-card-hover"
+      hoverable
+      onClick={onClick}
+      cover={
+        cover ? (
+          <img
+            src={cover}
+            alt={item.title}
+            style={{ height: 160, objectFit: "cover" }}
+          />
+        ) : undefined
+      }
+      title={item.title}
+    >
+      <div style={{ fontWeight: 700, marginBottom: 8 }}>{formatPrice(item.price, item.currency)}</div>
+      {extra}
+    </Card>
+  );
+}

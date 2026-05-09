@@ -1,0 +1,71 @@
+:root {
+  --cs-bg: #f5f7fb;
+  --cs-surface: #ffffff;
+  --cs-text: #1a1d24;
+  --cs-muted: #64748b;
+  --cs-primary: #1677ff;
+  --cs-sidebar: #0b1220;
+  --cs-sidebar-border: rgba(148, 163, 184, 0.12);
+  --cs-sidebar-text: rgba(226, 232, 240, 0.75);
+  --cs-sidebar-active: #93c5fd;
+  --cs-radius: 14px;
+  --cs-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --cs-shadow-hover: 0 12px 40px rgba(15, 23, 42, 0.1);
+  --font: "Inter", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--cs-primary);
+}
+
+/* Auth */
+.cs-auth-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(22, 119, 255, 0.12), transparent),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(114, 46, 209, 0.1), transparent), var(--cs-bg);
+}
+
+.cs-auth-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--cs-radius) !important;
+  box-shadow: var(--cs-shadow-hover) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+.cs-auth-brand {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(120deg, #1677ff, #722ed1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 4px;
+}
+
+.cs-auth-tag {
+  color: var(--cs-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
