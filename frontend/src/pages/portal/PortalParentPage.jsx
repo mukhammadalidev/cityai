@@ -1,7 +1,8 @@
-import { Card, Descriptions, Row, Col, Statistic, Table, Typography, message } from "antd";
+import { Button, Card, Descriptions, Form, Input, Row, Col, Statistic, Table, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import LoadingScreen from "../../components/ui/LoadingScreen";
+import { fetchMe, patchParentTelegram } from "../../services/authService";
 import { getParentPortalSummary } from "../../services/portalService";
 import { formatPhone } from "../../utils/formatters";
 
@@ -11,6 +12,8 @@ const STATUS_UZ = { active: "Faol", paused: "Tanaffus", graduated: "Bitirgan" };
 export default function PortalParentPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tgForm] = Form.useForm();
+  const [tgSaving, setTgSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -28,6 +31,17 @@ export default function PortalParentPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const u = await fetchMe();
+        tgForm.setFieldsValue({ telegram_id: u.telegram_id || "" });
+      } catch {
+        /* sessiya yo‘q bo‘lsa — form bo‘sh */
+      }
+    })();
+  }, [tgForm]);
+
   if (loading && !data) return <LoadingScreen />;
   if (!data) return <Typography.Text>Yuklash muvaffaqiyatsiz.</Typography.Text>;
 
@@ -38,10 +52,63 @@ export default function PortalParentPage() {
       <Typography.Title level={4} style={{ marginTop: 0 }}>
         {data.business?.name}
       </Typography.Title>
+      <Typography.Title level={3} style={{ marginTop: 8, marginBottom: 4 }}>
+        Farzand:{" "}
+        <Typography.Text strong style={{ fontSize: "1.15em" }}>
+          {s.name || "—"}
+        </Typography.Text>
+      </Typography.Title>
       <Typography.Text type="secondary">
         {data.business?.city ? `${data.business.city} · ` : null}
-        Farzandingizning o‘qishi va davomati — faqat shu markaz bo‘yicha.
+        O‘qish va davomat — faqat shu farzand va shu markaz bo‘yicha.
       </Typography.Text>
+
+      <Card title="Telegram bildirishnomalar" size="small" style={{ marginTop: 16 }}>
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 12 }}>
+          Farzandingiz davomati o‘zgarganda shu yerga kiritilgan <b>Telegram chat ID</b> ga xabar ketadi. ID ni
+          Telegramda <Typography.Text code>@userinfobot</Typography.Text> ga yozib olishingiz yoki markaz
+          tavsiya qilgan bot orqali bilishingiz mumkin (faqat raqam, masalan:{" "}
+          <Typography.Text code>123456789</Typography.Text>).
+        </Typography.Paragraph>
+        <Form
+          form={tgForm}
+          layout="vertical"
+          onFinish={async (v) => {
+            setTgSaving(true);
+            try {
+              await patchParentTelegram((v.telegram_id || "").trim());
+              message.success("Telegram ID saqlandi. Endi davomat xabarlari shu akkauntga yuboriladi.");
+            } catch (e) {
+              const msg = e?.response?.data?.telegram_id?.[0] || e?.response?.data?.detail;
+              message.error(msg || "Saqlanmadi. Chat ID faqat raqam bo‘lishi kerak.");
+            } finally {
+              setTgSaving(false);
+            }
+          }}
+        >
+          <Form.Item
+            name="telegram_id"
+            label="Telegram chat ID"
+            rules={[
+              {
+                validator: (_, value) => {
+                  const s = (value || "").trim();
+                  if (!s) return Promise.resolve();
+                  if (!/^-?\d{1,20}$/.test(s)) {
+                    return Promise.reject(new Error("Faqat raqam kiriting (5–15 ta raqam odatda)."));
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
+            <Input placeholder="Masalan: 591234567" inputMode="numeric" autoComplete="off" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={tgSaving}>
+            Saqlash
+          </Button>
+        </Form>
+      </Card>
 
       <Card title="Farzand profili" size="small" style={{ marginTop: 16 }}>
         <Descriptions column={1} size="small">

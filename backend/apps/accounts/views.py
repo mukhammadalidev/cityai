@@ -10,7 +10,7 @@ from apps.businesses.serializers import BusinessSerializer
 from apps.service_categories.models import ServiceCategory
 
 from .models import User
-from .serializers import BusinessOwnerRegisterSerializer, UserSerializer
+from .serializers import BusinessOwnerRegisterSerializer, ParentTelegramPatchSerializer, UserSerializer
 
 
 class RegisterBusinessOwnerView(APIView):
@@ -71,6 +71,16 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        user = request.user
+        if user.role != User.Role.EDU_PARENT:
+            return Response({"detail": "Faqat ota-ona kabineti Telegram ID ni yangilay oladi."}, status=403)
+        ser = ParentTelegramPatchSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        user.telegram_id = ser.validated_data["telegram_id"]
+        user.save(update_fields=["telegram_id"])
+        return Response(UserSerializer(user).data)
 
 
 class ManagerListView(APIView):

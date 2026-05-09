@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 
 from apps.city.models import City
@@ -48,6 +50,23 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.portal_parent_id:
             return obj.portal_parent.business.name
         return None
+
+
+class ParentTelegramPatchSerializer(serializers.Serializer):
+    """Ota-ona kabineti: davomat xabarlari uchun Telegram chat ID."""
+
+    telegram_id = serializers.CharField(max_length=50, allow_blank=True, required=True)
+
+    def validate_telegram_id(self, value):
+        v = (value or "").strip()
+        if not v:
+            return ""
+        if not re.fullmatch(r"-?\d{1,20}", v):
+            raise serializers.ValidationError(
+                "Chat ID faqat raqam bo‘lishi kerak (masalan: 987654321). "
+                "Telegramda @userinfobot ga yozing yoki botdagi /myid buyrug‘idan foydalaning."
+            )
+        return v
 
 
 class BusinessOwnerRegisterSerializer(serializers.Serializer):

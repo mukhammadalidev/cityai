@@ -14,6 +14,7 @@ from apps.businesses.services import accessible_business_ids
 from apps.subscriptions.services import get_plan_for_business
 
 from .models import Student, StudentAttendance, StudentGroup, StudentRating
+from .notifications import notify_parents_student_attendance
 from .serializers import (
     StudentAttendanceSerializer,
     StudentGroupSerializer,
@@ -393,12 +394,15 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         st = serializer.validated_data["student"]
         _ensure_business_access(self.request, st.business_id)
-        serializer.save()
+        instance = serializer.save()
+        notify_parents_student_attendance(instance, previous_status=None)
 
     def perform_update(self, serializer):
         st = serializer.validated_data.get("student", serializer.instance.student)
         _ensure_business_access(self.request, st.business_id)
-        serializer.save()
+        old_status = serializer.instance.status
+        instance = serializer.save()
+        notify_parents_student_attendance(instance, previous_status=old_status)
 
     def perform_destroy(self, instance):
         _ensure_business_access(self.request, instance.student.business_id)
@@ -435,6 +439,8 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
                 student = Student.objects.filter(id=sid, business_id=bid).first()
                 if not student:
                     continue
+                prev = StudentAttendance.objects.filter(student=student, date=d).first()
+                prev_status = prev.status if prev else None
                 obj, is_created = StudentAttendance.objects.update_or_create(
                     student=student,
                     date=d,
@@ -444,4 +450,6 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
                     created += 1
                 else:
                     updated += 1
+                if prev_status != obj.status:
+                    notify_parents_student_attendance(obj, previous_status=prev_status)
         return Response({"date": d.isoformat(), "created": created, "updated": updated})

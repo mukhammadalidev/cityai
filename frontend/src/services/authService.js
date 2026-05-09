@@ -15,6 +15,13 @@ export async function fetchMe() {
   return data;
 }
 
+/** Ota-ona kabineti: davomat bildirishnomalari uchun Telegram chat ID (raqam). */
+export async function patchParentTelegram(telegram_id) {
+  const { data } = await api.patch("/auth/me/", { telegram_id: telegram_id ?? "" });
+  setStoredUser(data);
+  return data;
+}
+
 export async function loginWithMe(username, password) {
   const d = await login(username, password);
   if (!d.user) await fetchMe();
