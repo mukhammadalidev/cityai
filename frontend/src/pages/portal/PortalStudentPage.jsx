@@ -54,6 +54,57 @@ export default function PortalStudentPage() {
         </Descriptions>
       </Card>
 
+      <Card title="Baholar (joriy oy)" size="small" style={{ marginTop: 16 }}>
+        <Row gutter={16}>
+          <Col xs={12} sm={8}>
+            <Statistic title="Baho yozuvlari" value={data.ratings_month?.count ?? 0} />
+          </Col>
+          <Col xs={12} sm={8}>
+            <Statistic
+              title="O‘rtacha ball"
+              value={
+                data.ratings_month?.avg_points != null ? `${data.ratings_month.avg_points}` : "—"
+              }
+            />
+          </Col>
+          <Col xs={12} sm={8}>
+            <Statistic
+              title="Reyting (joriy oy)"
+              value={
+                data.ratings_rank_month?.rank != null
+                  ? `${data.ratings_rank_month.rank} / ${data.ratings_rank_month.peers_graded}`
+                  : "—"
+              }
+            />
+          </Col>
+        </Row>
+        {data.ratings_rank_month?.scope_label ? (
+          <Typography.Text type="secondary" style={{ display: "block", marginTop: 8 }}>
+            {data.ratings_rank_month.scope_label}: bahosi bo‘lgan o‘quvchilar orasida.
+          </Typography.Text>
+        ) : null}
+      </Card>
+
+      <Card title="So‘nggi baholar" size="small" style={{ marginTop: 16 }}>
+        <Table
+          size="small"
+          rowKey="id"
+          pagination={{ pageSize: 8 }}
+          dataSource={data.recent_ratings || []}
+          locale={{ emptyText: "Hozircha baho yo‘q" }}
+          columns={[
+            {
+              title: "Sana",
+              dataIndex: "rated_at",
+              render: (d) => (d ? dayjs(d).format("DD.MM.YYYY") : "—"),
+            },
+            { title: "Sarlavha", dataIndex: "title", ellipsis: true },
+            { title: "Ball", dataIndex: "points", width: 72 },
+            { title: "Izoh", dataIndex: "comment", ellipsis: true, render: (v) => v || "—" },
+          ]}
+        />
+      </Card>
+
       <Card title="Davomat (joriy oy)" size="small" style={{ marginTop: 16 }}>
         <Row gutter={16}>
           <Col xs={12} sm={8}>

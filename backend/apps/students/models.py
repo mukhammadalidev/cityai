@@ -84,3 +84,21 @@ class StudentAttendance(models.Model):
 
     def __str__(self) -> str:
         return f"{self.student_id} {self.date} {self.status}"
+
+
+class StudentRating(models.Model):
+    """O‘quvchi baholari (0–100 ball); o‘quvchi va ota-ona portallarida ko‘rinadi."""
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="ratings")
+    title = models.CharField(max_length=200, help_text="Masalan: Matematika — oraliq nazorat")
+    points = models.PositiveSmallIntegerField(help_text="0 dan 100 gacha ball")
+    comment = models.TextField(blank=True)
+    rated_at = models.DateField(db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-rated_at", "-created_at", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.student_id} {self.title} ({self.points})"

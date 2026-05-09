@@ -1,19 +1,47 @@
 import calendar
 from datetime import date
 
-from django.db.models import Count
+from django.db.models import Avg, Count
 from rest_framework import permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.businesses.services import can_edit_business
 from apps.subscriptions.services import get_plan_for_business
-from apps.students.models import Student, StudentAttendance, StudentGroup
-from apps.students.serializers import StudentAttendanceSerializer, StudentSerializer
+from apps.students.models import Student, StudentAttendance, StudentGroup, StudentRating
+from apps.students.serializers import (
+    StudentAttendanceSerializer,
+    StudentRatingSerializer,
+    StudentSerializer,
+)
 from apps.teachers.models import Teacher
 from apps.teachers.serializers import TeacherSerializer
 
 from .models import User
+
+
+def _portal_rating_rank_month(student: Student, start: date, end: date) -> dict:
+    peer_qs = Student.objects.filter(business_id=student.business_id)
+    scope_label = "Markaz bo‘yicha"
+    if student.group_id:
+        peer_qs = peer_qs.filter(group_id=student.group_id)
+        scope_label = "Guruh bo‘yicha"
+    graded = []
+    for sid in peer_qs.values_list("id", flat=True):
+        a = (
+            StudentRating.objects.filter(student_id=sid, rated_at__gte=start, rated_at__lte=end)
+            .aggregate(avg=Avg("points"))
+            .get("avg")
+        )
+        if a is not None:
+            graded.append((sid, float(a)))
+    graded.sort(key=lambda x: (-x[1], x[0]))
+    rank = next((i + 1 for i, (sid, _) in enumerate(graded) if sid == student.id), None)
+    return {
+        "rank": rank,
+        "peers_graded": len(graded),
+        "scope_label": scope_label,
+    }
 
 
 def build_student_portal_payload(student: Student) -> dict:
@@ -38,6 +66,12 @@ def build_student_portal_payload(student: Student) -> dict:
 
     recent = recs.order_by("-date")[:60]
 
+    r_all = StudentRating.objects.filter(student=student)
+    r_month = r_all.filter(rated_at__gte=start, rated_at__lte=end)
+    m_avg = r_month.aggregate(avg=Avg("points")).get("avg")
+    all_avg = r_all.aggregate(avg=Avg("points")).get("avg")
+    recent_ratings = r_all.order_by("-rated_at", "-id")[:30]
+
     return {
         "business": {
             "id": student.business_id,
@@ -57,6 +91,17 @@ def build_student_portal_payload(student: Student) -> dict:
             "rate_percent": round(100 * present / marked, 1) if marked else None,
         },
         "recent_attendance": StudentAttendanceSerializer(recent, many=True).data,
+        "ratings_month": {
+            "month": month_str,
+            "count": r_month.count(),
+            "avg_points": round(float(m_avg), 1) if m_avg is not None else None,
+        },
+        "ratings_overall": {
+            "count": r_all.count(),
+            "avg_points": round(float(all_avg), 1) if all_avg is not None else None,
+        },
+        "ratings_rank_month": _portal_rating_rank_month(student, start, end),
+        "recent_ratings": StudentRatingSerializer(recent_ratings, many=True).data,
     }
 
 

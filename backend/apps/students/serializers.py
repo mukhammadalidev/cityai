@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.accounts.models import User
 
-from .models import Student, StudentAttendance, StudentGroup
+from .models import Student, StudentAttendance, StudentGroup, StudentRating
 
 
 class StudentGroupSerializer(serializers.ModelSerializer):
@@ -66,3 +66,17 @@ class StudentAttendanceSerializer(serializers.ModelSerializer):
         model = StudentAttendance
         fields = "__all__"
         read_only_fields = ("id", "created_at", "updated_at")
+
+
+class StudentRatingSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.name", read_only=True)
+
+    class Meta:
+        model = StudentRating
+        fields = "__all__"
+        read_only_fields = ("id", "created_at", "updated_at")
+
+    def validate_points(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("Ball 0–100 orasida bo‘lishi kerak.")
+        return value

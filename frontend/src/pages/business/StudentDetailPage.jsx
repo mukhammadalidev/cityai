@@ -91,6 +91,9 @@ export default function StudentDetailPage() {
             <Link to="/business/students">
               <Button>O‘quvchilar ro‘yxati</Button>
             </Link>
+            <Link to={`/business/student-ratings?student=${st.id}`}>
+              <Button>Baholar</Button>
+            </Link>
             {st.course ? (
               <Link to={`/business/items/${st.course}`}>
                 <Button type="link">Kurs sahifasi</Button>
@@ -164,6 +167,45 @@ export default function StudentDetailPage() {
           <Typography.Text type="secondary">Kurs biriktirilmagan — tahrirlashda tanlashingiz mumkin.</Typography.Text>
         </Card>
       )}
+
+      {data.ratings ? (
+        <Card title="Baholar (tanlangan davr)" size="small" style={{ marginBottom: 16 }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={12} sm={8}>
+              <Statistic title="Yozuvlar soni" value={data.ratings.count ?? 0} />
+            </Col>
+            <Col xs={12} sm={8}>
+              <Statistic
+                title="O‘rtacha ball"
+                value={data.ratings.avg_points != null ? data.ratings.avg_points : "—"}
+              />
+            </Col>
+          </Row>
+          {data.ratings.recent?.length ? (
+            <Table
+              size="small"
+              style={{ marginTop: 16 }}
+              rowKey="id"
+              pagination={false}
+              dataSource={data.ratings.recent}
+              columns={[
+                {
+                  title: "Sana",
+                  dataIndex: "rated_at",
+                  render: (d) => (d ? dayjs(d).format("DD.MM.YYYY") : "—"),
+                },
+                { title: "Sarlavha", dataIndex: "title", ellipsis: true },
+                { title: "Ball", dataIndex: "points", width: 72 },
+                { title: "Izoh", dataIndex: "comment", ellipsis: true, render: (v) => v || "—" },
+              ]}
+            />
+          ) : (
+            <Typography.Text type="secondary" style={{ display: "block", marginTop: 12 }}>
+              Bu davr uchun baho kiritilmagan.
+            </Typography.Text>
+          )}
+        </Card>
+      ) : null}
 
       <Card title="Davomat statistikasi" size="small" style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]}>

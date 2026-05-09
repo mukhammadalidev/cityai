@@ -2,7 +2,7 @@ import calendar
 from datetime import date
 
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Avg, Count
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -13,8 +13,13 @@ from apps.businesses.models import Business
 from apps.businesses.services import accessible_business_ids
 from apps.subscriptions.services import get_plan_for_business
 
-from .models import Student, StudentAttendance, StudentGroup
-from .serializers import StudentAttendanceSerializer, StudentGroupSerializer, StudentSerializer
+from .models import Student, StudentAttendance, StudentGroup, StudentRating
+from .serializers import (
+    StudentAttendanceSerializer,
+    StudentGroupSerializer,
+    StudentRatingSerializer,
+    StudentSerializer,
+)
 
 
 def _ensure_business_access(request, business_id: int) -> None:
@@ -218,6 +223,13 @@ class StudentViewSet(viewsets.ModelViewSet):
                 "metadata": c.metadata or {},
             }
 
+        r_qs = StudentRating.objects.filter(student=student)
+        if month_str:
+            r_qs = r_qs.filter(rated_at__gte=start, rated_at__lte=end)
+        r_avg = r_qs.aggregate(avg=Avg("points"))["avg"]
+        r_avg_rounded = round(float(r_avg), 1) if r_avg is not None else None
+        recent_ratings = r_qs.order_by("-rated_at", "-id")[:50]
+
         return Response(
             {
                 "student": StudentSerializer(student).data,
@@ -232,8 +244,122 @@ class StudentViewSet(viewsets.ModelViewSet):
                 },
                 "course": course_block,
                 "recent_attendance": StudentAttendanceSerializer(recent, many=True).data,
+                "ratings": {
+                    "count": r_qs.count(),
+                    "avg_points": r_avg_rounded,
+                    "recent": StudentRatingSerializer(recent_ratings, many=True).data,
+                },
             }
         )
+
+    @action(detail=False, methods=["get"], url_path="rating-leaderboard")
+    def rating_leaderboard(self, request):
+        business_id = request.query_params.get("business_id")
+        group_id = request.query_params.get("group_id")
+        month_str = request.query_params.get("month")
+        if not business_id:
+            raise ValidationError({"business_id": "Majburiy"})
+        bid = int(business_id)
+        _ensure_business_access(request, bid)
+
+        st_qs = Student.objects.filter(business_id=bid)
+        if group_id and str(group_id) not in ("0", "none"):
+            st_qs = st_qs.filter(group_id=int(group_id))
+        elif group_id in ("0", "none"):
+            st_qs = st_qs.filter(group__isnull=True)
+
+        rfilter = StudentRating.objects.filter(student__business_id=bid)
+        if group_id and str(group_id) not in ("0", "none"):
+            rfilter = rfilter.filter(student__group_id=int(group_id))
+        elif group_id in ("0", "none"):
+            rfilter = rfilter.filter(student__group__isnull=True)
+
+        if month_str:
+            try:
+                year_s, month_s = month_str.split("-", 1)
+                year, month = int(year_s), int(month_s)
+            except ValueError as e:
+                raise ValidationError({"month": "Format: YYYY-MM"}) from e
+            start = date(year, month, 1)
+            last = calendar.monthrange(year, month)[1]
+            end = date(year, month, last)
+            rfilter = rfilter.filter(rated_at__gte=start, rated_at__lte=end)
+
+        rows = []
+        for s in st_qs.select_related("group").order_by("name", "id"):
+            sub = rfilter.filter(student_id=s.id)
+            agg = sub.aggregate(avg=Avg("points"), n=Count("id"))
+            avg = agg["avg"]
+            rows.append(
+                {
+                    "student_id": s.id,
+                    "name": s.name,
+                    "group_id": s.group_id,
+                    "group_name": s.group.name if s.group_id else "",
+                    "ratings_count": agg["n"] or 0,
+                    "avg_points": round(float(avg), 1) if avg is not None else None,
+                }
+            )
+        graded = [r for r in rows if r["avg_points"] is not None]
+        graded.sort(key=lambda x: (-x["avg_points"], x["name"]))
+        rank_by_id = {r["student_id"]: idx + 1 for idx, r in enumerate(graded)}
+        for row in rows:
+            row["rank"] = rank_by_id.get(row["student_id"])
+        rows.sort(key=lambda x: (-(x["avg_points"] if x["avg_points"] is not None else -1), x["name"]))
+
+        return Response(
+            {
+                "month": month_str,
+                "business_id": bid,
+                "group_id": int(group_id) if group_id and str(group_id).isdigit() else group_id,
+                "rows": rows,
+            }
+        )
+
+
+class StudentRatingViewSet(viewsets.ModelViewSet):
+    queryset = StudentRating.objects.select_related("student", "student__business").all()
+    serializer_class = StudentRatingSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        business_id = self.request.query_params.get("business_id")
+        student_id = self.request.query_params.get("student_id")
+        month_str = self.request.query_params.get("month")
+        if business_id:
+            qs = qs.filter(student__business_id=business_id)
+        if student_id:
+            qs = qs.filter(student_id=student_id)
+        if month_str:
+            try:
+                year_s, month_s = month_str.split("-", 1)
+                year, month = int(year_s), int(month_s)
+            except ValueError as e:
+                raise ValidationError({"month": "Format: YYYY-MM"}) from e
+            start = date(year, month, 1)
+            last = calendar.monthrange(year, month)[1]
+            end = date(year, month, last)
+            qs = qs.filter(rated_at__gte=start, rated_at__lte=end)
+        user = self.request.user
+        if user.is_authenticated and user.role != User.Role.SUPER_ADMIN:
+            ids = accessible_business_ids(user)
+            if ids is not None:
+                qs = qs.filter(student__business_id__in=ids)
+        return qs.order_by("-rated_at", "-id")
+
+    def perform_create(self, serializer):
+        st = serializer.validated_data["student"]
+        _ensure_business_access(self.request, st.business_id)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        st = serializer.validated_data.get("student", serializer.instance.student)
+        _ensure_business_access(self.request, st.business_id)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        _ensure_business_access(self.request, instance.student.business_id)
+        instance.delete()
 
 
 class StudentAttendanceViewSet(viewsets.ModelViewSet):
