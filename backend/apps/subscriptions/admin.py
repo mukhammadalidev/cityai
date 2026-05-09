@@ -5,7 +5,18 @@ from .models import BusinessSubscription, SubscriptionPlan
 
 @admin.register(SubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "monthly_price", "is_active")
+    list_display = (
+        "name",
+        "code",
+        "monthly_price",
+        "max_items",
+        "max_managers",
+        "has_edu_portals",
+        "has_marketing_generator",
+        "is_active",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("name", "code")
 
 
 @admin.register(BusinessSubscription)

@@ -3,6 +3,7 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from apps.businesses.models import Business
 
 from botapp.bot_constants import (
+    AI_ASSIST_BUTTON,
     AS_ADDR,
     AS_CARS,
     AS_CREDIT,
@@ -177,4 +178,8 @@ def category_reply_keyboard(business_type: str) -> ReplyKeyboardMarkup:
             [KeyboardButton(text=ADDRESS_BUTTON), KeyboardButton(text=OPERATOR_BUTTON)],
             ch,
         ]
+    if rows and rows[-1] is ch:
+        rows = rows[:-1]
+        rows.append([KeyboardButton(text=AI_ASSIST_BUTTON)])
+        rows.append(ch)
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)

@@ -2,6 +2,48 @@
 
 Django REST **backend**, React (Vite) **frontend**, **Telegram bot** (aiogram). Bitta **SQLite** bazasi; muhit o‘zgaruvchilari loyiha **ildizidagi** `.env` orqali o‘qiladi (`backend/config/settings.py`).
 
+## Loyihaning funksiyalari (qisqa ro‘yxat)
+
+### Umumiy va kirish
+- **JWT** orqali kirish; rollar: super admin, biznes egasi, menejer, ta’lim uchun ustoz / o‘quvchi / ota-ona.
+- **Ochiq sahifalar:** shahar (`/c/...`), kategoriya, biznes kartochkasi (`/b/...`) — Telegram Web App bilan bog‘lash mumkin.
+
+### Platforma (super admin, `/admin`)
+- Shaharlar va xizmat **kategoriyalari**, **bizneslar** moderatsiyasi.
+- **Tariflar (subscriptions)** va **billing** / hisob-fakturalar.
+- Platforma **analitikasi** va sozlamalar.
+
+### Biznes kabineti (`/business`)
+- **Boshqaruv paneli** (biznes turiga qarab dinamik ko‘rsatkichlar).
+- **Katalog:** mahsulot / xizmat / kurs (narx, rasm, holat); ta’lim markazlarida **kurs / kitob / mahsulot** ajratish; `slug` avtogeneratsiya.
+- **Lidlar** (ariza / qiziqish turlari, jumladan kursga yozilish).
+- **Bronlar** va **buyurtmalar** (biznes turiga qarab ko‘rinadi).
+- **Menejerlar** (biznes a’zolari).
+- **AI bilim bazasi** (biznesga bog‘liq kontent), **AI sarfi**, **marketing** matn generatori (tarifga bog‘liq; demo rejim mumkin).
+- **Billing:** joriy tarif, cheklovlar.
+
+### O‘quv markazi (ta’lim) moduli
+- **O‘quvchilar** va **kunlik/oylik davomat** (tarifda `has_edu_attendance` bo‘lsa).
+- **O‘quv guruhlari**, **ustozlar**, **materiallar** (kitob/mahsulot — tarifga bog‘liq).
+- **Baholar va reyting** (0–100 ball, oylik filtr, podium ko‘rinishidagi reyting, jadval).
+- **Ta’lim kabinetlari** uchun login yaratish (ustoz / o‘quvchi / ota-ona) — tarifda portallar bo‘lsa.
+- **Davomat o‘zgarganda** ota-onaga **Telegram xabari** (ota-ona profilida `telegram_id` + `TELEGRAM_BOT_TOKEN`).
+
+### Kabinetlar (`/portal`)
+- **Ustoz:** o‘z guruhlari va o‘quvchilar ro‘yxati.
+- **O‘quvchi:** profil, davomat, baholar, reyting.
+- **Ota-ona:** farzand ismi (sarlavhada), profil, Telegram ID kiritish, davomat, baholar, reyting.
+
+### Telegram bot
+- **Biznes turi** bo‘yicha menyu: xizmatlar/narxlar, manzil, operator, boshqa salon; restoran uchun alohiga tugmalar (menyu, bron, yetkazib berish va hokazo).
+- **Web App** havolasi (`TELEGRAM_WEB_APP_URL`) — ochiq `/b/<slug>` sahifa.
+- Mijozlar bilan ishlash: bron, buyurtma, lid — admin va mijozga bildirishnomalar (mavjud modullar bo‘yicha).
+
+### Texnik qatlam
+- **REST API** (`/api/...`), **CORS** (lokal + ngrok).
+- **Bot engine:** sessiyalar, shablonlar, xabar loglari (API orqali).
+- Django **admin** panel: jadval va baholar (rangli ball) boshqaruvi.
+
 ## Talablar
 
 - **Python 3.11+** (tavsiya; macOS’da ba’zan `python` yo‘q — `python3.11` ishlating)

@@ -91,3 +91,13 @@ PH_PORT = "🎬 Portfolio"
 PH_ORD = "📅 Buyurtma berish"
 PH_PRICE = "💰 Narxlar"
 PH_OP = "☎️ Operator"
+
+# Sun’iy intellekt (Telegram bot)
+AI_ASSIST_BUTTON = "🤖 AI yordamchi"
+
+# Tugma matni bo‘lgan barcha konstantalar (AI rejimidan chiqish uchun solishtirish)
+ALL_REPLY_MENU_LABELS = frozenset(
+    v
+    for k, v in globals().items()
+    if k.isupper() and isinstance(v, str) and k != "AI_ASSIST_BUTTON"
+)

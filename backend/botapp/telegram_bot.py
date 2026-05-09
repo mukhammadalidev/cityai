@@ -54,12 +54,15 @@ from apps.orders.notifications import (  # noqa: E402
     notify_admin_order_status_line,
     notify_customer_order_status,
 )
-from botapp.bot_states import Flow  # noqa: E402
+from apps.knowledge.models import KnowledgeBase  # noqa: E402
+from botapp.bot_constants import AI_ASSIST_BUTTON, ALL_REPLY_MENU_LABELS  # noqa: E402
+from botapp.bot_states import AiAssistStates, Flow  # noqa: E402
 from botapp.category_flows import (  # noqa: E402
     category_intro_extra,
     category_reply_keyboard,
     register_category_flows,
 )
+from botapp.services.ai_service import generate_ai_reply  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +107,52 @@ class BookFlow(StatesGroup):
     date = State()
     time = State()
     note = State()
+
+
+def _build_ai_system_prompt(business_block: str, knowledge_block: str) -> str:
+    lines = [
+        "Sen ushbu biznes uchun Telegram-bot yordamchisisan. Javoblar o‘zbek tilida, qisqa va muloyim bo‘lsin.",
+        "Faqat pastdagi biznes ma’lumoti va bilim bazasiga tayan. Yetarli bo‘lmasa, aniq aytib, "
+        "mijozni operator yoki bron/admin orqali bog‘lanishga yo‘naltir.",
+        "Tibbiy tashxis, dori tavsiyasi yoki yakuniy yuridik maslahat bermagin.",
+        "",
+        "=== Biznes ===",
+        business_block or "Ma’lumot yo‘q.",
+    ]
+    if knowledge_block:
+        lines.extend(["", "=== Bilim bazasi (FAQ va qoidalar) ===", knowledge_block])
+    return "\n".join(lines)
+
+
+@sync_to_async
+def _ai_context_for_business(business_id: int) -> tuple[str, str]:
+    row = (
+        Business.objects.filter(pk=business_id)
+        .values("name", "business_type", "description", "address", "phone", "working_hours")
+        .first()
+    )
+    if not row:
+        return "", ""
+    type_label = dict(Business.BusinessType.choices).get(row["business_type"], row["business_type"])
+    biz_lines = [
+        f"Nomi: {row['name']}",
+        f"Tur: {type_label}",
+    ]
+    if row.get("description"):
+        biz_lines.append(f"Tavsif: {row['description'][:2000]}")
+    if row.get("address"):
+        biz_lines.append(f"Manzil: {row['address']}")
+    if row.get("phone"):
+        biz_lines.append(f"Telefon: {row['phone']}")
+    if row.get("working_hours"):
+        biz_lines.append(f"Ish vaqti: {row['working_hours']}")
+    biz_block = "\n".join(biz_lines)
+    kb_chunks: list[str] = []
+    for entry in KnowledgeBase.objects.filter(business_id=business_id, is_active=True).order_by(
+        "-updated_at"
+    )[:25]:
+        kb_chunks.append(f"## {entry.title}\n{entry.content}")
+    return biz_block, "\n\n".join(kb_chunks)
 
 
 def business_type_keyboard() -> InlineKeyboardMarkup:
@@ -298,6 +347,74 @@ async def start_handler(message: Message, state: FSMContext) -> None:
         "Pastdagi tugmalardan boshlang:"
     )
     await message.answer(text, reply_markup=business_type_keyboard())
+
+
+@dp.message(AiAssistStates.waiting_question, F.text)
+async def ai_assist_question(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if not text:
+        return
+    data = await state.get_data()
+    btype = data.get("business_type") or ""
+    reply_kb = category_reply_keyboard(btype)
+
+    if text in ALL_REPLY_MENU_LABELS:
+        await state.set_state(Flow.browsing)
+        await message.answer("Menyuga qaytdingiz.", reply_markup=reply_kb)
+        return
+
+    if text == AI_ASSIST_BUTTON:
+        await message.answer(
+            "Savolingizni yozing. Chiqish uchun menyudagi boshqa tugmani bosing.",
+            reply_markup=reply_kb,
+        )
+        return
+
+    bid = data.get("business_id")
+    if not bid:
+        await state.set_state(Flow.browsing)
+        await message.answer("Avval salon tanlang — /start.", reply_markup=business_type_keyboard())
+        return
+
+    biz_ctx, know_ctx = await _ai_context_for_business(int(bid))
+    system = _build_ai_system_prompt(biz_ctx, know_ctx)
+    reply_text = await asyncio.to_thread(generate_ai_reply, system, text)
+    await state.set_state(Flow.browsing)
+    await message.answer(reply_text, parse_mode=None, reply_markup=reply_kb)
+
+
+@dp.message(F.text == AI_ASSIST_BUTTON)
+async def ai_assist_tap(message: Message, state: FSMContext) -> None:
+    st = await state.get_state()
+    if st is not None and "BookFlow" in str(st):
+        await message.answer(
+            "Bron jarayonidasiz. AI yordamchidan foydalanish uchun avval «Bekor qilish» "
+            "yoki bronni yakunlang."
+        )
+        return
+    data = await state.get_data()
+    bid = data.get("business_id")
+    if not bid:
+        await message.answer(
+            "Avval salon tanlang: /start",
+            reply_markup=business_type_keyboard(),
+        )
+        return
+    btype = data.get("business_type") or ""
+    reply_kb = category_reply_keyboard(btype)
+    if not (os.getenv("OPENAI_API_KEY") or "").strip():
+        await message.answer(
+            "⚠️ AI hozircha ulanmagan: serverda <code>OPENAI_API_KEY</code> yo‘q. "
+            "Admin sozlagach, qayta urinib ko‘ring.",
+            reply_markup=reply_kb,
+        )
+        return
+    await state.set_state(AiAssistStates.waiting_question)
+    await message.answer(
+        "🤖 <b>AI yordamchi</b>\n\nSavolingizni yozing (matn). Chiqish uchun pastdagi menyudan "
+        "boshqa tugmani bosing.",
+        reply_markup=reply_kb,
+    )
 
 
 @dp.callback_query(F.data == "t:back")
