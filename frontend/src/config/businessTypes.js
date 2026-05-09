@@ -2,7 +2,7 @@
 export const BUSINESS_TYPE_CONFIG = {
   auto_salon: {
     label: "Avtosalon",
-    color: "#1677ff",
+    color: "#2563eb",
     itemLabel: "Mashina",
     itemsLabel: "Mashinalar",
     leadsLabel: "Mijoz so‘rovlari",

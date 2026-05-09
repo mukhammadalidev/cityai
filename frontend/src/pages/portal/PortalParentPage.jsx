@@ -2,7 +2,7 @@ import { Button, Card, Descriptions, Form, Input, Row, Col, Statistic, Table, Ty
 import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import LoadingScreen from "../../components/ui/LoadingScreen";
-import { fetchMe, patchParentTelegram } from "../../services/authService";
+import { createEduPortalUser, fetchMe, patchParentTelegram } from "../../services/authService";
 import { getParentPortalSummary } from "../../services/portalService";
 import { formatPhone } from "../../utils/formatters";
 
@@ -14,6 +14,8 @@ export default function PortalParentPage() {
   const [loading, setLoading] = useState(true);
   const [tgForm] = Form.useForm();
   const [tgSaving, setTgSaving] = useState(false);
+  const [childPortalForm] = Form.useForm();
+  const [childPortalSaving, setChildPortalSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -108,6 +110,72 @@ export default function PortalParentPage() {
             Saqlash
           </Button>
         </Form>
+      </Card>
+
+      <Card title="Farzandning o‘quvchi kabineti" size="small" style={{ marginTop: 16 }}>
+        {data.child_portal?.username ? (
+          <>
+            <Typography.Paragraph style={{ marginBottom: 8 }}>
+              Login:{" "}
+              <Typography.Text copyable strong>
+                {data.child_portal.username}
+              </Typography.Text>
+            </Typography.Paragraph>
+            <Typography.Text type="secondary">
+              Parolni farzand o‘zi bilishi kerak. Uni tiklash yoki almashtirish uchun markazga murojaat qiling.
+            </Typography.Text>
+          </>
+        ) : data.parent_can_create_child_portal ? (
+          <>
+            <Typography.Paragraph type="secondary" style={{ marginBottom: 12 }}>
+              <b>Premium</b> tarif: farzandingiz o‘zi <b>/login</b> orqali kiradigan o‘quvchi kabineti uchun login va
+              parolni shu yerda belgilashingiz mumkin (markazning «admin» kabineti funksiyasi — faqat sizning
+              farzandingiz uchun).
+            </Typography.Paragraph>
+            <Form
+              form={childPortalForm}
+              layout="vertical"
+              onFinish={async (v) => {
+                setChildPortalSaving(true);
+                try {
+                  await createEduPortalUser({
+                    kind: "student",
+                    student_id: s.id,
+                    username: v.username.trim(),
+                    password: v.password,
+                  });
+                  message.success("O‘quvchi kabineti yaratildi. Farzand /login sahifasidan kiradi.");
+                  childPortalForm.resetFields();
+                  await load();
+                } catch (e) {
+                  message.error(e.response?.data?.detail || "Yaratilmadi.");
+                } finally {
+                  setChildPortalSaving(false);
+                }
+              }}
+            >
+              <Form.Item name="username" label="Login" rules={[{ required: true, message: "Login kiriting" }]}>
+                <Input autoComplete="off" />
+              </Form.Item>
+              <Form.Item
+                name="password"
+                label="Parol"
+                rules={[{ required: true, min: 6, message: "Kamida 6 belgi" }]}
+              >
+                <Input.Password autoComplete="new-password" />
+              </Form.Item>
+              <Button type="primary" htmlType="submit" loading={childPortalSaving}>
+                Kabinet yaratish
+              </Button>
+            </Form>
+          </>
+        ) : (
+          <Typography.Text type="secondary">
+            Farzand uchun o‘quvchi kabinetini odatda <b>markaz administratori</b> (biznes kabineti) yaratadi.
+            Ota-ona kabinetidan login/parolni <b>o‘zingiz belgilash</b> imkoniyati <b>Premium</b> tarifidagi
+            o‘quv markazlar uchun yoqilgan. Markaz bilan bog‘laning.
+          </Typography.Text>
+        )}
       </Card>
 
       <Card title="Farzand profili" size="small" style={{ marginTop: 16 }}>

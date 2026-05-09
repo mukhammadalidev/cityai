@@ -1,7 +1,9 @@
 import { api } from "./api";
 
-export async function getTeacherPortalSummary() {
-  const { data } = await api.get("/auth/portal/education/teacher-summary/");
+export async function getTeacherPortalSummary(params = {}) {
+  const { month } = params;
+  const query = month ? { month } : {};
+  const { data } = await api.get("/auth/portal/education/teacher-summary/", { params: query });
   return data;
 }
 

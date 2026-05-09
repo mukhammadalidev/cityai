@@ -11,11 +11,11 @@ export default function Topbar({ title, subtitle, businesses = [], onMenuClick, 
 
   return (
     <header className="cs-topbar">
-      <Space align="start">
+      <Space align="start" size={12}>
         <Button type="text" icon={<MenuOutlined />} onClick={onMenuClick} className="mobile-only" />
         <div>
-          <div style={{ fontWeight: 800, fontSize: "1.05rem" }}>{title}</div>
-          {subtitle && <div style={{ color: "var(--cs-muted)", fontSize: 13 }}>{subtitle}</div>}
+          <div className="cs-topbar__title">{title}</div>
+          {subtitle && <div className="cs-topbar__subtitle">{subtitle}</div>}
           {adminOverride ? (
             <Tag color="gold" style={{ marginTop: 6 }}>
               Admin override mode
@@ -23,10 +23,9 @@ export default function Topbar({ title, subtitle, businesses = [], onMenuClick, 
           ) : null}
         </div>
       </Space>
-      <Space wrap>
+      <Space wrap className="cs-topbar__actions">
         {showBizSelect && businesses.length > 0 && (
           <Select
-            style={{ minWidth: 220 }}
             placeholder="Biznes"
             value={bid ?? undefined}
             options={businesses.map((b) => ({ value: b.id, label: b.name }))}

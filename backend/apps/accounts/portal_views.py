@@ -1,4 +1,5 @@
 import calendar
+from collections import defaultdict
 from datetime import date
 
 from django.db.models import Avg, Count
@@ -18,6 +19,26 @@ from apps.teachers.models import Teacher
 from apps.teachers.serializers import TeacherSerializer
 
 from .models import User
+
+
+def _resolve_portal_attendance_month(month_str: str | None) -> tuple[date, date, str]:
+    """YYYY-MM yoki None → oy boshi/oxiri va normalizlangan label."""
+    today = date.today()
+    if not (month_str or "").strip():
+        y, m = today.year, today.month
+        return date(y, m, 1), date(y, m, calendar.monthrange(y, m)[1]), f"{y}-{m:02d}"
+    try:
+        parts = month_str.strip().split("-", 1)
+        if len(parts) != 2:
+            raise ValueError
+        y, m = int(parts[0]), int(parts[1])
+        if not 1 <= m <= 12:
+            raise ValueError
+    except ValueError:
+        y, m = today.year, today.month
+    start = date(y, m, 1)
+    end = date(y, m, calendar.monthrange(y, m)[1])
+    return start, end, f"{y}-{m:02d}"
 
 
 def _portal_rating_rank_month(student: Student, start: date, end: date) -> dict:
@@ -132,7 +153,7 @@ class CreateEduPortalUserSerializer(serializers.Serializer):
 
 
 class CreateEduPortalUserView(APIView):
-    """Biznes egasi / menejer: ustoz, o‘quvchi yoki ota-ona uchun alohida kabinet login."""
+    """Biznes egasi / menejer yoki (Premium tarifda) ota-ona: ustoz / o‘quvchi / ota-ona kabinet login."""
 
     permission_classes = [permissions.IsAuthenticated]
 
@@ -186,8 +207,32 @@ class CreateEduPortalUserView(APIView):
             student = Student.objects.select_related("business").filter(pk=d["student_id"]).first()
             if not student:
                 return Response({"detail": "O‘quvchi topilmadi."}, status=404)
-            if not can_edit_business(request.user, student.business):
+            is_super = request.user.role == User.Role.SUPER_ADMIN
+            is_parent_actor = (
+                request.user.role == User.Role.EDU_PARENT
+                and getattr(request.user, "portal_parent_id", None) == student.id
+            )
+            can_business = can_edit_business(request.user, student.business)
+            if not is_super and not can_business and not is_parent_actor:
                 return Response({"detail": "Ruxsat yo‘q."}, status=403)
+            if not is_super:
+                pl = get_plan_for_business(student.business_id)
+                if not pl or not pl.has_edu_portals:
+                    return Response(
+                        {
+                            "detail": "Kabinetlar sizning tarifingizda yo‘q yoki markaz obunasi mos kelmaydi.",
+                        },
+                        status=403,
+                    )
+                if is_parent_actor and not getattr(
+                    pl, "parent_can_create_student_portal", False
+                ):
+                    return Response(
+                        {
+                            "detail": "Farzand uchun o‘quvchi kabinetini ota-ona o‘zi faqat Premium tarifda yaratishi mumkin. Markaz administratoriga murojaat qiling.",
+                        },
+                        status=403,
+                    )
             if User.objects.filter(portal_student=student).exists():
                 return Response({"detail": "Bu o‘quvchida kabinet allaqachon mavjud."}, status=400)
             user = User.objects.create_user(
@@ -242,32 +287,153 @@ class TeacherPortalSummaryView(APIView):
             .annotate(students_count=Count("students", distinct=True))
             .order_by("sort_order", "name")
         )
-        group_payload = [
-            {
-                "id": g.id,
-                "name": g.name,
-                "students_count": g.students_count,
-                "course_title": g.course.title if g.course_id else "",
-            }
-            for g in groups
-        ]
         group_ids = [g.id for g in groups]
         students_qs = (
             Student.objects.filter(business=teacher.business, group_id__in=group_ids)
             .select_related("group", "course")
             .order_by("group__sort_order", "group__name", "name")[:300]
         )
-        students_payload = [
-            {
+        students_list = list(students_qs)
+        student_ids = [s.id for s in students_list]
+
+        plan = get_plan_for_business(teacher.business_id)
+        attendance_insights = bool(plan and plan.has_edu_attendance)
+        att_start, att_end, att_month = _resolve_portal_attendance_month(
+            request.query_params.get("month")
+        )
+
+        by_group_student_ids: dict[int, list[int]] = defaultdict(list)
+        for s in students_list:
+            if s.group_id:
+                by_group_student_ids[s.group_id].append(s.id)
+
+        rating_by_sid: dict[int, dict] = {}
+        if student_ids:
+            for row in (
+                StudentRating.objects.filter(
+                    student_id__in=student_ids,
+                    rated_at__gte=att_start,
+                    rated_at__lte=att_end,
+                )
+                .values("student_id")
+                .annotate(cnt=Count("id"), avg=Avg("points"))
+            ):
+                rating_by_sid[row["student_id"]] = row
+
+        rank_by_sid: dict[int, dict] = {}
+        for _gid, sids in by_group_student_ids.items():
+            graded: list[tuple[int, float]] = []
+            for sid in sids:
+                r = rating_by_sid.get(sid)
+                if r and r.get("avg") is not None:
+                    graded.append((sid, float(r["avg"])))
+            graded.sort(key=lambda x: (-x[1], x[0]))
+            for i, (sid, _) in enumerate(graded):
+                rank_by_sid[sid] = {
+                    "rank": i + 1,
+                    "peers_graded": len(graded),
+                    "scope_label": "Guruh bo‘yicha (oy)",
+                }
+
+        students_payload = []
+        for s in students_list:
+            r = rating_by_sid.get(s.id)
+            entry = {
                 "id": s.id,
                 "name": s.name,
                 "phone": s.phone,
                 "group_name": s.group.name if s.group_id else "",
                 "course_title": s.course.title if s.course_id else "",
                 "status": s.status,
+                "ratings_month": {
+                    "month": att_month,
+                    "count": int(r["cnt"]) if r else 0,
+                    "avg_points": round(float(r["avg"]), 1) if r and r.get("avg") is not None else None,
+                },
+                "ratings_rank_month": rank_by_sid.get(s.id),
             }
-            for s in students_qs
+            students_payload.append(entry)
+
+        group_payload = []
+        for g in groups:
+            row = {
+                "id": g.id,
+                "name": g.name,
+                "students_count": g.students_count,
+                "course_title": g.course.title if g.course_id else "",
+            }
+            if attendance_insights:
+                row["best_attendance"] = None
+            sids_g = by_group_student_ids.get(g.id, [])
+            graded_pairs: list[tuple[int, float, str]] = []
+            for sid in sids_g:
+                r = rating_by_sid.get(sid)
+                if r and r.get("avg") is not None:
+                    st_name = next((x.name for x in students_list if x.id == sid), "")
+                    graded_pairs.append((sid, float(r["avg"]), st_name))
+            if graded_pairs:
+                best_sid, best_avg, best_name = max(graded_pairs, key=lambda x: (x[1], -x[0]))
+                row["top_rating_month"] = {
+                    "student_id": best_sid,
+                    "name": best_name,
+                    "avg_points": round(best_avg, 1),
+                }
+            else:
+                row["top_rating_month"] = None
+            group_payload.append(row)
+
+        if attendance_insights and group_ids and students_list:
+            student_ids = [s.id for s in students_list]
+            stat_by_student: dict[int, dict[str, int]] = defaultdict(lambda: {"marked": 0, "present": 0})
+            for rec in StudentAttendance.objects.filter(
+                student_id__in=student_ids,
+                date__gte=att_start,
+                date__lte=att_end,
+            ).values("student_id", "status"):
+                sid = rec["student_id"]
+                stat_by_student[sid]["marked"] += 1
+                if rec["status"] in (
+                    StudentAttendance.Status.PRESENT,
+                    StudentAttendance.Status.LATE,
+                ):
+                    stat_by_student[sid]["present"] += 1
+            by_group: dict[int, list[Student]] = defaultdict(list)
+            for s in students_list:
+                if s.group_id:
+                    by_group[s.group_id].append(s)
+            group_best: dict[int, dict | None] = {}
+            for gid in group_ids:
+                candidates = []
+                for s in by_group.get(gid, []):
+                    st = stat_by_student[s.id]
+                    mk, pr = st["marked"], st["present"]
+                    if mk == 0:
+                        continue
+                    rate = pr / mk
+                    candidates.append((rate, pr, mk, s.name, s.id))
+                if not candidates:
+                    group_best[gid] = None
+                    continue
+                candidates.sort(key=lambda x: (-x[0], -x[1], -x[2], x[3]))
+                rate, pr, mk, name, sid = candidates[0]
+                group_best[gid] = {
+                    "student_id": sid,
+                    "name": name,
+                    "rate_percent": round(100 * rate, 1),
+                    "present_days": pr,
+                    "marked_days": mk,
+                }
+            for row in group_payload:
+                row["best_attendance"] = group_best.get(row["id"])
+
+        graded_avgs = [
+            float(r["avg"]) for r in rating_by_sid.values() if r.get("avg") is not None
         ]
+        ratings_summary = {
+            "month": att_month,
+            "students_with_grades": len(rating_by_sid),
+            "overall_avg_points": round(sum(graded_avgs) / len(graded_avgs), 1) if graded_avgs else None,
+        }
 
         return Response(
             {
@@ -279,6 +445,10 @@ class TeacherPortalSummaryView(APIView):
                 "teacher": TeacherSerializer(teacher).data,
                 "groups": group_payload,
                 "students": students_payload,
+                "summary_month": att_month,
+                "ratings_summary": ratings_summary,
+                "attendance_insights_enabled": attendance_insights,
+                "attendance_month": att_month if attendance_insights else None,
             }
         )
 
@@ -320,4 +490,15 @@ class ParentPortalSummaryView(APIView):
 
         payload = build_student_portal_payload(student)
         payload["viewer"] = "parent"
+        child_portal_user = User.objects.filter(portal_student=student).first()
+        plan = get_plan_for_business(student.business_id)
+        payload["child_portal"] = {
+            "username": child_portal_user.username if child_portal_user else None,
+        }
+        payload["parent_can_create_child_portal"] = bool(
+            plan
+            and plan.has_edu_portals
+            and getattr(plan, "parent_can_create_student_portal", False)
+            and not child_portal_user
+        )
         return Response(payload)

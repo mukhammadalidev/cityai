@@ -36,6 +36,10 @@ class SubscriptionPlan(models.Model):
         default=False,
         help_text="O‘quv markaz: ustoz / o‘quvchi / ota-ona kabinet loginlari",
     )
+    parent_can_create_student_portal = models.BooleanField(
+        default=False,
+        help_text="Premium: ota-ona kabinetidan farzand uchun o‘quvchi login/parolni o‘zi yaratishi mumkin",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -3,7 +3,7 @@
   --cs-surface: #ffffff;
   --cs-text: #1a1d24;
   --cs-muted: #64748b;
-  --cs-primary: #1677ff;
+  --cs-primary: #2563eb;
   --cs-sidebar: #0b1220;
   --cs-sidebar-border: rgba(148, 163, 184, 0.12);
   --cs-sidebar-text: rgba(226, 232, 240, 0.75);
@@ -33,6 +33,28 @@ body {
 
 a {
   color: var(--cs-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: #1d4ed8;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--cs-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cs-primary);
+  outline-offset: 2px;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
 }
 
 /* Auth */
@@ -57,7 +79,7 @@ a {
   font-weight: 800;
   font-size: 1.35rem;
   letter-spacing: -0.02em;
-  background: linear-gradient(120deg, #1677ff, #722ed1);
+  background: linear-gradient(120deg, #2563eb, #7c3aed);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -68,4 +90,17 @@ a {
   color: var(--cs-muted);
   font-size: 0.9rem;
   margin-bottom: 20px;
+}
+
+.cs-login-demo-alert .ant-alert-message {
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.cs-loading-screen {
+  display: grid;
+  place-items: center;
+  min-height: min(70vh, 520px);
+  padding: 32px 16px;
 }

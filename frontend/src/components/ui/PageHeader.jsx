@@ -1,12 +1,21 @@
 export default function PageHeader({ eyebrow, title, description, extra }) {
   return (
-    <div className="cs-page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
-      <div>
+    <div
+      className={`cs-page-header cs-page-header--split${extra ? "" : " cs-page-header--no-extra"}`}
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 16,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ flex: "1 1 220px", minWidth: 0 }}>
         {eyebrow && <div className="cs-page-header__eyebrow">{eyebrow}</div>}
         <h1 className="cs-page-header__title">{title}</h1>
         {description && <p className="cs-page-header__desc">{description}</p>}
       </div>
-      {extra}
+      {extra ? <div style={{ flex: "0 1 auto" }}>{extra}</div> : null}
     </div>
   );
 }

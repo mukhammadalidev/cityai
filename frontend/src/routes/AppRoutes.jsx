@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import BusinessLayout from "../layouts/BusinessLayout";
@@ -41,6 +41,7 @@ const MarketingGeneratorPage = lazy(() => import("../pages/business/MarketingGen
 const BillingPage = lazy(() => import("../pages/business/BillingPage"));
 const BusinessSettingsPage = lazy(() => import("../pages/business/BusinessSettingsPage"));
 const PortalTeacherPage = lazy(() => import("../pages/portal/PortalTeacherPage"));
+const PortalTeacherStudentPage = lazy(() => import("../pages/portal/PortalTeacherStudentPage"));
 const PortalStudentPage = lazy(() => import("../pages/portal/PortalStudentPage"));
 const PortalParentPage = lazy(() => import("../pages/portal/PortalParentPage"));
 const PublicCityPage = lazy(() => import("../pages/public/PublicCityPage"));
@@ -73,10 +74,13 @@ export default function AppRoutes() {
           path="teacher"
           element={
             <RoleRoute roles={["edu_teacher"]}>
-              {page(PortalTeacherPage)}
+              <Outlet />
             </RoleRoute>
           }
-        />
+        >
+          <Route index element={page(PortalTeacherPage)} />
+          <Route path="students/:id" element={page(PortalTeacherStudentPage)} />
+        </Route>
         <Route
           path="student"
           element={

@@ -3,9 +3,26 @@
   margin-bottom: 24px;
   padding: 22px 24px;
   border-radius: var(--cs-radius);
-  background: linear-gradient(120deg, rgba(22, 119, 255, 0.08), rgba(114, 46, 209, 0.06));
+  background: linear-gradient(120deg, rgba(37, 99, 235, 0.09), rgba(124, 58, 237, 0.07));
   border: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: var(--cs-shadow);
+}
+
+@media (max-width: 767px) {
+  .cs-page-header.cs-page-header--split {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 18px 18px;
+  }
+
+  .cs-page-header.cs-page-header--split > div:last-child {
+    width: 100%;
+  }
+
+  .cs-page-header.cs-page-header--split .ant-space {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 .cs-page-header__eyebrow {
@@ -159,4 +176,51 @@
   color: #fff;
   text-decoration: underline;
   font-weight: 600;
+}
+
+/* Standart kartalar — sahifa ichida izchillik */
+.cs-page .ant-card {
+  border-radius: var(--cs-radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--cs-shadow);
+}
+
+.cs-page .ant-card-head {
+  border-bottom-color: rgba(15, 23, 42, 0.06);
+  min-height: 48px;
+}
+
+.cs-page .ant-card-head-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cs-page .ant-card-small > .ant-card-head {
+  min-height: 42px;
+}
+
+/* Modal / Drawer sarlavha */
+.ant-modal-header,
+.ant-drawer-header-title {
+  font-weight: 700;
+}
+
+/* Tabs */
+.cs-page .ant-tabs-nav::before {
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-stat-card,
+  .cs-card-hover,
+  .cs-category-card,
+  .cs-business-card {
+    transition: none !important;
+  }
+
+  .cs-stat-card:hover,
+  .cs-card-hover:hover,
+  .cs-category-card:hover {
+    transform: none !important;
+  }
 }

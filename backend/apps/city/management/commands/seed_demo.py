@@ -349,6 +349,7 @@ class Command(BaseCommand):
                     has_edu_attendance=ed_a,
                     has_edu_materials=ed_m,
                     has_edu_portals=ed_p,
+                    parent_can_create_student_portal=(code == SubscriptionPlan.Code.PREMIUM),
                 )
             )
         demo_plan = plan_objs[0]

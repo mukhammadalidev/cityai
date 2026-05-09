@@ -12,6 +12,7 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
         "max_items",
         "max_managers",
         "has_edu_portals",
+        "parent_can_create_student_portal",
         "has_marketing_generator",
         "is_active",
     )

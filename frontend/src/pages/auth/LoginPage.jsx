@@ -52,6 +52,7 @@ export default function LoginPage() {
         </Button>
       </Form>
       <Alert
+        className="cs-login-demo-alert"
         style={{ marginTop: 16 }}
         type="info"
         showIcon

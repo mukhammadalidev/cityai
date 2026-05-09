@@ -18,5 +18,7 @@ export function planFeatureList(plan) {
     plan.has_edu_attendance && "O‘quv markaz: davomat",
     plan.has_edu_materials && "O‘quv markaz: materiallar (kitob/mahsulot)",
     plan.has_edu_portals && "O‘quv markaz: ustoz/o‘quvchi/ota-ona kabinetlari",
+    plan.parent_can_create_student_portal &&
+      "Premium: ota-ona farzand uchun o‘quvchi loginini kabinetdan yaratadi",
   ].filter(Boolean);
 }

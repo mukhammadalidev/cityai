@@ -36,6 +36,7 @@ Django REST **backend**, React (Vite) **frontend**, **Telegram bot** (aiogram). 
 
 ### Telegram bot
 - **Biznes turi** bo‘yicha menyu: xizmatlar/narxlar, manzil, operator, boshqa salon; restoran uchun alohiga tugmalar (menyu, bron, yetkazib berish va hokazo).
+- **🤖 AI yordamchi** — salon tanlangach pastki menyuda tugma; savol matnini yuboriladi, javob **OpenAI Chat Completions** orqali keladi. Kontekst: tanlangan **biznes** maydonlari + admin paneldagi **AI bilim bazasi** (`apps.knowledge`, biznesga bog‘langan faol yozuvlar). Kalit yo‘q bo‘lsa, bot foydalanuvchiga `OPENAI_API_KEY` yo‘qligi haqida xabar beradi.
 - **Web App** havolasi (`TELEGRAM_WEB_APP_URL`) — ochiq `/b/<slug>` sahifa.
 - Mijozlar bilan ishlash: bron, buyurtma, lid — admin va mijozga bildirishnomalar (mavjud modullar bo‘yicha).
 
@@ -69,7 +70,8 @@ Batafsil izohlar `.env.example` ichida. Asosiy qatorlar:
 | `VITE_API_BASE_URL` | Brauzerda API manzili, masalan `http://localhost:8000` |
 | `VITE_TELEGRAM_BOT_URL` | Bot havolasi (`https://t.me/...`) |
 | `TELEGRAM_WEB_APP_URL` | Web App uchun **HTTPS** domen (path va oxirgi `/` **siz**), masalan ngrok |
-| `OPENAI_API_KEY` | Marketing / AI funksiyalari uchun (ixtiyoriy) |
+| `OPENAI_API_KEY` | **Telegram botdagi AI yordamchi**, marketing va boshqa AI funksiyalari uchun (botda suhbat uchun praktikada majburiy) |
+| `OPENAI_MODEL` | Ixtiyoriy; default `gpt-4o-mini` (`botapp/services/ai_service.py`) |
 
 Telegram Web App va tunnel uchun qo‘shimcha: `VITE_TELEGRAM_WEB_APP_URL`, `VITE_TUNNEL_HMR_HOST` — `.env.example` dagi izohlarga qarang.
 
@@ -143,6 +145,8 @@ python botapp/telegram_bot.py
 
 Bot **faol** bizneslar va katalogdagi **active** pozitsiyalardan foydalanadi.
 
+**AI yordamchi:** `.env` da `OPENAI_API_KEY` bo‘lishi kerak; kod `backend/.env` va loyiha ildizidagi `.env` ni o‘qiydi (`telegram_bot.py`). AI rejimidan chiqish uchun pastdagi menyudan boshqa tugmani bosing. Stol bron qilish bosqichida AI tugmasi bloklanadi — avval bronni tugating yoki bekor qiling.
+
 ## Telegram Web App (telefonda sinash)
 
 1. Backend `runserver` va frontend `npm run dev` ishlayotgan bo‘lsin.
@@ -168,6 +172,7 @@ Bot **faol** bizneslar va katalogdagi **active** pozitsiyalardan foydalanadi.
 | `command not found: python` | `python3.11` yoki `python3` ishlating; yoki venv ichidagi `python` |
 | CORS | `DJANGO_DEBUG=1`; kerak bo‘lsa `CORS_ALLOWED_ORIGINS` |
 | Bo‘sh bot | `seed_demo` ishgani, biznes `active` ekanini tekshiring |
+| AI javob bermaydi / «kalit yo‘q» | `.env` da `OPENAI_API_KEY`; bot jarayonini qayta ishga tushiring; bilim bazasi bo‘sh bo‘lsa ham javob kelishi kerak |
 | Web App ochilmaydi | `TELEGRAM_WEB_APP_URL` HTTPS va tunnel to‘g‘ri portga ulanganmi |
 | ngrok ogohlantirishi | `.env.example` dagi `ERR_NGROK_6024` / tunnel izohlari |
 

@@ -12,6 +12,7 @@ from apps.accounts.models import User
 from apps.businesses.models import Business
 from apps.businesses.services import accessible_business_ids
 from apps.subscriptions.services import get_plan_for_business
+from apps.teachers.models import Teacher
 
 from .models import Student, StudentAttendance, StudentGroup, StudentRating
 from .notifications import notify_parents_student_attendance
@@ -32,6 +33,26 @@ def _ensure_business_access(request, business_id: int) -> None:
     ids = accessible_business_ids(user)
     if ids is not None and business_id not in ids:
         raise PermissionDenied()
+
+
+def _ensure_student_crm_access(request, student: Student) -> None:
+    """Biznes a’zolari yoki shu o‘quvchining guruhidagi ustoz (kabinet)."""
+    user = request.user
+    if not user.is_authenticated:
+        raise PermissionDenied()
+    if user.role == User.Role.SUPER_ADMIN:
+        return
+    if user.role == User.Role.EDU_TEACHER and getattr(user, "portal_teacher_id", None):
+        teacher = Teacher.objects.filter(pk=user.portal_teacher_id).first()
+        if (
+            teacher
+            and student.business_id == teacher.business_id
+            and student.group_id
+            and student.group.teacher_id == teacher.id
+        ):
+            return
+        raise PermissionDenied()
+    _ensure_business_access(request, student.business_id)
 
 
 def _require_edu_attendance_plan(request, business_id: int) -> None:
@@ -87,7 +108,25 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        user = self.request.user
+        is_portal_teacher = (
+            user.is_authenticated
+            and user.role == User.Role.EDU_TEACHER
+            and getattr(user, "portal_teacher_id", None)
+        )
+        if is_portal_teacher:
+            teacher = Teacher.objects.filter(pk=user.portal_teacher_id).first()
+            if not teacher:
+                qs = Student.objects.none()
+            else:
+                group_ids = StudentGroup.objects.filter(teacher=teacher).values_list("id", flat=True)
+                qs = Student.objects.filter(
+                    business_id=teacher.business_id,
+                    group_id__in=group_ids,
+                ).select_related("business", "course", "lead", "group")
+        else:
+            qs = Student.objects.select_related("business", "course", "lead", "group").all()
+
         business_id = self.request.query_params.get("business_id")
         status_param = self.request.query_params.get("status")
         group_id = self.request.query_params.get("group_id")
@@ -100,8 +139,7 @@ class StudentViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(group__isnull=True)
             else:
                 qs = qs.filter(group_id=group_id)
-        user = self.request.user
-        if user.is_authenticated and user.role != User.Role.SUPER_ADMIN:
+        if user.is_authenticated and user.role != User.Role.SUPER_ADMIN and not is_portal_teacher:
             ids = accessible_business_ids(user)
             if ids is not None:
                 qs = qs.filter(business_id__in=ids)
@@ -190,7 +228,7 @@ class StudentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="crm-summary")
     def crm_summary(self, request, pk=None):
         student = self.get_object()
-        _ensure_business_access(request, student.business_id)
+        _ensure_student_crm_access(request, student)
         month_str = request.query_params.get("month")
         recs = StudentAttendance.objects.filter(student=student)
         if month_str:

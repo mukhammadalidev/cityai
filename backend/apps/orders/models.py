@@ -35,7 +35,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="lines")
-    item = models.ForeignKey(Item, on_delete=models.PROTECT)
+    # CASCADE: mahsulot (yoki butun biznes) o‘chganda qator ham yo‘qoladi; PROTECT admin/biznes o‘chirishni bloklardi.
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="order_lines")
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=15, decimal_places=2)
     total = models.DecimalField(max_digits=15, decimal_places=2)

@@ -78,7 +78,7 @@ export default function PublicBusinessPage() {
         className="cs-business-cover"
         style={{
           height: 220,
-          background: biz.cover_image ? `url(${mediaUrl(biz.cover_image)}) center/cover` : "linear-gradient(120deg,#1677ff,#722ed1)",
+          background: biz.cover_image ? `url(${mediaUrl(biz.cover_image)}) center/cover` : "linear-gradient(120deg,#2563eb,#7c3aed)",
         }}
       />
       <div style={{ padding: "24px", maxWidth: 1100, margin: "0 auto" }}>
