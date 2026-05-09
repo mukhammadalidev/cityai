@@ -1,4 +1,4 @@
-import { Button, Card, Form, Input, Select, Space, Table, Typography, message } from "antd";
+import { Alert, Button, Card, Form, Input, Select, Space, Table, Typography, message } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import { useCallback, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
@@ -70,7 +70,9 @@ export default function MarketingGeneratorPage() {
       message.success("Generatsiya tayyor.");
       await checkPlan();
     } catch (e) {
-      message.error(e.response?.data?.detail || "Xatolik.");
+      const d = e.response?.data?.detail;
+      const text = typeof d === "string" ? d : Array.isArray(d) ? d[0] : d ? String(d) : null;
+      message.error(text || "Xatolik.");
     }
   };
 
@@ -94,6 +96,12 @@ export default function MarketingGeneratorPage() {
   return (
     <>
       <PageHeader title="Marketing generator" description="Ijtimoiy tarmoqlar va reklama matnlari." />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message="Matn OpenAI orqali yaratiladi. Serverda «OPENAI_API_KEY» bo‘lmasa, tizim ogohlantirish matnini qaytaradi — .env ni tekshiring."
+      />
       <Card>
         <Form form={form} layout="vertical" onFinish={onGenerate} style={{ maxWidth: 520 }}>
           <Form.Item name="content_type" label="Kontent turi" rules={[{ required: true }]}>

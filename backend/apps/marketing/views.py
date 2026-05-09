@@ -2,12 +2,40 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from apps.businesses.services import accessible_business_ids, can_edit_business
+from apps.businesses.services import accessible_business_ids, can_generate_marketing
 from apps.accounts.models import User
 from apps.subscriptions.services import get_plan_for_business
+from botapp.services.ai_service import generate_ai_reply
 
 from .models import MarketingContentRequest
 from .serializers import MarketingContentRequestSerializer
+
+_CONTENT_TYPE_LABELS = {
+    "instagram_post": "Instagram post",
+    "telegram_post": "Telegram kanal posti",
+    "reels_script": "Reels / qisqa video ssenariy",
+    "ad_copy": "Reklama matni (sarlavha + asosiy matn)",
+    "story": "Stories matni",
+    "product_desc": "Mahsulot yoki xizmat tavsifi",
+}
+
+
+def _build_marketing_system_prompt(business) -> str:
+    parts = [
+        "Sen tajribali marketing mutaxissisan. Javoblar o‘zbek tilida, tayyor nashr qilish mumkin bo‘lgan holda.",
+        f"Biznes nomi: «{business.name}».",
+        f"Biznes turi: {business.get_business_type_display()}.",
+    ]
+    desc = (business.description or "").strip()
+    if desc:
+        parts.append(f"Biznes haqida (qisqa): {desc[:1500]}")
+    if (business.phone or "").strip():
+        parts.append(f"Aloqa telefoni (agar matnga mos kelsa): {business.phone}")
+    parts.append(
+        "Talablar: professional, ishonchli; emoji muvozanatli; bitta aniq chaqiriq (CTA); "
+        "keraksiz «biz platformamiz» kabi gaplardan qoch; matn uzunligi kontent turiga mos (odatda 400–2000 belg)."
+    )
+    return "\n".join(parts)
 
 
 @api_view(["POST"])
@@ -17,7 +45,7 @@ def marketing_generate_view(request):
     from apps.businesses.models import Business
 
     business = Business.objects.filter(pk=business_id).first()
-    if not business or not can_edit_business(request.user, business):
+    if not business or not can_generate_marketing(request.user, business):
         return Response({"detail": "Ruxsat yo‘q."}, status=status.HTTP_403_FORBIDDEN)
     if request.user.role != User.Role.SUPER_ADMIN:
         pl = get_plan_for_business(business.id)
@@ -26,10 +54,19 @@ def marketing_generate_view(request):
                 {"detail": "Marketing generator joriy tarifda yo‘q. Billing sahifasidan tarifni yangilang."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-    prompt = request.data.get("prompt", "")
+    prompt = (request.data.get("prompt") or "").strip()
     ctype = request.data.get("content_type", "post")
-    # MVP: mock generation (OpenAI can be wired via env)
-    result = f"[Demo] {business.name} uchun {ctype}: {prompt[:200] or 'matn'}"
+    ctype_label = _CONTENT_TYPE_LABELS.get(ctype, ctype)
+
+    system = _build_marketing_system_prompt(business)
+    if prompt:
+        user_message = f"Kontent turi: {ctype_label}.\n\nMijoz ko‘rsatmalari va kontekst:\n{prompt}"
+    else:
+        user_message = (
+            f"Kontent turi: {ctype_label}.\n\n"
+            f"Faqat tur: {ctype_label}. Yangi, jalb qiluvchi matn yoz."
+        )
+    result = generate_ai_reply(system, user_message)
     row = MarketingContentRequest.objects.create(
         business=business,
         user=request.user,

@@ -24,3 +24,18 @@ def can_edit_business(user: User, business: Business) -> bool:
     return BusinessManager.objects.filter(
         business=business, user=user, is_active=True, can_manage_settings=True
     ).exists()
+
+
+def can_generate_marketing(user: User, business: Business) -> bool:
+    """Egasi, sozlamalar yoki katalog/mahsulot bo‘yicha ruxsatli menejer."""
+    if not user.is_authenticated:
+        return False
+    if user.role == User.Role.SUPER_ADMIN:
+        return True
+    if business.owner_id == user.id:
+        return True
+    if can_edit_business(user, business):
+        return True
+    return BusinessManager.objects.filter(
+        business=business, user=user, is_active=True, can_manage_items=True
+    ).exists()
