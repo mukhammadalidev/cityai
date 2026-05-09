@@ -17,7 +17,7 @@ import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
 import { BOOKING_STATUS } from "../../config/statusConfigs";
 import StatusTag from "../../components/ui/StatusTag";
-import { formatDate, formatPhone, formatPrice } from "../../utils/formatters";
+import { formatDate, formatPhone, formatPrice, formatUsd } from "../../utils/formatters";
 
 export default function BusinessDashboardPage() {
   const { businessId, business, plan } = useOutletContext();
@@ -28,6 +28,7 @@ export default function BusinessDashboardPage() {
   const [allLeads, setAllLeads] = useState([]);
   const [leadRows, setLeadRows] = useState([]);
   const [aiList, setAiList] = useState([]);
+  const [aiMonthSummary, setAiMonthSummary] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +43,7 @@ export default function BusinessDashboardPage() {
       const results = await Promise.all(tasks);
       const d = results[0];
       const leads = results[1];
-      const ai = results[2];
+      const aiPack = results[2];
       const bookings = isRestaurant ? results[3] : null;
 
       let a = null;
@@ -58,7 +59,8 @@ export default function BusinessDashboardPage() {
       setAnalytics(a);
       setAllLeads(leads);
       setLeadRows(leads.slice(0, 8));
-      setAiList(ai);
+      setAiList(aiPack.rows || []);
+      setAiMonthSummary(aiPack.monthSummary || null);
       setRecentBookings(isRestaurant ? (bookings || []).slice(0, 8) : []);
     } catch {
       message.error("Ma’lumotlarni yuklashda xatolik yuz berdi.");
@@ -67,6 +69,7 @@ export default function BusinessDashboardPage() {
       setAllLeads([]);
       setLeadRows([]);
       setAiList([]);
+      setAiMonthSummary(null);
       setRecentBookings([]);
     } finally {
       setLoading(false);
@@ -180,6 +183,12 @@ export default function BusinessDashboardPage() {
         </Col>
         <Col xs={24} lg={12}>
           <Card title="AI tokenlar (kunlar)">
+            {aiMonthSummary ? (
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 8 }}>
+                Joriy oy ({aiMonthSummary.month}): taxminiy AI sarfi {formatUsd(aiMonthSummary.total_estimated_cost_usd)} ·{" "}
+                {aiMonthSummary.total_tokens} token
+              </Typography.Paragraph>
+            ) : null}
             <UsageChart data={tokenBars} />
           </Card>
         </Col>

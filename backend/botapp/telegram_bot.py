@@ -62,7 +62,9 @@ from botapp.category_flows import (  # noqa: E402
     category_reply_keyboard,
     register_category_flows,
 )
-from botapp.services.ai_service import generate_ai_reply  # noqa: E402
+from apps.analytics.services import save_ai_usage_record  # noqa: E402
+from botapp.repository import ensure_customer  # noqa: E402
+from botapp.services.ai_service import chat_complete  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -236,6 +238,40 @@ def list_items(business_id: int, category_idx: int | None):
 
 
 @sync_to_async
+def log_ai_usage_from_bot(
+    business_id: int,
+    telegram_user,
+    user_message: str,
+    reply_text: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    total_tokens: int,
+    estimated_cost_usd: Decimal,
+) -> None:
+    biz = Business.objects.filter(pk=business_id).select_related("city").first()
+    if not biz:
+        return
+    cust = ensure_customer(
+        business_id,
+        telegram_user.id,
+        username=telegram_user.username or "",
+        first_name=telegram_user.first_name or "",
+        last_name=telegram_user.last_name or "",
+    )
+    save_ai_usage_record(
+        city_id=biz.city_id,
+        business_id=business_id,
+        customer_id=cust.pk if cust else None,
+        message=user_message,
+        response=reply_text,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=total_tokens,
+        estimated_cost_usd=estimated_cost_usd,
+    )
+
+
+@sync_to_async
 def touch_customer(business_id: int, user) -> None:
     city_id = Business.objects.filter(pk=business_id).values_list("city_id", flat=True).first()
     if not city_id:
@@ -378,7 +414,19 @@ async def ai_assist_question(message: Message, state: FSMContext) -> None:
 
     biz_ctx, know_ctx = await _ai_context_for_business(int(bid))
     system = _build_ai_system_prompt(biz_ctx, know_ctx)
-    reply_text = await asyncio.to_thread(generate_ai_reply, system, text)
+    completion = await asyncio.to_thread(chat_complete, system, text)
+    reply_text = completion.text
+    if completion.should_persist:
+        await log_ai_usage_from_bot(
+            int(bid),
+            message.from_user,
+            text,
+            reply_text,
+            completion.prompt_tokens,
+            completion.completion_tokens,
+            completion.total_tokens,
+            completion.estimated_cost_usd,
+        )
     await state.set_state(Flow.browsing)
     await message.answer(reply_text, parse_mode=None, reply_markup=reply_kb)
 

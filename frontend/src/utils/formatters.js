@@ -9,6 +9,19 @@ export function formatPrice(value, currency = "UZS") {
   return currency === "UZS" ? `${s} so‘m` : `${s} ${currency}`;
 }
 
+/** OpenAI API narxlariga asoslangan taxminiy xarajat (USD). */
+export function formatUsd(value) {
+  if (value == null || value === "") return "—";
+  const n = Number(value);
+  if (Number.isNaN(n)) return String(value);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(n);
+}
+
 export function formatDate(iso) {
   if (!iso) return "—";
   return dayjs(iso).format("DD.MM.YYYY");

@@ -8,13 +8,14 @@ import UpgradeCard from "../../components/ui/UpgradeCard";
 import UsageChart from "../../components/charts/UsageChart";
 import { getAIUsage } from "../../services/aiUsageService";
 import { getSubscriptions, getPlans } from "../../services/subscriptionService";
-import { formatDateTime } from "../../utils/formatters";
+import { formatDateTime, formatUsd } from "../../utils/formatters";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
 
 export default function AIUsagePage() {
   const { businessId, plan } = useOutletContext();
   const [rows, setRows] = useState([]);
+  const [monthSummary, setMonthSummary] = useState(null);
   const [limit, setLimit] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -22,18 +23,20 @@ export default function AIUsagePage() {
     if (!businessId) return;
     setLoading(true);
     try {
-      const [ai, subs, plans] = await Promise.all([
+      const [aiPack, subs, plans] = await Promise.all([
         getAIUsage({ business_id: businessId }),
         getSubscriptions({ business_id: businessId }),
         getPlans(),
       ]);
-      setRows(ai);
+      setRows(aiPack.rows || []);
+      setMonthSummary(aiPack.monthSummary || null);
       const sub = subs[0];
       const plan = plans.find((p) => p.id === sub?.plan);
       setLimit(plan?.max_ai_messages_per_month || 0);
     } catch {
       message.error("AI statistikasi yuklanmadi.");
       setRows([]);
+      setMonthSummary(null);
     } finally {
       setLoading(false);
     }
@@ -48,6 +51,10 @@ export default function AIUsagePage() {
 
   const used = rows.length;
   const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  const listCostSum = useMemo(
+    () => rows.reduce((s, r) => s + Number(r.estimated_cost || 0), 0),
+    [rows],
+  );
 
   const chartData = useMemo(() => {
     const m = {};
@@ -82,7 +89,10 @@ export default function AIUsagePage() {
 
   return (
     <>
-      <PageHeader title="AI ishlatish" description="Javoblar, tokenlar va limitlar." />
+      <PageHeader
+        title="AI ishlatish"
+        description="Tokenlar, taxminiy OpenAI sarfi (USD, model narxlari bo‘yicha) va oylik limit."
+      />
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <Card title="Limit (oylik yozuvlar)">
@@ -91,8 +101,35 @@ export default function AIUsagePage() {
             <Progress percent={pct} status={pct > 90 ? "exception" : "active"} />
           </Card>
         </Col>
-        <Col xs={24} md={16}>
-          <Card title="Tokenlar">
+        <Col xs={24} md={8}>
+          <Card title="Joriy oy (API)">
+            {monthSummary ? (
+              <>
+                <Typography.Paragraph>
+                  Tokenlar: <strong>{monthSummary.total_tokens}</strong>
+                </Typography.Paragraph>
+                <Typography.Paragraph>
+                  Taxminiy sarfi: <strong>{formatUsd(monthSummary.total_estimated_cost_usd)}</strong>
+                </Typography.Paragraph>
+                <Typography.Text type="secondary">Oy: {monthSummary.month}</Typography.Text>
+              </>
+            ) : (
+              <Typography.Text type="secondary">Yig‘indi yo‘q.</Typography.Text>
+            )}
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card title="Ro‘yxatdagi yozuvlar (yig‘indi)">
+            <Typography.Paragraph>
+              Taxminiy sarfi: <strong>{formatUsd(listCostSum)}</strong>
+            </Typography.Paragraph>
+            <Typography.Text type="secondary">
+              So‘nggi {Math.min(200, rows.length)} ta yozuv ustidan (barcha vaqt).
+            </Typography.Text>
+          </Card>
+        </Col>
+        <Col xs={24} md={24}>
+          <Card title="Tokenlar (kunlar, ro‘yxatdan)">
             <UsageChart data={chartData} />
           </Card>
         </Col>
@@ -109,6 +146,11 @@ export default function AIUsagePage() {
             columns={[
               { title: "Vaqt", dataIndex: "created_at", render: formatDateTime },
               { title: "Tokenlar", dataIndex: "total_tokens" },
+              {
+                title: "Sarfi (≈USD)",
+                dataIndex: "estimated_cost",
+                render: (v) => formatUsd(v),
+              },
               { title: "Xabar", dataIndex: "message", ellipsis: true },
               { title: "Javob", dataIndex: "response", ellipsis: true },
             ]}

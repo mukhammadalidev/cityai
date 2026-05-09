@@ -1,5 +1,8 @@
-from django.db.models import Count
+from decimal import Decimal
+
+from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -89,4 +92,23 @@ def ai_usage_list_view(request):
         if ids is not None:
             qs = qs.filter(business_id__in=ids)
     qs = qs.order_by("-created_at")[:200]
-    return Response(AIUsageSerializer(qs, many=True).data)
+    payload = {"results": AIUsageSerializer(qs, many=True).data}
+    if business_id:
+        month = timezone.now().strftime("%Y-%m")
+        agg = (
+            AIUsage.objects.filter(business_id=business_id, created_at__startswith=month)
+            .aggregate(
+                total_tokens=Sum("total_tokens"),
+                total_cost=Sum("estimated_cost"),
+            )
+        )
+        tok = int(agg["total_tokens"] or 0)
+        cost = agg["total_cost"] or Decimal("0")
+        if not isinstance(cost, Decimal):
+            cost = Decimal(str(cost))
+        payload["month_summary"] = {
+            "month": month,
+            "total_tokens": tok,
+            "total_estimated_cost_usd": str(cost.quantize(Decimal("0.0001"))),
+        }
+    return Response(payload)

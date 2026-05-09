@@ -5,7 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import StatusTag from "../../components/ui/StatusTag";
 import { BUSINESS_STATUS } from "../../config/statusConfigs";
-import { formatPhone, formatDate } from "../../utils/formatters";
+import { formatPhone, formatDate, formatUsd } from "../../utils/formatters";
 import { getBusiness, resetBusinessOwnerCredentials, updateBusiness } from "../../services/businessService";
 import { getItems } from "../../services/itemService";
 import { getLeads } from "../../services/leadService";
@@ -48,7 +48,7 @@ export default function BusinessDetailPage() {
       setLeads(ld.slice(0, 8));
       setSubs(sb);
       setPlans(pl);
-      setAiRows(ai.slice(0, 10));
+      setAiRows((ai.rows || []).slice(0, 10));
     } catch {
       message.error("Ma’lumot yuklanmadi.");
       setBiz(null);
@@ -222,11 +222,16 @@ export default function BusinessDetailPage() {
           rowKey="id"
           dataSource={aiRows}
           pagination={false}
-          columns={[
-            { title: "Vaqt", dataIndex: "created_at", render: formatDate },
-            { title: "Tokenlar", dataIndex: "total_tokens" },
-            { title: "Xulosa", dataIndex: "response", ellipsis: true },
-          ]}
+            columns={[
+                { title: "Vaqt", dataIndex: "created_at", render: formatDate },
+                { title: "Tokenlar", dataIndex: "total_tokens" },
+                {
+                  title: "Sarfi (≈USD)",
+                  dataIndex: "estimated_cost",
+                  render: (v) => formatUsd(v),
+                },
+                { title: "Xulosa", dataIndex: "response", ellipsis: true },
+              ]}
         />
       </Card>
       <Modal title="Obunani yangilash" open={subModal} onCancel={() => setSubModal(false)} onOk={onUpgrade} okText="Saqlash" cancelText="Bekor">

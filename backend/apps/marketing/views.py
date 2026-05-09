@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from apps.businesses.services import accessible_business_ids, can_generate_marketing
 from apps.accounts.models import User
 from apps.subscriptions.services import get_plan_for_business
-from botapp.services.ai_service import generate_ai_reply
+from apps.analytics.services import save_ai_usage_record
+from botapp.services.ai_service import chat_complete
 
 from .models import MarketingContentRequest
 from .serializers import MarketingContentRequestSerializer
@@ -66,7 +67,20 @@ def marketing_generate_view(request):
             f"Kontent turi: {ctype_label}.\n\n"
             f"Faqat tur: {ctype_label}. Yangi, jalb qiluvchi matn yoz."
         )
-    result = generate_ai_reply(system, user_message)
+    completion = chat_complete(system, user_message)
+    result = completion.text
+    if completion.should_persist:
+        save_ai_usage_record(
+            city_id=business.city_id,
+            business_id=business.id,
+            customer_id=None,
+            message=user_message,
+            response=result,
+            prompt_tokens=completion.prompt_tokens,
+            completion_tokens=completion.completion_tokens,
+            total_tokens=completion.total_tokens,
+            estimated_cost_usd=completion.estimated_cost_usd,
+        )
     row = MarketingContentRequest.objects.create(
         business=business,
         user=request.user,

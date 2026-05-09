@@ -27,7 +27,8 @@ export default function PlatformAnalyticsPage() {
         setData(a);
         const b = await getBusinesses({});
         setTopBiz([...b].sort((x, y) => Number(y.rating || 0) - Number(x.rating || 0)).slice(0, 8));
-        const ai = await getAIUsage({});
+        const aiPack = await getAIUsage({});
+        const ai = aiPack.rows || [];
         const byDay = {};
         ai.forEach((row) => {
           const d = String(row.created_at || "").slice(0, 10);
