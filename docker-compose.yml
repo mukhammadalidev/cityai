@@ -29,6 +29,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_USE_RELATIVE_API: "1"
+        VITE_TELEGRAM_BOT_URL: "https://t.me/citybotuz_bot"
         # docker-compose v1: ${VAR:-default} ba’zan build.args da bo‘sh qoladi — heap ~512MB.
         # 2 GB RAM VPS: 2048 odatda yetadi; kernel OOM bo‘lsa 1792 yoki 512MB+ swap.
         NODE_MEMORY_MB: "2048"

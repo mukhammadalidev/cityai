@@ -2,9 +2,9 @@ import { Button, Space } from "antd";
 import { Link, Outlet } from "react-router-dom";
 import { LoginOutlined, SendOutlined } from "@ant-design/icons";
 import BrandLogo from "../components/ui/BrandLogo";
+import { PUBLIC_TELEGRAM_BOT_URL } from "../config/publicSite";
 
-const telegramBotUrl =
-  (import.meta.env.VITE_TELEGRAM_BOT_URL || "https://t.me/citybotuz_bot").replace(/\/$/, "");
+const telegramBotUrl = PUBLIC_TELEGRAM_BOT_URL.replace(/\/$/, "");
 
 export default function PublicLayout() {
   return (
