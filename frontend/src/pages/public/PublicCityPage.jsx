@@ -1,5 +1,5 @@
-import { Button, Col, Input, Row, Typography, message } from "antd";
-import { SearchOutlined, SendOutlined } from "@ant-design/icons";
+import { Col, Input, Row, Typography, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import LoadingScreen from "../../components/ui/LoadingScreen";
@@ -10,8 +10,6 @@ import PromoSlider from "../../components/public/PromoSlider";
 import { getCities } from "../../services/cityService";
 import { getCategories } from "../../services/categoryService";
 import { getBusinesses } from "../../services/businessService";
-
-const botUrl = import.meta.env.VITE_TELEGRAM_BOT_URL || "https://t.me/city_services_ai_bot";
 
 export default function PublicCityPage() {
   const { citySlug } = useParams();
@@ -74,10 +72,7 @@ export default function PublicCityPage() {
           onChange={(e) => setQ(e.target.value)}
           style={{ maxWidth: 480, marginBottom: 16 }}
         />
-        <Button type="primary" size="large" icon={<SendOutlined />} href={botUrl} target="_blank" rel="noreferrer">
-          Telegram botga o‘tish
-        </Button>
-        <PromoSlider city={city} citySlug={city.slug} categories={categories} featured={featured} botUrl={botUrl} />
+        <PromoSlider city={city} citySlug={city.slug} categories={categories} featured={featured} />
       </section>
       <section style={{ padding: "32px 24px" }}>
         <Typography.Title level={3}>Xizmat kategoriyalari</Typography.Title>

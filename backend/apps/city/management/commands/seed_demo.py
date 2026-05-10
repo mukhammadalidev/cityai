@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 from datetime import date, timedelta, time
 from decimal import Decimal
 
@@ -416,13 +417,17 @@ class Command(BaseCommand):
             )
 
         items = []
+        _item_seq_by_business: dict[int, int] = defaultdict(int)
         for i in range(150):
             b = businesses[i % len(businesses)]
-            title, meta, desc = _demo_item_title_metadata_description(b.business_type, i)
+            seq = _item_seq_by_business[b.pk]
+            _item_seq_by_business[b.pk] = seq + 1
+            title, meta, desc = _demo_item_title_metadata_description(b.business_type, seq)
             items.append(
                 Item.objects.create(
                     business=b,
                     title=title,
+                    slug=f"demo-item-{b.pk}-{seq}",
                     category_name=b.category.name,
                     price=Decimal(random.randint(50_000, 500_000_000)),
                     currency="UZS",

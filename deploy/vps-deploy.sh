@@ -18,8 +18,10 @@ fi
 
 echo "== stack.env =="
 if [ ! -f deploy/stack.env ]; then
-  echo "deploy/stack.env yo‘q. Nusxa oling:"
-  echo "  cp deploy/stack.env.example deploy/stack.env && nano deploy/stack.env"
+  echo "deploy/stack.env yo‘q — yaratilmoqda..."
+  bash "$(dirname "$0")/bootstrap-stack-env.sh"
+  echo "Avval deploy/stack.env ni tahrirlang (YOUR_VPS_IP va kalitlar), keyin qayta:"
+  echo "  bash deploy/vps-deploy.sh"
   exit 1
 fi
 

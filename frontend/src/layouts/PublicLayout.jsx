@@ -1,7 +1,10 @@
 import { Button, Space } from "antd";
 import { Link, Outlet } from "react-router-dom";
-import { LoginOutlined } from "@ant-design/icons";
+import { LoginOutlined, SendOutlined } from "@ant-design/icons";
 import BrandLogo from "../components/ui/BrandLogo";
+
+const telegramBotUrl =
+  (import.meta.env.VITE_TELEGRAM_BOT_URL || "https://t.me/citybotuz_bot").replace(/\/$/, "");
 
 export default function PublicLayout() {
   return (
@@ -10,7 +13,10 @@ export default function PublicLayout() {
         <Link to="/c/buxoro" className="cs-public-nav__brand">
           <BrandLogo height={34} className="cs-brand-img--public" />
         </Link>
-        <Space>
+        <Space wrap>
+          <Button icon={<SendOutlined />} href={telegramBotUrl} target="_blank" rel="noreferrer">
+            Telegram bot
+          </Button>
           <Link to="/login">
             <Button type="primary" icon={<LoginOutlined />}>
               Kabinetga kirish

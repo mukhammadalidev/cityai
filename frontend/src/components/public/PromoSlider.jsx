@@ -1,21 +1,11 @@
-import { Button, Carousel, Typography } from "antd";
+import { Carousel, Typography } from "antd";
 import { Link } from "react-router-dom";
 
-export default function PromoSlider({ city, citySlug, categories = [], featured = [], botUrl }) {
+export default function PromoSlider({ city, citySlug, categories = [], featured = [] }) {
   const cat = categories[0];
   const biz = featured[0];
 
   const slides = [
-    {
-      key: "bot",
-      title: "Telegram bot orqali mijoz yig'ing",
-      description: `${city?.name || "Shahar"} bo'yicha 24/7 avtomatik qabul. Mijozlar bir tugma bilan sizga yozadi.`,
-      cta: (
-        <Button type="primary" href={botUrl} target="_blank" rel="noreferrer">
-          Botga o'tish
-        </Button>
-      ),
-    },
     {
       key: "featured",
       title: "Top bizneslar bannerda chiqadi",

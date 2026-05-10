@@ -1,5 +1,4 @@
-import { Button, Card, Col, Form, Input, Rate, Row, Typography, message } from "antd";
-import { SendOutlined } from "@ant-design/icons";
+import { Card, Col, Form, Input, Rate, Row, Typography, message } from "antd";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingScreen from "../../components/ui/LoadingScreen";
@@ -10,8 +9,6 @@ import { getItems } from "../../services/itemService";
 import { createLead } from "../../services/leadService";
 import { formatPhone, mediaUrl } from "../../utils/formatters";
 import { notifyBusinessDataChanged } from "../../utils/businessEvents";
-
-const botUrl = import.meta.env.VITE_TELEGRAM_BOT_URL || "https://t.me/city_services_ai_bot";
 
 export default function PublicBusinessPage() {
   const { businessSlug } = useParams();
@@ -105,9 +102,6 @@ export default function PublicBusinessPage() {
             <Typography.Paragraph>
               <strong>Ish vaqti:</strong> {biz.working_hours || "—"}
             </Typography.Paragraph>
-            <Button type="primary" size="large" icon={<SendOutlined />} href={botUrl} target="_blank" rel="noreferrer" style={{ marginTop: 8 }}>
-              Telegram botga o‘tish
-            </Button>
           </Col>
         </Row>
         {biz.business_type === "education_center" ? (

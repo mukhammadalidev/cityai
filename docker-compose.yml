@@ -29,8 +29,9 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_USE_RELATIVE_API: "1"
-        # Kam RAM (1 GB VPS): NODE_MEMORY_MB=1024 docker-compose build frontend
-        NODE_MEMORY_MB: "${NODE_MEMORY_MB:-2048}"
+        # docker-compose v1: ${VAR:-default} ba’zan build.args da bo‘sh qoladi — heap ~512MB.
+        # 2 GB RAM VPS: 2048 odatda yetadi; kernel OOM bo‘lsa 1792 yoki 512MB+ swap.
+        NODE_MEMORY_MB: "2048"
     # Eski docker-compose v1: ${VAR:-80} ishlamaydi. Boshqa port: masalan "8080:80"
     ports:
       - "80:80"
