@@ -4,6 +4,9 @@
 # 2. docker compose up -d --build
 # 3. Superuser: docker compose exec backend python manage.py createsuperuser
 #
+# Eski docker-compose uchun majburiy (aks holda "Unsupported config option" xatosi).
+version: "3.8"
+
 services:
   backend:
     build:
