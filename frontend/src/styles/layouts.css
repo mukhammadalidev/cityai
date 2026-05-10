@@ -165,6 +165,25 @@
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
+/* <a> ko‘rinishida Ant tugma (href doim https://t.me/citybotuz_bot) */
+a.cs-public-telegram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 15px;
+  font-size: 14px;
+  line-height: 1.5715;
+  border-radius: 6px;
+  text-decoration: none !important;
+  box-sizing: border-box;
+}
+
+a.cs-public-telegram-link .ant-btn-icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
 .cs-public-nav__brand {
   display: inline-flex;
   align-items: center;

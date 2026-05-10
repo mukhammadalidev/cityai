@@ -2,9 +2,6 @@ import { Button, Space } from "antd";
 import { Link, Outlet } from "react-router-dom";
 import { LoginOutlined, SendOutlined } from "@ant-design/icons";
 import BrandLogo from "../components/ui/BrandLogo";
-import { PUBLIC_TELEGRAM_BOT_URL } from "../config/publicSite";
-
-const telegramBotUrl = PUBLIC_TELEGRAM_BOT_URL.replace(/\/$/, "");
 
 export default function PublicLayout() {
   return (
@@ -14,17 +11,17 @@ export default function PublicLayout() {
           <BrandLogo height={34} className="cs-brand-img--public" />
         </Link>
         <Space wrap className="cs-public-nav__actions" size="middle">
-          <Button
-            type="default"
-            ghost
-            className="cs-public-nav__btn-ghost"
-            icon={<SendOutlined />}
-            href={telegramBotUrl}
+          <a
+            className="ant-btn ant-btn-default ant-btn-color-default cs-public-nav__btn-ghost cs-public-telegram-link"
+            href="https://t.me/citybotuz_bot"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
-            Telegram bot
-          </Button>
+            <span className="ant-btn-icon">
+              <SendOutlined />
+            </span>
+            <span>Telegram bot</span>
+          </a>
           <Link to="/login">
             <Button type="primary" icon={<LoginOutlined />}>
               Kabinetga kirish
@@ -39,7 +36,7 @@ export default function PublicLayout() {
         <div className="cs-public-footer__inner">
           <p className="cs-public-footer__tagline">Shahar bo‘yicha xizmatlar va ishonchli bizneslar</p>
           <div className="cs-public-footer__links">
-            <a href={telegramBotUrl} target="_blank" rel="noreferrer">
+            <a href="https://t.me/citybotuz_bot" target="_blank" rel="noopener noreferrer">
               Telegram
             </a>
             <span className="cs-public-footer__dot" aria-hidden>
