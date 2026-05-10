@@ -8,13 +8,21 @@ const telegramBotUrl =
 
 export default function PublicLayout() {
   return (
-    <div>
-      <nav className="cs-public-nav">
-        <Link to="/c/buxoro" className="cs-public-nav__brand">
+    <div className="cs-public-shell">
+      <nav className="cs-public-nav" aria-label="Asosiy navigatsiya">
+        <Link to="/c/buxoro" className="cs-public-nav__brand" title="Bosh sahifa">
           <BrandLogo height={34} className="cs-brand-img--public" />
         </Link>
-        <Space wrap>
-          <Button icon={<SendOutlined />} href={telegramBotUrl} target="_blank" rel="noreferrer">
+        <Space wrap className="cs-public-nav__actions" size="middle">
+          <Button
+            type="default"
+            ghost
+            className="cs-public-nav__btn-ghost"
+            icon={<SendOutlined />}
+            href={telegramBotUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Telegram bot
           </Button>
           <Link to="/login">
@@ -28,7 +36,23 @@ export default function PublicLayout() {
         <Outlet />
       </div>
       <footer className="cs-public-footer">
-        <span>© {new Date().getFullYear()} Shahar Xizmatlari AI</span>
+        <div className="cs-public-footer__inner">
+          <p className="cs-public-footer__tagline">Shahar bo‘yicha xizmatlar va ishonchli bizneslar</p>
+          <div className="cs-public-footer__links">
+            <a href={telegramBotUrl} target="_blank" rel="noreferrer">
+              Telegram
+            </a>
+            <span className="cs-public-footer__dot" aria-hidden>
+              ·
+            </span>
+            <Link to="/c/buxoro">Bosh sahifa</Link>
+            <span className="cs-public-footer__dot" aria-hidden>
+              ·
+            </span>
+            <Link to="/login">Kabinet</Link>
+          </div>
+          <p className="cs-public-footer__copy">© {new Date().getFullYear()} Citybot</p>
+        </div>
       </footer>
     </div>
   );
