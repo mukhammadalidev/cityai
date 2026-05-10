@@ -9,6 +9,7 @@ import {
   Layers,
   LayoutDashboard,
   Library,
+  ListChecks,
   Package,
   Receipt,
   Settings,
@@ -83,6 +84,7 @@ export default function BusinessSidebar({ collapsed, businessType, plan }) {
                 label: withLock("Materiallar", !showEduMaterials),
                 locked: !showEduMaterials,
               },
+              { key: "/business/edu-quizzes", icon: ListChecks, label: "Testlar / quizlar" },
             ]
           : []),
         { key: "/business/bookings", icon: Calendar, label: cfg.bookingsLabel || "Bronlar" },

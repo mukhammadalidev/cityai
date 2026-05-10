@@ -5,6 +5,7 @@ from .portal_views import (
     CreateEduPortalUserView,
     ParentPortalSummaryView,
     StudentPortalSummaryView,
+    StudentQuizSubmitView,
     TeacherPortalSummaryView,
 )
 from .views import LoginView, ManagerListView, MeView, RegisterBusinessOwnerView
@@ -18,5 +19,6 @@ urlpatterns = [
     path("portal/education/create-user/", CreateEduPortalUserView.as_view(), name="edu_portal_create_user"),
     path("portal/education/teacher-summary/", TeacherPortalSummaryView.as_view(), name="edu_teacher_portal"),
     path("portal/education/student-summary/", StudentPortalSummaryView.as_view(), name="edu_student_portal"),
+    path("portal/education/student-quiz-submit/", StudentQuizSubmitView.as_view(), name="edu_student_quiz_submit"),
     path("portal/education/parent-summary/", ParentPortalSummaryView.as_view(), name="edu_parent_portal"),
 ]

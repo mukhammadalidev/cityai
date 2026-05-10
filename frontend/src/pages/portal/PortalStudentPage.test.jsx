@@ -29,6 +29,7 @@ const mockSummary = {
   ],
   attendance_month: { marked_days: 12, present_days: 11, rate_percent: 92 },
   recent_attendance: [{ id: 1, date: "2026-05-02", status: "present", note: "" }],
+  portal_quizzes: [],
 };
 
 function cardByTitle(title) {
@@ -79,6 +80,10 @@ describe("PortalStudentPage", () => {
 
     expect(cardByTitle("So‘nggi baholar")).toBeInTheDocument();
     expect(cardByTitle("Davomat jadvali")).toBeInTheDocument();
+    expect(cardByTitle("Mock testlar va quizlar")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Matematika" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Ingliz tili" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Arab tili" })).toBeInTheDocument();
   });
 
   it("API xatosi bo‘lsa xabar va fallback matn", async () => {

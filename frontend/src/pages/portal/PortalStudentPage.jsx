@@ -1,6 +1,7 @@
 import { Card, Descriptions, Row, Col, Statistic, Table, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import LoadingScreen from "../../components/ui/LoadingScreen";
+import StudentMockTestsSection from "./StudentMockTestsSection";
 import { getStudentPortalSummary } from "../../services/portalService";
 import { formatPhone } from "../../utils/formatters";
 import dayjs from "dayjs";
@@ -53,6 +54,8 @@ export default function PortalStudentPage() {
           <Descriptions.Item label="Holat">{STATUS_UZ[s.status] || s.status}</Descriptions.Item>
         </Descriptions>
       </Card>
+
+      <StudentMockTestsSection portalQuizzes={data.portal_quizzes || []} />
 
       <Card title="Baholar (joriy oy)" size="small" style={{ marginTop: 16 }}>
         <Row gutter={16}>

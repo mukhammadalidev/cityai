@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 
 from apps.businesses.services import can_edit_business
 from apps.subscriptions.services import get_plan_for_business
+from apps.edu_quizzes.models import EduQuiz, EduQuizQuestion
+from apps.edu_quizzes.portal import portal_quizzes_for_business
 from apps.students.models import Student, StudentAttendance, StudentGroup, StudentRating
 from apps.students.serializers import (
     StudentAttendanceSerializer,
@@ -123,6 +125,7 @@ def build_student_portal_payload(student: Student) -> dict:
         },
         "ratings_rank_month": _portal_rating_rank_month(student, start, end),
         "recent_ratings": StudentRatingSerializer(recent_ratings, many=True).data,
+        "portal_quizzes": portal_quizzes_for_business(student.business_id),
     }
 
 
@@ -451,6 +454,54 @@ class TeacherPortalSummaryView(APIView):
                 "attendance_month": att_month if attendance_insights else None,
             }
         )
+
+
+class StudentQuizSubmitSerializer(serializers.Serializer):
+    quiz_id = serializers.IntegerField(min_value=1)
+    answers = serializers.ListField(
+        child=serializers.DictField(),
+        allow_empty=False,
+    )
+
+
+class StudentQuizSubmitView(APIView):
+    """O‘quvchi yuborgan javoblarni serverda tekshiradi (to‘g‘ri indekslar faqat serverda)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if user.role != User.Role.EDU_STUDENT or not user.portal_student_id:
+            return Response({"detail": "Faqat o‘quvchi kabineti."}, status=403)
+        ser = StudentQuizSubmitSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        student = Student.objects.filter(pk=user.portal_student_id).first()
+        if not student:
+            return Response({"detail": "Profil topilmadi."}, status=404)
+        quiz = EduQuiz.objects.filter(
+            pk=ser.validated_data["quiz_id"],
+            business_id=student.business_id,
+            is_published=True,
+        ).first()
+        if not quiz:
+            return Response({"detail": "Test topilmadi yoki hozir ochilmagan."}, status=404)
+        questions = {q.id: q for q in EduQuizQuestion.objects.filter(quiz=quiz)}
+        if not questions:
+            return Response({"detail": "Savollar yo‘q."}, status=400)
+        ok = 0
+        for item in ser.validated_data["answers"]:
+            qid = item.get("question_id")
+            if qid not in questions:
+                continue
+            q = questions[qid]
+            try:
+                sel = int(item.get("selected_index"))
+            except (TypeError, ValueError):
+                continue
+            if 0 <= sel < len(q.options or []) and sel == q.correct_index:
+                ok += 1
+        total = len(questions)
+        return Response({"correct": ok, "total": total})
 
 
 class StudentPortalSummaryView(APIView):

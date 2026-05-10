@@ -12,6 +12,12 @@ export async function getStudentPortalSummary() {
   return data;
 }
 
+/** O‘quvchi: markaz testi natijasini serverda tekshirish */
+export async function submitStudentPortalQuiz(body) {
+  const { data } = await api.post("/auth/portal/education/student-quiz-submit/", body);
+  return data;
+}
+
 export async function getParentPortalSummary() {
   const { data } = await api.get("/auth/portal/education/parent-summary/");
   return data;
