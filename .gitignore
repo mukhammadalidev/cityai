@@ -1,6 +1,7 @@
 # Muhit va maxfiy (GitHubga qo‘ymang)
 .env
 .env.local
+deploy/stack.env
 .env.*.local
 !.env.example
 backend/.env

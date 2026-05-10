@@ -160,8 +160,8 @@ Bot **faol** bizneslar va katalogdagi **active** pozitsiyalardan foydalanadi.
 Men sizning serveringizga ulanib deploy qila olmayman; quyidagilar tayyor:
 
 1. Serverda **Docker** va **Docker Compose** o‘rnating.
-2. Loyihani klonlang, ildizda `cp deploy/env.example .env` va `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` (va kerak bo‘lsa `CSRF_TRUSTED_ORIGINS`) ni to‘ldiring.
-3. `docker compose up -d --build`
+2. Loyihani klonlang, **`cp deploy/stack.env.example deploy/stack.env`** va ichini to‘ldiring. **`DJANGO_SECRET_KEY`** uchun `openssl rand -hex 32` ishlating (ichida `$` bo‘lmasin — aks holda Compose xato beradi). Loyiha ildizidagi `.env` bo‘lsa va ichida `$` bo‘lsa: `mv .env .env.local`.
+3. `docker-compose up -d --build` yoki **`bash deploy/vps-deploy.sh`** (DNS tekshiruvi bilan).
 4. Birinchi marta: `docker compose exec backend python manage.py createsuperuser`
 5. Telegram bot alohida jarayon sifatida ishga tushirish kerak bo‘lsa, serverda `backend` virtual muhit yoki alohida konteynerda `python manage.py run_telegram_bot` (`.env` bilan).
 

@@ -1,11 +1,12 @@
 # Production: nginx (frontend) + Django (gunicorn). SQLite va media — volume.
 #
-# 1. Ildizda .env yarating (deploy/env.example dan).
+# 1. deploy/stack.env yarating: cp deploy/stack.env.example deploy/stack.env
+#    Ildizdagi .env ichida $ bo‘lmasin (Compose noto‘g‘ri o‘qiydi) yoki .env ni rename qiling.
 # 2. docker compose up -d --build
 # 3. Superuser: docker compose exec backend python manage.py createsuperuser
 #
-# Eski docker-compose uchun majburiy (aks holda "Unsupported config option" xatosi).
-version: "3.8"
+# Juda eski docker-compose faqat 3.3 (yoki 2.2) ni qabul qiladi — 3.8 "unsupported" beradi.
+version: "3.3"
 
 services:
   backend:
@@ -13,14 +14,14 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - ./deploy/stack.env
     environment:
       DJANGO_DEBUG: "0"
       DJANGO_SQLITE_PATH: /data/db.sqlite3
     volumes:
       - app_data:/data
       - app_media:/app/media
-    restart: unless-stopped
+    restart: always
 
   frontend:
     build:
@@ -33,7 +34,7 @@ services:
       - "80:80"
     depends_on:
       - backend
-    restart: unless-stopped
+    restart: always
 
 volumes:
   app_data:
