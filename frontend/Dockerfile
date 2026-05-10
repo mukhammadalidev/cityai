@@ -10,6 +10,10 @@ COPY . .
 ARG VITE_USE_RELATIVE_API=1
 ENV VITE_USE_RELATIVE_API=$VITE_USE_RELATIVE_API
 
+# Vite katta loyihalarda default heap (~512MB) yetmaydi; VPSda build OOM bo‘lmasin.
+ARG NODE_MEMORY_MB=2048
+ENV NODE_OPTIONS=--max-old-space-size=${NODE_MEMORY_MB}
+
 RUN npm run build
 
 FROM nginx:1.27-alpine

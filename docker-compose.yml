@@ -29,6 +29,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_USE_RELATIVE_API: "1"
+        # Kam RAM (1 GB VPS): NODE_MEMORY_MB=1024 docker-compose build frontend
+        NODE_MEMORY_MB: "${NODE_MEMORY_MB:-2048}"
     # Eski docker-compose v1: ${VAR:-80} ishlamaydi. Boshqa port: masalan "8080:80"
     ports:
       - "80:80"
