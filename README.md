@@ -155,6 +155,18 @@ Bot **faol** bizneslar va katalogdagi **active** pozitsiyalardan foydalanadi.
 4. Botni qayta ishga tushiring. Biznes tanlangach **Web App** tugmasi `/b/<biznes-slug>` sahifasini ochadi.
 5. Telefonda `localhost` ishlamaydi: Vite dev rejimida `/api` va `/media` odatda Django ga proxylanadi; `DEBUG=1` paytida CORS ngrok domenlariga ruxsat berilgan.
 
+## Production: Docker (VPS / server)
+
+Men sizning serveringizga ulanib deploy qila olmayman; quyidagilar tayyor:
+
+1. Serverda **Docker** va **Docker Compose** o‘rnating.
+2. Loyihani klonlang, ildizda `cp deploy/env.example .env` va `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` (va kerak bo‘lsa `CSRF_TRUSTED_ORIGINS`) ni to‘ldiring.
+3. `docker compose up -d --build`
+4. Birinchi marta: `docker compose exec backend python manage.py createsuperuser`
+5. Telegram bot alohida jarayon sifatida ishga tushirish kerak bo‘lsa, serverda `backend` virtual muhit yoki alohida konteynerda `python manage.py run_telegram_bot` (`.env` bilan).
+
+SQLite va yuklangan fayllar **volume**da saqlanadi (`app_data`, `app_media`). HTTPS uchun server oldidan **Caddy** yoki **nginx** bilan reverse proxy qo‘shing.
+
 ## Loyiha tuzilishi (qisqa)
 
 - **`backend/`** — Django ilovalari: `accounts`, `businesses`, `catalog`, `leads`, `bookings`, `orders`, `students`, `teachers`, `subscriptions`, `billing`, `analytics`, `knowledge`, `bot_engine` va hokazo. Telegram mantiq `botapp/`.

@@ -6,3 +6,5 @@ aiogram==3.27.0
 openai==2.34.0
 Pillow==10.4.0
 django-cors-headers==4.9.0
+gunicorn==23.0.0
+whitenoise==6.8.2

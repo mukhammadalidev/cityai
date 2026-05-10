@@ -46,12 +46,20 @@ def upgrade_subscription_view(request):
     if not can_edit_business(request.user, business) and request.user.role != User.Role.SUPER_ADMIN:
         return Response({"detail": "Ruxsat yo‘q."}, status=status.HTTP_403_FORBIDDEN)
     plan = get_object_or_404(SubscriptionPlan, code=plan_code, is_active=True)
+    d0 = date.today()
+    trial = int(getattr(plan, "trial_days", 0) or 0)
+    if plan.code == SubscriptionPlan.Code.DEMO and trial > 0:
+        end = d0 + timedelta(days=trial)
+        st = BusinessSubscription.Status.TRIAL
+    else:
+        end = d0 + timedelta(days=30)
+        st = BusinessSubscription.Status.ACTIVE
     sub = BusinessSubscription.objects.create(
         business=business,
         plan=plan,
-        status=BusinessSubscription.Status.ACTIVE,
-        start_date=date.today(),
-        end_date=date.today() + timedelta(days=30),
-        next_payment_date=date.today() + timedelta(days=30),
+        status=st,
+        start_date=d0,
+        end_date=end,
+        next_payment_date=end,
     )
     return Response(BusinessSubscriptionSerializer(sub).data, status=status.HTTP_201_CREATED)

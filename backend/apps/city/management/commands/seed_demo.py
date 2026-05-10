@@ -246,20 +246,20 @@ class Command(BaseCommand):
             )
             owners.append(u)
 
-        # Tariflar: demo → start → business → premium (cheklovlar va funksiyalar asta-sekin o‘sadi).
+        # Tariflar: demo → start → business → premium.
         # Tuple: name, code, monthly, setup, max_items, max_managers, max_leads/mo, max_ai/mo,
         #        ai_chat, analytics, public_page, marketing, auto_followup, white_label,
-        #        edu_attendance, edu_materials, edu_portals
+        #        edu_attendance, edu_materials, edu_portals, trial_days (0 = sinovsiz; demo = 7 kun)
         plans = [
             (
                 "Demo",
                 SubscriptionPlan.Code.DEMO,
                 0,
                 0,
-                35,
-                2,
-                200,
-                800,
+                20,
+                1,
+                100,
+                250,
                 True,
                 False,
                 True,
@@ -269,6 +269,7 @@ class Command(BaseCommand):
                 True,
                 True,
                 True,
+                7,
             ),
             (
                 "Start",
@@ -288,6 +289,7 @@ class Command(BaseCommand):
                 True,
                 True,
                 True,
+                0,
             ),
             (
                 "Business",
@@ -307,6 +309,7 @@ class Command(BaseCommand):
                 True,
                 True,
                 True,
+                0,
             ),
             (
                 "Premium",
@@ -326,10 +329,11 @@ class Command(BaseCommand):
                 True,
                 True,
                 True,
+                0,
             ),
         ]
         plan_objs = []
-        for name, code, mprice, sprice, mi, mm, ml, ma, ai, an, pub, mk, af, wl, ed_a, ed_m, ed_p in plans:
+        for name, code, mprice, sprice, mi, mm, ml, ma, ai, an, pub, mk, af, wl, ed_a, ed_m, ed_p, trial_days in plans:
             plan_objs.append(
                 SubscriptionPlan.objects.create(
                     name=name,
@@ -349,6 +353,7 @@ class Command(BaseCommand):
                     has_edu_attendance=ed_a,
                     has_edu_materials=ed_m,
                     has_edu_portals=ed_p,
+                    trial_days=trial_days,
                     parent_can_create_student_portal=(code == SubscriptionPlan.Code.PREMIUM),
                 )
             )
@@ -393,13 +398,14 @@ class Command(BaseCommand):
                 rating=Decimal(f"{3 + random.random() * 2:.2f}"),
             )
             businesses.append(b)
+            d0 = date.today()
             BusinessSubscription.objects.create(
                 business=b,
                 plan=demo_plan,
-                status=BusinessSubscription.Status.ACTIVE,
-                start_date=date.today() - timedelta(days=30),
-                end_date=date.today() + timedelta(days=30),
-                next_payment_date=date.today() + timedelta(days=7),
+                status=BusinessSubscription.Status.TRIAL,
+                start_date=d0,
+                end_date=d0 + timedelta(days=demo_plan.trial_days or 7),
+                next_payment_date=d0 + timedelta(days=demo_plan.trial_days or 7),
             )
             Invoice.objects.create(
                 business=b,

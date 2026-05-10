@@ -8,7 +8,9 @@ export const PLAN_LABELS = {
 
 export function planFeatureList(plan) {
   if (!plan) return [];
+  const trial = Number(plan.trial_days || 0);
   return [
+    trial > 0 && `${trial} kun bepul sinov`,
     plan.has_ai_chat && "AI chat-bot",
     plan.has_analytics && "Analitika",
     plan.has_public_page && "Ochiq sahifa",

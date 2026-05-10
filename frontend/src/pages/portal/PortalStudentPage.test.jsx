@@ -30,6 +30,7 @@ const mockSummary = {
   attendance_month: { marked_days: 12, present_days: 11, rate_percent: 92 },
   recent_attendance: [{ id: 1, date: "2026-05-02", status: "present", note: "" }],
   portal_quizzes: [],
+  portal_quiz_scores: [],
 };
 
 function cardByTitle(title) {

@@ -41,6 +41,7 @@ class SubscriptionFeatureGuardsTests(APITestCase):
         defaults = {
             "name": "Demo plan",
             "code": SubscriptionPlan.Code.DEMO,
+            "trial_days": 0,
             "max_items": 1,
             "has_ai_chat": False,
             "has_analytics": False,

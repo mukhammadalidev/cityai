@@ -40,6 +40,10 @@ class SubscriptionPlan(models.Model):
         default=False,
         help_text="Premium: ota-ona kabinetidan farzand uchun o‘quvchi login/parolni o‘zi yaratishi mumkin",
     )
+    trial_days = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="0 = sinovsiz. Demo: odatda 7 — bepul sinov muddati (kun).",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

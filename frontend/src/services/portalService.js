@@ -9,7 +9,20 @@ export async function getTeacherPortalSummary(params = {}) {
 
 export async function getStudentPortalSummary() {
   const { data } = await api.get("/auth/portal/education/student-summary/");
-  return data;
+  if (!data || typeof data !== "object") return data;
+  return {
+    ...data,
+    portal_quizzes: Array.isArray(data.portal_quizzes)
+      ? data.portal_quizzes
+      : Array.isArray(data.portalQuizzes)
+        ? data.portalQuizzes
+        : [],
+    portal_quiz_scores: Array.isArray(data.portal_quiz_scores)
+      ? data.portal_quiz_scores
+      : Array.isArray(data.portalQuizScores)
+        ? data.portalQuizScores
+        : [],
+  };
 }
 
 /** O‘quvchi: markaz testi natijasini serverda tekshirish */
@@ -20,5 +33,18 @@ export async function submitStudentPortalQuiz(body) {
 
 export async function getParentPortalSummary() {
   const { data } = await api.get("/auth/portal/education/parent-summary/");
-  return data;
+  if (!data || typeof data !== "object") return data;
+  return {
+    ...data,
+    portal_quizzes: Array.isArray(data.portal_quizzes)
+      ? data.portal_quizzes
+      : Array.isArray(data.portalQuizzes)
+        ? data.portalQuizzes
+        : [],
+    portal_quiz_scores: Array.isArray(data.portal_quiz_scores)
+      ? data.portal_quiz_scores
+      : Array.isArray(data.portalQuizScores)
+        ? data.portalQuizScores
+        : [],
+  };
 }

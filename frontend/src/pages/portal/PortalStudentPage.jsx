@@ -19,7 +19,7 @@ export default function PortalStudentPage() {
       setData(await getStudentPortalSummary());
     } catch {
       message.error("Ma’lumot yuklanmadi.");
-      setData(null);
+      setData((prev) => prev ?? null);
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,11 @@ export default function PortalStudentPage() {
         </Descriptions>
       </Card>
 
-      <StudentMockTestsSection portalQuizzes={data.portal_quizzes || []} />
+      <StudentMockTestsSection
+        portalQuizzes={Array.isArray(data.portal_quizzes) ? data.portal_quizzes : []}
+        portalQuizScores={Array.isArray(data.portal_quiz_scores) ? data.portal_quiz_scores : []}
+        onCenterQuizSubmitted={load}
+      />
 
       <Card title="Baholar (joriy oy)" size="small" style={{ marginTop: 16 }}>
         <Row gutter={16}>

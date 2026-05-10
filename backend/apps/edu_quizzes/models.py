@@ -53,3 +53,24 @@ class EduQuizQuestion(models.Model):
 
     class Meta:
         ordering = ["sort_order", "id"]
+
+
+class EduQuizAttempt(models.Model):
+    """O‘quvchi test topshirgan urinish (ball tarix)."""
+
+    student = models.ForeignKey(
+        "students.Student",
+        on_delete=models.CASCADE,
+        related_name="quiz_attempts",
+    )
+    quiz = models.ForeignKey(EduQuiz, on_delete=models.CASCADE, related_name="attempts")
+    correct_count = models.PositiveSmallIntegerField()
+    total_questions = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [
+            models.Index(fields=["student", "-created_at"]),
+            models.Index(fields=["student", "quiz", "-created_at"]),
+        ]

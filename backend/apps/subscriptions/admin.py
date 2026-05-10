@@ -8,6 +8,7 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "code",
+        "trial_days",
         "monthly_price",
         "max_items",
         "max_managers",

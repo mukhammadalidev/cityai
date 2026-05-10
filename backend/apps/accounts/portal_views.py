@@ -2,6 +2,7 @@ import calendar
 from collections import defaultdict
 from datetime import date
 
+from django.db import transaction
 from django.db.models import Avg, Count
 from rest_framework import permissions, serializers, status
 from rest_framework.response import Response
@@ -9,8 +10,8 @@ from rest_framework.views import APIView
 
 from apps.businesses.services import can_edit_business
 from apps.subscriptions.services import get_plan_for_business
-from apps.edu_quizzes.models import EduQuiz, EduQuizQuestion
-from apps.edu_quizzes.portal import portal_quizzes_for_business
+from apps.edu_quizzes.models import EduQuiz, EduQuizAttempt, EduQuizQuestion
+from apps.edu_quizzes.portal import portal_quiz_data_for_student
 from apps.students.models import Student, StudentAttendance, StudentGroup, StudentRating
 from apps.students.serializers import (
     StudentAttendanceSerializer,
@@ -95,6 +96,7 @@ def build_student_portal_payload(student: Student) -> dict:
     all_avg = r_all.aggregate(avg=Avg("points")).get("avg")
     recent_ratings = r_all.order_by("-rated_at", "-id")[:30]
 
+    portal_quizzes, portal_quiz_scores = portal_quiz_data_for_student(student)
     return {
         "business": {
             "id": student.business_id,
@@ -125,7 +127,8 @@ def build_student_portal_payload(student: Student) -> dict:
         },
         "ratings_rank_month": _portal_rating_rank_month(student, start, end),
         "recent_ratings": StudentRatingSerializer(recent_ratings, many=True).data,
-        "portal_quizzes": portal_quizzes_for_business(student.business_id),
+        "portal_quizzes": portal_quizzes,
+        "portal_quiz_scores": portal_quiz_scores,
     }
 
 
@@ -501,6 +504,13 @@ class StudentQuizSubmitView(APIView):
             if 0 <= sel < len(q.options or []) and sel == q.correct_index:
                 ok += 1
         total = len(questions)
+        with transaction.atomic():
+            EduQuizAttempt.objects.create(
+                student=student,
+                quiz=quiz,
+                correct_count=ok,
+                total_questions=total,
+            )
         return Response({"correct": ok, "total": total})
 
 

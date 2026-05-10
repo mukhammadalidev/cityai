@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EduQuiz, EduQuizCategory, EduQuizQuestion
+from .models import EduQuiz, EduQuizAttempt, EduQuizCategory, EduQuizQuestion
 
 
 class EduQuizQuestionInline(admin.TabularInline):
@@ -12,6 +12,12 @@ class EduQuizQuestionInline(admin.TabularInline):
 class EduQuizCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "business", "name", "created_at")
     list_filter = ("business",)
+
+
+@admin.register(EduQuizAttempt)
+class EduQuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ("id", "student", "quiz", "correct_count", "total_questions", "created_at")
+    list_filter = ("quiz__business",)
 
 
 @admin.register(EduQuiz)

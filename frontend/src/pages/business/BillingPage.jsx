@@ -1,4 +1,4 @@
-import { Button, Card, Col, Row, Table, Typography, message } from "antd";
+import { Alert, Button, Card, Col, Row, Table, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
@@ -52,10 +52,25 @@ export default function BillingPage() {
 
   const sub = subs[0];
   const plan = plans.find((p) => p.id === sub?.plan);
+  const isDemoTrial = plan?.code === "demo" && Number(plan?.trial_days || sub?.trial_days || 0) > 0;
+  const trialEndLabel = sub?.trial_ends_on
+    ? formatDate(sub.trial_ends_on)
+    : sub?.end_date
+      ? formatDate(sub.end_date)
+      : null;
 
   return (
     <>
       <PageHeader title="Billing" description="Tarif, limitlar va hisob-fakturalar." />
+      {isDemoTrial && trialEndLabel ? (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={`Demo bepul sinov tugash sanasi: ${trialEndLabel}`}
+          description="Shu kundan keyin to‘liq ishlash uchun Start yoki boshqa tarifni tanlang (pastdagi tariflar yoki sozlamalar)."
+        />
+      ) : null}
       <Row gutter={[16, 16]}>
         <Col xs={24} md={12}>
           <Card title="Joriy tarif">
