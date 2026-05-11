@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import date
 
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import Avg, Count
 from rest_framework import permissions, serializers, status
 from rest_framework.response import Response
@@ -543,6 +544,9 @@ class ParentPortalSummaryView(APIView):
         user = request.user
         if user.role != User.Role.EDU_PARENT or not user.portal_parent_id:
             return Response({"detail": "Faqat ota-ona kabineti."}, status=403)
+        # Ota-ona portaliga kirgan vaqtni yangilab boramiz (faollikni kuzatish uchun).
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
         student = (
             Student.objects.select_related("business", "business__city", "group", "course", "group__teacher")
             .filter(pk=user.portal_parent_id)

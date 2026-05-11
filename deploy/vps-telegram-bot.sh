@@ -28,8 +28,9 @@ case "${1:-start}" in
       docker start "$NAME"
       exit 0
     fi
-    echo "Yangi konteyner (bir martalik image + migrate)..."
+    echo "Yangi konteyner (backend bilan bir xil volume/env — SQLite va token)..."
     dc run -d --name "$NAME" --no-deps backend python manage.py run_telegram_bot
+    docker update --restart=unless-stopped "$NAME" 2>/dev/null || true
     echo "OK: $NAME"
     echo "Log: bash deploy/vps-telegram-bot.sh logs"
     ;;
