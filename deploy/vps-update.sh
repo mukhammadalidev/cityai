@@ -6,6 +6,30 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+echo "== Tarmoq (git va docker build uchun) =="
+if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+  echo "   OK: ping 8.8.8.8"
+else
+  echo "   XATO: Internetga chiqish yo'q (yoki ICMP o'chirilgan). Provayder / firewall."
+  exit 1
+fi
+if command -v curl >/dev/null 2>&1; then
+  if ! curl -sfI --max-time 15 -o /dev/null https://github.com; then
+    echo "   XATO: https://github.com ochilmadi — odatda DNS (Could not resolve host)."
+    echo "   Bir martalik tuzatish: sudo bash deploy/vps-fix-dns.sh"
+    echo "   Qo'lda: cat /etc/resolv.conf  — nameserver 8.8.8.8 bo'lishi kerak (yoki systemd-resolved DNS=...)."
+    exit 1
+  fi
+  echo "   OK: github.com (HTTPS)"
+else
+  if ! getent hosts github.com >/dev/null 2>&1; then
+    echo "   XATO: github.com DNS da yo'q. curl o'rnatilgan bo'lsa aniqroq tekshiriladi."
+    echo "   sudo bash deploy/vps-fix-dns.sh"
+    exit 1
+  fi
+  echo "   OK: github.com (getent)"
+fi
+
 echo "== git pull =="
 git pull
 
