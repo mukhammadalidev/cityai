@@ -1,0 +1,35 @@
+# Build qilmasdan ishga tushirish: registrydan image tortiladi.
+#
+# 1) deploy/images.env yarating (images.env.example dan nusxa).
+# 2) docker login ghcr.io   # yoki docker.io
+# 3) Loyiha ildizida:
+#    docker-compose -f docker-compose.images.yml --env-file deploy/images.env pull
+#    docker-compose -f docker-compose.images.yml --env-file deploy/images.env up -d
+#
+# Yangilash: pull + up -d (build yo'q).
+version: "3.3"
+
+services:
+  backend:
+    image: ${CITYAI_BACKEND_IMAGE}
+    env_file:
+      - ./deploy/stack.env
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_SQLITE_PATH: /data/db.sqlite3
+    volumes:
+      - app_data:/data
+      - app_media:/app/media
+    restart: always
+
+  frontend:
+    image: ${CITYAI_FRONTEND_IMAGE}
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  app_data:
+  app_media:
