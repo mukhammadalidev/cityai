@@ -13,6 +13,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      # Sekin VPS: ildizda .env da PIP_INDEX_URL yoki bir martalik:
+      #   PIP_INDEX_URL=https://pypi.mirrors.ustc.edu.cn/simple docker-compose build backend
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
     env_file:
       - ./deploy/stack.env
     environment:

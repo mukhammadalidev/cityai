@@ -9,8 +9,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DJANGO_SETTINGS_MODULE=config.settings
 
 COPY requirements.txt .
-# Sekin server: uzoq kutish va qayta urinish (pip / PyPI).
-RUN pip install --no-cache-dir --prefer-binary --default-timeout=300 --retries=15 -r requirements.txt
+# Ixtiyoriy indeks (docker-compose build args): sekin tarmoqda yaqin mirror sinab ko‘ring.
+ARG PIP_INDEX_URL=https://pypi.org/simple
+# set -x — logda qaysi bosqichda ekanini ko‘rish osonroq (to‘xtagan emas, sekin tortyapti).
+RUN set -x \
+  && pip install --no-cache-dir --upgrade pip \
+  && pip install --no-cache-dir --prefer-binary \
+    --default-timeout=300 --retries=15 \
+    -i "${PIP_INDEX_URL}" \
+    -r requirements.txt
 
 COPY . .
 COPY deploy-entrypoint.sh /deploy-entrypoint.sh
