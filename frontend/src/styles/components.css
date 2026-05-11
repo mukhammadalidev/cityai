@@ -274,6 +274,23 @@
   min-height: 42px;
 }
 
+/* Jadvallar: mobil va tor ekranda gorizontal scroll */
+.cs-page .ant-table-wrapper,
+.cs-public-main .ant-table-wrapper,
+.cs-auth-wrap .ant-table-wrapper,
+.ant-drawer-body .ant-table-wrapper,
+.ant-modal-body .ant-table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-table-wrap.ant-table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Modal / Drawer sarlavha */
 .ant-modal-header,
 .ant-drawer-header-title {

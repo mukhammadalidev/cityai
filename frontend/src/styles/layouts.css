@@ -108,6 +108,7 @@
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
+  min-width: 0; /* keng jadval: flex/grid ichida kichrayish va scroll */
 }
 
 @media (max-width: 767px) {

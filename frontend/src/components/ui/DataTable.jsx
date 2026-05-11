@@ -1,5 +1,7 @@
 import { Table } from "antd";
 
-export default function DataTable({ className = "cs-table-wrap", ...props }) {
-  return <Table className={className} scroll={{ x: "max-content" }} {...props} />;
+/** Ant Table + kichik ekranda gorizontal scroll (scroll berilsa, x max-content default bilan birlashtiriladi). */
+export default function DataTable({ className = "cs-table-wrap", scroll, ...props }) {
+  const mergedScroll = { x: "max-content", ...(scroll || {}) };
+  return <Table className={className} scroll={mergedScroll} {...props} />;
 }
