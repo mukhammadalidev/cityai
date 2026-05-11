@@ -1,5 +1,5 @@
-# bookworm: trixie (python:3.11-slim default) o‘zgarishi va katta gcc zanjiridan qochish.
-# Barcha requirements uchun PyPI da wheel bor — gcc/-dev shart emas; apt minimal.
+# bookworm: trixie (python:3.11-slim) o‘rniga barqaror bazaviy image.
+# apt-get yo‘q — faqat pip wheel (VPSda deb.debian.org xatolari bilan build to‘xtamasin).
 FROM python:3.11-slim-bookworm
 
 WORKDIR /app
@@ -9,7 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DJANGO_SETTINGS_MODULE=config.settings
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
+# Sekin server: uzoq kutish va qayta urinish (pip / PyPI).
+RUN pip install --no-cache-dir --prefer-binary --default-timeout=300 --retries=15 -r requirements.txt
 
 COPY . .
 COPY deploy-entrypoint.sh /deploy-entrypoint.sh

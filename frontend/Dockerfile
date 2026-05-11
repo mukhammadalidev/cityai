@@ -3,7 +3,11 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# Sekin tarmoq: npm qayta urinish va timeout.
+RUN npm ci \
+  --fetch-retries=10 \
+  --fetch-retry-mintimeout=20000 \
+  --fetch-retry-maxtimeout=180000
 
 COPY . .
 
