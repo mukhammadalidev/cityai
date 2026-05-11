@@ -36,7 +36,7 @@ import {
   getStudents,
   updateStudent,
 } from "../../services/studentService";
-import { formatPhone } from "../../utils/formatters";
+import { formatDateTime, formatPhone } from "../../utils/formatters";
 import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
 import { tuitionPaymentTagProps } from "../../utils/tuitionPayment";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
@@ -321,11 +321,15 @@ export default function StudentsPage() {
               render: (_, row) => (
                 <Space direction="vertical" size={4}>
                   <Space wrap size={4}>
-                    {(row.parent_portal_usernames || []).map((u) => (
-                      <Typography.Text key={u} copyable style={{ fontSize: 12 }}>
-                        {u}
-                      </Typography.Text>
-                    ))}
+                    {(row.parent_portal_users ||
+                      (row.parent_portal_usernames || []).map((u) => ({ username: u, last_login: null }))).map(
+                      (p) => (
+                        <Typography.Text key={p.username} copyable style={{ fontSize: 12 }}>
+                          {p.username}
+                          {p.last_login ? ` — ${formatDateTime(p.last_login)}` : " — —"}
+                        </Typography.Text>
+                      )
+                    )}
                   </Space>
                   <Button
                     size="small"
@@ -536,6 +540,11 @@ export default function StudentsPage() {
                               render: (text, row) => <Link to={`/business/students/${row.id}`}>{text}</Link>,
                             },
                             { title: "Guruh", dataIndex: "group_name", render: (v) => v || "—" },
+                            {
+                              title: "Ota-ona oxirgi kirishi",
+                              dataIndex: "parent_portal_last_login",
+                              render: (v) => (v ? formatDateTime(v) : "—"),
+                            },
                             {
                               title: "Davomat",
                               key: "att",

@@ -2,7 +2,7 @@ import calendar
 from datetime import date
 
 from django.db import transaction
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, OuterRef, Subquery
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -144,6 +144,19 @@ class StudentViewSet(viewsets.ModelViewSet):
             ids = accessible_business_ids(user)
             if ids is not None:
                 qs = qs.filter(business_id__in=ids)
+
+        # Har bir o‘quvchi uchun ota-onalar (EDU_PARENT) oxirgi kirish vaqti.
+        # Multiple ota-ona bo‘lsa, oxirgisi (max last_login) ko‘rsatiladi.
+        parent_last_login_sq = (
+            User.objects.filter(
+                role=User.Role.EDU_PARENT,
+                portal_parent_id=OuterRef("pk"),
+            )
+            .order_by("-last_login")
+            .values("last_login")[:1]
+        )
+        qs = qs.annotate(parent_portal_last_login=Subquery(parent_last_login_sq))
+
         return qs.order_by("name", "id")
 
     def perform_create(self, serializer):

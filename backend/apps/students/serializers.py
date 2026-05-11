@@ -35,6 +35,8 @@ class StudentSerializer(serializers.ModelSerializer):
     group_name = serializers.CharField(source="group.name", read_only=True, default="")
     portal_username = serializers.SerializerMethodField()
     parent_portal_usernames = serializers.SerializerMethodField()
+    parent_portal_last_login = serializers.SerializerMethodField()
+    parent_portal_users = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
@@ -44,12 +46,34 @@ class StudentSerializer(serializers.ModelSerializer):
     def get_portal_username(self, obj):
         return User.objects.filter(portal_student=obj).values_list("username", flat=True).first()
 
-    def get_parent_portal_usernames(self, obj):
-        return list(
+    def _get_parent_portal_users_cached(self, obj):
+        cache_attr = "_parent_portal_users_cache"
+        if hasattr(obj, cache_attr):
+            return getattr(obj, cache_attr)
+        parents = list(
             User.objects.filter(portal_parent=obj, role=User.Role.EDU_PARENT)
-            .values_list("username", flat=True)
             .order_by("username")
+            .values_list("username", "last_login")
         )
+        payload = [
+            {"username": u, "last_login": ll.isoformat() if ll else None} for (u, ll) in parents
+        ]
+        setattr(obj, cache_attr, payload)
+        return payload
+
+    def get_parent_portal_usernames(self, obj):
+        return [x["username"] for x in self._get_parent_portal_users_cached(obj)]
+
+    def get_parent_portal_last_login(self, obj):
+        # Avval annotate qilingan bo‘lsa, N+1 query qilmaslik uchun shuni ishlatamiz.
+        if hasattr(obj, "parent_portal_last_login"):
+            return getattr(obj, "parent_portal_last_login")
+        parents = self._get_parent_portal_users_cached(obj)
+        last = max((p["last_login"] for p in parents if p["last_login"]), default=None)
+        return last
+
+    def get_parent_portal_users(self, obj):
+        return self._get_parent_portal_users_cached(obj)
 
     def validate(self, attrs):
         group = attrs.get("group", getattr(self.instance, "group", None) if self.instance else None)
