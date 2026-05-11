@@ -1,9 +1,15 @@
 import { Button, Space } from "antd";
 import { Link, Outlet } from "react-router-dom";
-import { LoginOutlined, SendOutlined } from "@ant-design/icons";
+import { LoginOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import BrandLogo from "../components/ui/BrandLogo";
+import { getDashboardPathForRole } from "../utils/authRouting";
+import { getAccessToken, getStoredUser } from "../utils/storage";
 
 export default function PublicLayout() {
+  const token = typeof window !== "undefined" ? getAccessToken() : null;
+  const user = typeof window !== "undefined" ? getStoredUser() : null;
+  const cabinetPath = user?.role ? getDashboardPathForRole(user.role) : "/business/select";
+
   return (
     <div className="cs-public-shell">
       <nav className="cs-public-nav" aria-label="Asosiy navigatsiya">
@@ -22,11 +28,19 @@ export default function PublicLayout() {
             </span>
             <span>Telegram bot</span>
           </a>
-          <Link to="/login">
-            <Button type="primary" icon={<LoginOutlined />}>
-              Kabinetga kirish
-            </Button>
-          </Link>
+          {token ? (
+            <Link to={cabinetPath}>
+              <Button type="primary" icon={<UserOutlined />}>
+                Kabinet
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/login">
+              <Button type="primary" icon={<LoginOutlined />}>
+                Kabinetga kirish
+              </Button>
+            </Link>
+          )}
         </Space>
       </nav>
       <div className="cs-public-main">
@@ -46,7 +60,11 @@ export default function PublicLayout() {
             <span className="cs-public-footer__dot" aria-hidden>
               ·
             </span>
-            <Link to="/login">Kabinet</Link>
+            {token ? (
+              <Link to={cabinetPath}>Kabinet</Link>
+            ) : (
+              <Link to="/login">Kabinet</Link>
+            )}
           </div>
           <p className="cs-public-footer__copy">© {new Date().getFullYear()} Citybot</p>
         </div>

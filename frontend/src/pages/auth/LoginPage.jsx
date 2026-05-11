@@ -1,13 +1,33 @@
 import { Alert, Button, Card, Form, Input, Typography, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginWithMe } from "../../services/authService";
+import { fetchMe, loginWithMe } from "../../services/authService";
 import BrandLogo from "../../components/ui/BrandLogo";
-import { getStoredUser, setSelectedBusinessId } from "../../utils/storage";
+import { getDashboardPathForRole } from "../../utils/authRouting";
+import { clearSession, getAccessToken, getStoredUser, setSelectedBusinessId } from "../../utils/storage";
 
 export default function LoginPage() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) return;
+    const u = getStoredUser();
+    const go = (role) => {
+      if (role === "edu_teacher" || role === "edu_student" || role === "edu_parent") {
+        setSelectedBusinessId(null);
+      }
+      nav(getDashboardPathForRole(role), { replace: true });
+    };
+    if (u?.role) {
+      go(u.role);
+      return;
+    }
+    fetchMe()
+      .then((me) => go(me?.role))
+      .catch(() => clearSession());
+  }, [nav]);
 
   const onFinish = async (v) => {
     setLoading(true);
@@ -15,17 +35,10 @@ export default function LoginPage() {
       const data = await loginWithMe(v.username, v.password);
       message.success("Muvaffaqiyatli kirdingiz");
       const role = data.user?.role || getStoredUser()?.role;
-      if (role === "super_admin") nav("/admin/dashboard");
-      else if (role === "edu_teacher") {
+      if (role === "edu_teacher" || role === "edu_student" || role === "edu_parent") {
         setSelectedBusinessId(null);
-        nav("/portal/teacher");
-      } else if (role === "edu_student") {
-        setSelectedBusinessId(null);
-        nav("/portal/student");
-      } else if (role === "edu_parent") {
-        setSelectedBusinessId(null);
-        nav("/portal/parent");
-      } else nav("/business/select");
+      }
+      nav(getDashboardPathForRole(role));
     } catch {
       message.error("Login yoki parol noto‘g‘ri yoki server ishlamayapti.");
     } finally {

@@ -23,10 +23,11 @@ export default function BusinessLayout() {
   const isSuperAdmin = getStoredUser()?.role === "super_admin";
 
   const reloadList = useCallback(() => {
-    getBusinesses({ mine: 1 })
+    const params = isSuperAdmin ? {} : { mine: 1 };
+    getBusinesses(params)
       .then(setList)
       .catch(() => setList([]));
-  }, []);
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     reloadList();

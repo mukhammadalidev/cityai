@@ -4,17 +4,18 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import EmptyState from "../../components/ui/EmptyState";
 import LoadingScreen from "../../components/ui/LoadingScreen";
-import { setSelectedBusinessId } from "../../utils/storage";
+import { getStoredUser, setSelectedBusinessId } from "../../utils/storage";
 import { getBusinesses } from "../../services/businessService";
 
 export default function BusinessSelectPage() {
   const nav = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isSuperAdmin = getStoredUser()?.role === "super_admin";
 
   const load = () => {
     setLoading(true);
-    getBusinesses({ mine: 1 })
+    getBusinesses(isSuperAdmin ? {} : { mine: 1 })
       .then(setList)
       .catch(() => {
         message.error("Bizneslar ro‘yxati yuklanmadi.");
@@ -32,15 +33,29 @@ export default function BusinessSelectPage() {
   if (!list.length) {
     return (
       <>
-        <PageHeader title="Biznes tanlash" description="Platformadagi o‘z biznesingizni tanlang." />
-        <EmptyState description="Sizga biriktirilgan biznes topilmadi." />
+        <PageHeader
+          title="Biznes tanlash"
+          description={
+            isSuperAdmin
+              ? "Super admin: istalgan biznesni kabinet rejimida boshqarish uchun tanlang."
+              : "Platformadagi o‘z biznesingizni tanlang."
+          }
+        />
+        <EmptyState description={isSuperAdmin ? "Bizneslar ro‘yxati bo‘sh." : "Sizga biriktirilgan biznes topilmadi."} />
       </>
     );
   }
 
   return (
     <>
-      <PageHeader title="Biznes tanlash" description="Davom etish uchun kartani bosing." />
+      <PageHeader
+        title="Biznes tanlash"
+        description={
+          isSuperAdmin
+            ? "Super admin: istalgan biznesni tanlang — kurslar, lidlar, sozlamalar kabinetdan."
+            : "Davom etish uchun kartani bosing."
+        }
+      />
       <Row gutter={[16, 16]}>
         {list.map((b) => (
           <Col xs={24} sm={12} md={8} key={b.id}>
