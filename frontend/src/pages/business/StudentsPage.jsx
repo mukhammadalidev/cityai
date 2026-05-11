@@ -14,6 +14,7 @@ import {
   Statistic,
   Table,
   Tabs,
+  Tag,
   Typography,
   message,
 } from "antd";
@@ -37,6 +38,7 @@ import {
 } from "../../services/studentService";
 import { formatPhone } from "../../utils/formatters";
 import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
+import { tuitionPaymentTagProps } from "../../utils/tuitionPayment";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 
 const STUDENT_STATUS = {
@@ -183,13 +185,21 @@ export default function StudentsPage() {
       ...row,
       course: row.course ?? undefined,
       group: row.group ?? undefined,
+      tuition_paid_until: row.tuition_paid_until ? dayjs(row.tuition_paid_until) : undefined,
+      tuition_payment_note: row.tuition_payment_note || "",
     });
     setDrawer({ open: true, record: row });
   };
 
   const saveStudent = async () => {
     const v = await form.validateFields();
-    const payload = { ...v, course: v.course ?? null, group: v.group ?? null };
+    const payload = {
+      ...v,
+      course: v.course ?? null,
+      group: v.group ?? null,
+      tuition_paid_until: v.tuition_paid_until ? v.tuition_paid_until.format("YYYY-MM-DD") : null,
+      tuition_payment_note: (v.tuition_payment_note || "").trim(),
+    };
     try {
       if (drawer.record) {
         await updateStudent(drawer.record.id, payload);
@@ -272,6 +282,15 @@ export default function StudentsPage() {
         title: "Holat",
         dataIndex: "status",
         render: (v) => STUDENT_STATUS[v]?.label ?? v,
+      },
+      {
+        title: "Abonement",
+        key: "tuition",
+        width: 130,
+        render: (_, row) => {
+          const p = tuitionPaymentTagProps(row);
+          return <Tag color={p.color}>{p.children}</Tag>;
+        },
       },
       ...(hasEduPortals
         ? [
@@ -475,7 +494,13 @@ export default function StudentsPage() {
               students.length === 0 ? (
                 <EmptyState title="Hozircha o‘quvchi yo‘q" description="Yangi o‘quvchi qo‘shing." />
               ) : (
-                <Table rowKey="id" dataSource={students} pagination={false} columns={studentColumns} />
+                <Table
+                  rowKey="id"
+                  dataSource={students}
+                  pagination={false}
+                  columns={studentColumns}
+                  scroll={{ x: "max-content" }}
+                />
               ),
           },
           ...(hasEduAttendance
@@ -538,7 +563,8 @@ export default function StudentsPage() {
         title={drawer.record ? "O‘quvchini tahrirlash" : "Yangi o‘quvchi"}
         open={drawer.open}
         onClose={() => setDrawer({ open: false, record: null })}
-        width={400}
+        width={520}
+        styles={{ body: { paddingBottom: 24 } }}
         extra={
           <Space>
             <Button onClick={() => setDrawer({ open: false, record: null })}>Bekor</Button>
@@ -572,6 +598,12 @@ export default function StudentsPage() {
           </Form.Item>
           <Form.Item name="notes" label="Izoh">
             <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="tuition_paid_until" label="Abonement muddati (shu kungacha to‘langan)">
+            <DatePicker style={{ width: "100%" }} format="DD.MM.YYYY" allowClear />
+          </Form.Item>
+          <Form.Item name="tuition_payment_note" label="To‘lov izohi (ota-onaga ko‘rinadi)">
+            <Input.TextArea rows={2} maxLength={500} showCount placeholder="Masalan: yanvar uchun qabul qilindi" />
           </Form.Item>
         </Form>
       </Drawer>

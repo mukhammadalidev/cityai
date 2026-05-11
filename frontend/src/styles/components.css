@@ -176,6 +176,52 @@
   z-index: 1;
 }
 
+.cs-public-hero--city .cs-public-hero-search {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 575px) {
+  .cs-public-hero--city .ant-typography h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .cs-public-hero--city .cs-public-hero-search {
+    max-width: none;
+  }
+}
+
+.cs-public-page-section {
+  padding: 32px 24px;
+}
+
+.cs-public-page-section--tight-top {
+  padding: 0 24px 32px;
+}
+
+.cs-public-page-section--bottom {
+  padding: 0 24px 48px;
+}
+
+@media (max-width: 575px) {
+  .cs-public-page-section,
+  .cs-public-page-section--tight-top,
+  .cs-public-page-section--bottom {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cs-public-page-section {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  .cs-public-page-section--bottom {
+    padding-bottom: 36px;
+  }
+}
+
 .cs-promo-slider {
   margin-top: 22px;
   max-width: 760px;

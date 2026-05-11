@@ -1,4 +1,4 @@
-import { Button, Card, Descriptions, Form, Input, Row, Col, Statistic, Table, Typography, message } from "antd";
+import { Alert, Button, Card, Descriptions, Form, Input, Row, Col, Statistic, Table, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import LoadingScreen from "../../components/ui/LoadingScreen";
@@ -64,6 +64,25 @@ export default function PortalParentPage() {
         {data.business?.city ? `${data.business.city} · ` : null}
         O‘qish va davomat — faqat shu farzand va shu markaz bo‘yicha.
       </Typography.Text>
+
+      {data.tuition_payment ? (
+        <Alert
+          style={{ marginTop: 16 }}
+          type={data.tuition_payment.status === "paid" ? "success" : data.tuition_payment.status === "unpaid" ? "error" : "info"}
+          showIcon
+          message={<strong>Farzand abonementi</strong>}
+          description={
+            <>
+              <div>{data.tuition_payment.message}</div>
+              {data.tuition_payment.note ? (
+                <Typography.Text type="secondary" style={{ display: "block", marginTop: 6 }}>
+                  Markaz izohi: {data.tuition_payment.note}
+                </Typography.Text>
+              ) : null}
+            </>
+          }
+        />
+      ) : null}
 
       <Card title="Telegram bildirishnomalar" size="small" style={{ marginTop: 16 }}>
         <Typography.Paragraph type="secondary" style={{ marginBottom: 12 }}>

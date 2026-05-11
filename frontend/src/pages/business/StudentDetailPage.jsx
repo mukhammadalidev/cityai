@@ -1,13 +1,30 @@
-import { Button, Card, Col, DatePicker, Descriptions, Row, Space, Statistic, Table, Tag, Typography, message } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Descriptions,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Space,
+  Statistic,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useOutletContext, useParams } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import LoadingScreen from "../../components/ui/LoadingScreen";
-import { getStudentCrmSummary } from "../../services/studentService";
+import { getStudentCrmSummary, updateStudent } from "../../services/studentService";
 import { formatPhone } from "../../utils/formatters";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
-import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
+import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
 
 const STUDENT_STATUS = {
   active: { label: "Darslarda faol", color: "green" },
@@ -40,6 +57,9 @@ export default function StudentDetailPage() {
   const [allTime, setAllTime] = useState(false);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tuitionModal, setTuitionModal] = useState(false);
+  const [tuitionSaving, setTuitionSaving] = useState(false);
+  const [tuitionForm] = Form.useForm();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -141,6 +161,81 @@ export default function StudentDetailPage() {
           </Descriptions>
         </Space>
       </Card>
+
+      {data.tuition_payment ? (
+        <Card size="small" style={{ marginBottom: 16 }} title="Abonement (to‘lov)">
+          <Space direction="vertical" style={{ width: "100%" }} size="middle">
+            <Alert
+              type={
+                data.tuition_payment.status === "paid"
+                  ? "success"
+                  : data.tuition_payment.status === "unpaid"
+                    ? "error"
+                    : "info"
+              }
+              showIcon
+              message={data.tuition_payment.label}
+              description={
+                <>
+                  <div>{data.tuition_payment.message}</div>
+                  {data.tuition_payment.note ? (
+                    <Typography.Text type="secondary" style={{ display: "block", marginTop: 6 }}>
+                      Izoh: {data.tuition_payment.note}
+                    </Typography.Text>
+                  ) : null}
+                </>
+              }
+            />
+            <Button
+              type="default"
+              onClick={() => {
+                tuitionForm.setFieldsValue({
+                  tuition_paid_until: st.tuition_paid_until ? dayjs(st.tuition_paid_until) : null,
+                  tuition_payment_note: st.tuition_payment_note || "",
+                });
+                setTuitionModal(true);
+              }}
+            >
+              Muddat / izohni yangilash
+            </Button>
+          </Space>
+        </Card>
+      ) : null}
+
+      <Modal
+        title="Abonement muddati"
+        open={tuitionModal}
+        onCancel={() => setTuitionModal(false)}
+        confirmLoading={tuitionSaving}
+        okText="Saqlash"
+        onOk={async () => {
+          const v = await tuitionForm.validateFields();
+          setTuitionSaving(true);
+          try {
+            await updateStudent(st.id, {
+              tuition_paid_until: v.tuition_paid_until ? v.tuition_paid_until.format("YYYY-MM-DD") : null,
+              tuition_payment_note: (v.tuition_payment_note || "").trim(),
+            });
+            message.success("Saqlandi.");
+            setTuitionModal(false);
+            load();
+            notifyBusinessDataChanged();
+          } catch (e) {
+            message.error(e?.response?.data?.detail || "Saqlanmadi.");
+          } finally {
+            setTuitionSaving(false);
+          }
+        }}
+      >
+        <Form form={tuitionForm} layout="vertical">
+          <Form.Item name="tuition_paid_until" label="To‘lov amal qilish muddati (shu kungacha)">
+            <DatePicker style={{ width: "100%" }} format="DD.MM.YYYY" allowClear />
+          </Form.Item>
+          <Form.Item name="tuition_payment_note" label="Izoh (ixtiyoriy, ota-onaga ko‘rinadi)">
+            <Input.TextArea rows={2} maxLength={500} showCount />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       {data.course ? (
         <Card title="Dars / kurs haqida" size="small" style={{ marginBottom: 16 }}>

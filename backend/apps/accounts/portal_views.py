@@ -13,6 +13,7 @@ from apps.subscriptions.services import get_plan_for_business
 from apps.edu_quizzes.models import EduQuiz, EduQuizAttempt, EduQuizQuestion
 from apps.edu_quizzes.portal import portal_quiz_data_for_student
 from apps.students.models import Student, StudentAttendance, StudentGroup, StudentRating
+from apps.students.payment_utils import tuition_payment_summary_for_student
 from apps.students.serializers import (
     StudentAttendanceSerializer,
     StudentRatingSerializer,
@@ -129,6 +130,7 @@ def build_student_portal_payload(student: Student) -> dict:
         "recent_ratings": StudentRatingSerializer(recent_ratings, many=True).data,
         "portal_quizzes": portal_quizzes,
         "portal_quiz_scores": portal_quiz_scores,
+        "tuition_payment": tuition_payment_summary_for_student(student),
     }
 
 

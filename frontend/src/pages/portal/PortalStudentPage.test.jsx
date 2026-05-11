@@ -31,6 +31,13 @@ const mockSummary = {
   recent_attendance: [{ id: 1, date: "2026-05-02", status: "present", note: "" }],
   portal_quizzes: [],
   portal_quiz_scores: [],
+  tuition_payment: {
+    status: "paid",
+    label: "To‘langan",
+    message: "Abonement 31.12.2026 gacha amal qiladi.",
+    paid_until: "2026-12-31",
+    note: null,
+  },
 };
 
 function cardByTitle(title) {
@@ -56,6 +63,8 @@ describe("PortalStudentPage", () => {
     });
 
     expect(screen.getByText(/Samarqand/)).toBeInTheDocument();
+    expect(screen.getByText(/Abonement \(to‘lov holati\)/)).toBeInTheDocument();
+    expect(screen.getByText(/31\.12\.2026 gacha amal qiladi/)).toBeInTheDocument();
 
     const profileCard = cardByTitle("Mening profilim");
     expect(within(profileCard).getByText("O‘quvchi Test")).toBeInTheDocument();

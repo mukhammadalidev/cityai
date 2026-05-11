@@ -27,6 +27,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@supports (padding: max(0px)) {
+  .cs-public-shell,
+  .cs-app-layout {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
 #root {
   min-height: 100vh;
 }

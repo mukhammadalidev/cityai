@@ -56,7 +56,7 @@ export default function PublicCityPage() {
 
   return (
     <div>
-      <section className="cs-public-hero">
+      <section className="cs-public-hero cs-public-hero--city">
         <Typography.Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
           {city.name}
         </Typography.Title>
@@ -64,17 +64,17 @@ export default function PublicCityPage() {
           {city.description || "Shahar xizmatlari va bizneslarni qidiring."}
         </Typography.Paragraph>
         <Input
+          className="cs-public-hero-search"
           size="large"
           allowClear
           prefix={<SearchOutlined />}
           placeholder="Xizmat yoki biznes qidirish"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          style={{ maxWidth: 480, marginBottom: 16 }}
         />
         <PromoSlider city={city} citySlug={city.slug} categories={categories} featured={featured} />
       </section>
-      <section style={{ padding: "32px 24px" }}>
+      <section className="cs-public-page-section">
         <Typography.Title level={3}>Xizmat kategoriyalari</Typography.Title>
         {!categories.length ? (
           <EmptyState description="Kategoriyalar hozircha yo‘q." />
@@ -90,7 +90,7 @@ export default function PublicCityPage() {
           </Row>
         )}
       </section>
-      <section style={{ padding: "0 24px 32px" }}>
+      <section className="cs-public-page-section cs-public-page-section--tight-top">
         <Typography.Title level={3}>Tavsiya etilgan bizneslar</Typography.Title>
         <Row gutter={[16, 16]}>
           {featured.length ? (
@@ -104,7 +104,7 @@ export default function PublicCityPage() {
           )}
         </Row>
       </section>
-      <section style={{ padding: "0 24px 48px" }}>
+      <section className="cs-public-page-section cs-public-page-section--bottom">
         <Typography.Title level={3}>Mashhur xizmatlar</Typography.Title>
         <Row gutter={[16, 16]}>
           {popular.map((b) => (

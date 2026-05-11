@@ -1,4 +1,4 @@
-import { Card, Descriptions, Row, Col, Statistic, Table, Typography, message } from "antd";
+import { Alert, Card, Descriptions, Row, Col, Statistic, Table, Typography, message } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import StudentMockTestsSection from "./StudentMockTestsSection";
@@ -43,6 +43,25 @@ export default function PortalStudentPage() {
         {data.business?.city ? `${data.business.city} · ` : null}
         Faqat o‘zingizning ma’lumotlaringiz.
       </Typography.Text>
+
+      {data.tuition_payment ? (
+        <Alert
+          style={{ marginTop: 16 }}
+          type={data.tuition_payment.status === "paid" ? "success" : data.tuition_payment.status === "unpaid" ? "error" : "info"}
+          showIcon
+          message={<strong>Abonement (to‘lov holati)</strong>}
+          description={
+            <>
+              <div>{data.tuition_payment.message}</div>
+              {data.tuition_payment.note ? (
+                <Typography.Text type="secondary" style={{ display: "block", marginTop: 6 }}>
+                  Markaz izohi: {data.tuition_payment.note}
+                </Typography.Text>
+              ) : null}
+            </>
+          }
+        />
+      ) : null}
 
       <Card title="Mening profilim" size="small" style={{ marginTop: 16 }}>
         <Descriptions column={1} size="small">
@@ -97,6 +116,7 @@ export default function PortalStudentPage() {
           size="small"
           rowKey="id"
           pagination={{ pageSize: 8 }}
+          scroll={{ x: "max-content" }}
           dataSource={data.recent_ratings || []}
           locale={{ emptyText: "Hozircha baho yo‘q" }}
           columns={[
@@ -136,6 +156,7 @@ export default function PortalStudentPage() {
           size="small"
           rowKey="id"
           pagination={{ pageSize: 12 }}
+          scroll={{ x: "max-content" }}
           dataSource={data.recent_attendance || []}
           locale={{ emptyText: "Yozuv yo‘q" }}
           columns={[

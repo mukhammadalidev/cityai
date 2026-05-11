@@ -15,6 +15,7 @@ from apps.subscriptions.services import get_plan_for_business
 from apps.teachers.models import Teacher
 
 from .models import Student, StudentAttendance, StudentGroup, StudentRating
+from .payment_utils import tuition_payment_summary_for_student
 from .notifications import notify_parents_student_attendance
 from .serializers import (
     StudentAttendanceSerializer,
@@ -272,6 +273,7 @@ class StudentViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 "student": StudentSerializer(student).data,
+                "tuition_payment": tuition_payment_summary_for_student(student),
                 "scope": {"month": month_str} if month_str else {"month": None, "all_time": True},
                 "totals": {
                     "marked_days": marked,

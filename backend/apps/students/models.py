@@ -53,6 +53,9 @@ class Student(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=30, blank=True)
     notes = models.TextField(blank=True)
+    # Abonement: shu sanagacha (shu kun boshqacha) to‘langan deb hisoblanadi.
+    tuition_paid_until = models.DateField(null=True, blank=True, db_index=True)
+    tuition_payment_note = models.CharField(max_length=500, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
