@@ -3,6 +3,9 @@
 #
 # MUHIM: productionda "docker-compose down" qilmang — 8080 bo‘shab, sayt eski CDN
 # yoki boshqa proksi orqali "o‘zgarmagan"dek ko‘rinadi. Yangilash: faqat build + up.
+#
+# SSH "qotgan"dek: build paytida pip 8MB+ tortadi — sekin tarmoqda log uzoq jim turadi.
+# Tavsiya: avvalo "tmux new -s dep" ichida ishga tushiring; Macda ~/.ssh/config: ServerAliveInterval 60
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -33,10 +36,10 @@ fi
 echo "== git pull =="
 git pull
 
-echo "== Docker: backend keshsiz build =="
+echo "== Docker: backend keshsiz build (sekin internetda 15–40+ daqiqa — jim turishi normal) =="
 docker-compose build --no-cache backend
 
-echo "== Docker: frontend keshsiz build =="
+echo "== Docker: frontend keshsiz build (npm + vite — yana uzoq bo‘lishi mumkin) =="
 docker-compose build --no-cache frontend
 
 echo "== qayta ishga tushirish (yangi image majburan konteynerga) =="
