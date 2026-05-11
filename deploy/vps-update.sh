@@ -6,6 +6,7 @@
 #
 # SSH "qotgan"dek: build paytida pip 8MB+ tortadi — sekin tarmoqda log uzoq jim turadi.
 # Tavsiya: avvalo "tmux new -s dep" ichida ishga tushiring; Macda ~/.ssh/config: ServerAliveInterval 60
+# Agar github tekshiruvi yolg'on xato bersa: SKIP_EXTERNAL_NETCHECK=1 bash deploy/vps-update.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -16,21 +17,31 @@ else
   echo "   XATO: Internetga chiqish yo'q (yoki ICMP o'chirilgan). Provayder / firewall."
   exit 1
 fi
-if command -v curl >/dev/null 2>&1; then
-  if ! curl -sfI --max-time 15 -o /dev/null https://github.com; then
-    echo "   XATO: https://github.com ochilmadi — odatda DNS (Could not resolve host)."
-    echo "   Bir martalik tuzatish: sudo bash deploy/vps-fix-dns.sh"
-    echo "   Qo'lda: cat /etc/resolv.conf  — nameserver 8.8.8.8 bo'lishi kerak (yoki systemd-resolved DNS=...)."
+# GitHub: DNS silliq bo'lganda curl xato, lekin getent/ping ishlaydi — bir nechta usul.
+github_ok=0
+if getent hosts github.com >/dev/null 2>&1; then
+  github_ok=1
+  echo "   OK: github.com (DNS — getent)"
+fi
+if [[ "$github_ok" -eq 0 ]] && ping -c 1 -W 5 github.com >/dev/null 2>&1; then
+  github_ok=1
+  echo "   OK: github.com (ping)"
+fi
+if [[ "$github_ok" -eq 0 ]] && command -v curl >/dev/null 2>&1; then
+  if curl -sfI --max-time 25 -o /dev/null https://github.com 2>/dev/null; then
+    github_ok=1
+    echo "   OK: github.com (HTTPS)"
+  fi
+fi
+if [[ "$github_ok" -eq 0 ]]; then
+  if [[ "${SKIP_EXTERNAL_NETCHECK:-}" == "1" ]]; then
+    echo "   OGOHLANTIRISH: github tekshiruvi o'tmadi — SKIP_EXTERNAL_NETCHECK=1, davom etamiz."
+  else
+    echo "   XATO: github.com topilmadi / HTTPS ochilmadi."
+    echo "   DNS: sudo bash deploy/vps-fix-dns.sh  yoki  /etc/systemd/resolved.conf  ichida DNS=8.8.8.8"
+    echo "   Vaqtincha: SKIP_EXTERNAL_NETCHECK=1 bash deploy/vps-update.sh  (git pull xato bersa baribir DNS kerak)"
     exit 1
   fi
-  echo "   OK: github.com (HTTPS)"
-else
-  if ! getent hosts github.com >/dev/null 2>&1; then
-    echo "   XATO: github.com DNS da yo'q. curl o'rnatilgan bo'lsa aniqroq tekshiriladi."
-    echo "   sudo bash deploy/vps-fix-dns.sh"
-    exit 1
-  fi
-  echo "   OK: github.com (getent)"
 fi
 
 echo "== git pull =="
