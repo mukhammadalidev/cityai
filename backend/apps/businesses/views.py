@@ -211,6 +211,19 @@ class BusinessViewSet(viewsets.ModelViewSet):
                     }
                 )
             data["edu_course_breakdown"] = breakdown
+
+            # Ota-ona portali: shu biznesdagi farzandlari bog'langan ota-onalarning oxirgi kirishi.
+            parent_last_login = (
+                User.objects.filter(
+                    role=User.Role.EDU_PARENT,
+                    is_active=True,
+                    portal_parent__business=business,
+                )
+                .order_by("-last_login")
+                .values_list("last_login", flat=True)
+                .first()
+            )
+            data["edu_parent_portal_last_login"] = parent_last_login
         return Response(data)
 
     @action(detail=False, methods=["get"], url_path=r"slug/(?P<slug>[^/.]+)")

@@ -17,7 +17,7 @@ import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
 import { BOOKING_STATUS } from "../../config/statusConfigs";
 import StatusTag from "../../components/ui/StatusTag";
-import { formatDate, formatPhone, formatPrice, formatUsd } from "../../utils/formatters";
+import { formatDate, formatDateTime, formatPhone, formatPrice, formatUsd } from "../../utils/formatters";
 
 export default function BusinessDashboardPage() {
   const { businessId, business, plan } = useOutletContext();
@@ -171,6 +171,21 @@ export default function BusinessDashboardPage() {
             </Link>
           </Col>
         </Row>
+      ) : null}
+      {isEducation ? (
+        <Card
+          size="small"
+          style={{ marginTop: 16 }}
+          title="Ota-ona kabineti faolligi"
+        >
+          <Typography.Paragraph style={{ marginBottom: 4 }}>
+            Oxirgi ota-ona kirishi:{" "}
+            <b>{formatDateTime(stats.edu_parent_portal_last_login)}</b>
+          </Typography.Paragraph>
+          <Typography.Paragraph type="secondary" style={{ marginBottom: 0, fontSize: 12 }}>
+            Ota-ona portali sahifasiga kirganda so‘nggi kirish vaqti yangilanadi.
+          </Typography.Paragraph>
+        </Card>
       ) : null}
       {isEducation ? (
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
