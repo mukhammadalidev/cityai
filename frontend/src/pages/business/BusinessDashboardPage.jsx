@@ -1,7 +1,7 @@
-import { Card, Col, Row, Table, Typography, message } from "antd";
+import { Card, Col, Row, Statistic, Table, Typography, message } from "antd";
 import EducationCoursesChart from "../../components/charts/EducationCoursesChart";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import DynamicBusinessDashboard from "../../components/dynamic/DynamicBusinessDashboard";
@@ -126,6 +126,52 @@ export default function BusinessDashboardPage() {
     <>
       <PageHeader title="Dashboard" description="Biznesingizning real vaqtdagi ko‘rinishi." />
       <DynamicBusinessDashboard stats={stats} businessType={business?.business_type} />
+      {isEducation ? (
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          <Col xs={24} sm={8}>
+            <Link to="/business/students">
+              <Card size="small" hoverable title="Abonement: to‘langan">
+                <Statistic
+                  value={stats.edu_tuition_paid_active ?? 0}
+                  suffix="faol o‘q."
+                  valueStyle={{ color: "#16a34a", fontWeight: 800 }}
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  Muddat bugun yoki keyin
+                </Typography.Text>
+              </Card>
+            </Link>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Link to="/business/students">
+              <Card size="small" hoverable title="Abonement: to‘lanmagan">
+                <Statistic
+                  value={stats.edu_tuition_unpaid_active ?? 0}
+                  suffix="faol o‘q."
+                  valueStyle={{ color: "#dc2626", fontWeight: 800 }}
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  Muddat o‘tgan
+                </Typography.Text>
+              </Card>
+            </Link>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Link to="/business/students">
+              <Card size="small" hoverable title="Abonement: kiritilmagan">
+                <Statistic
+                  value={stats.edu_tuition_unset_active ?? 0}
+                  suffix="faol o‘q."
+                  valueStyle={{ color: "#64748b", fontWeight: 800 }}
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  Muddat qo‘yilmagan
+                </Typography.Text>
+              </Card>
+            </Link>
+          </Col>
+        </Row>
+      ) : null}
       {isEducation ? (
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
           <Col xs={24} lg={12}>

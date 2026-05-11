@@ -167,6 +167,14 @@ class BusinessViewSet(viewsets.ModelViewSet):
                 business=business, status=Teacher.Status.ACTIVE
             ).count()
 
+            active_st = st_qs.filter(status=Student.Status.ACTIVE)
+            # Abonement (tuition_paid_until): bugun va keyingi kunlar = to'langan; o'tgan = to'lanmagan; null = kiritilmagan
+            data["edu_tuition_paid_active"] = active_st.filter(tuition_paid_until__gte=today).count()
+            data["edu_tuition_unpaid_active"] = active_st.filter(
+                tuition_paid_until__isnull=False, tuition_paid_until__lt=today
+            ).count()
+            data["edu_tuition_unset_active"] = active_st.filter(tuition_paid_until__isnull=True).count()
+
             active_with_course = st_qs.filter(status=Student.Status.ACTIVE, course__isnull=False)
             pt = active_with_course.aggregate(s=Coalesce(Sum("course__price"), Decimal("0")))["s"]
             data["edu_potential_active_sum"] = str(pt)
