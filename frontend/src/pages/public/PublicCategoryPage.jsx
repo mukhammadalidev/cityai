@@ -79,7 +79,6 @@ export default function PublicCategoryPage() {
           citySlug={city.slug}
           categories={category ? [category] : []}
           featured={businesses.filter((b) => b.is_featured).slice(0, 3)}
-          botUrl={import.meta.env.VITE_TELEGRAM_BOT_URL || "https://t.me/city_services_ai_bot"}
         />
       </section>
       <Space wrap style={{ marginBottom: 16 }}>

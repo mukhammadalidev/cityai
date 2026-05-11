@@ -31,10 +31,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = [host for host in os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",") if host]
+# Bo'sh yoki faqat probel bo'lsa getenv("") qaytaradi — ALLOWED_HOSTS=[] bo'lib, DEBUG=0 da har bir so'rov 400.
+# Vergul atrofidagi bo'sh joylar: "185.191.141.207, backend" → strip.
+_hosts_raw = (os.getenv("DJANGO_ALLOWED_HOSTS") or "*").strip()
+ALLOWED_HOSTS = [h.strip() for h in _hosts_raw.split(",") if h.strip()]
 
-_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+_csrf = (os.getenv("CSRF_TRUSTED_ORIGINS") or "").strip()
 CSRF_TRUSTED_ORIGINS = [x.strip() for x in _csrf.split(",") if x.strip()]
+
+# Nginx / boshqa reverse proxy ortida Host sarlavhasi to'g'ri ishlashi uchun
+USE_X_FORWARDED_HOST = True
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 

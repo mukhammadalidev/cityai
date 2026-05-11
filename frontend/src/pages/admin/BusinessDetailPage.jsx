@@ -1,12 +1,13 @@
 import { Button, Card, Col, Descriptions, Input, Modal, Row, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import StatusTag from "../../components/ui/StatusTag";
 import { BUSINESS_STATUS } from "../../config/statusConfigs";
 import { formatPhone, formatDate, formatUsd } from "../../utils/formatters";
 import { getBusiness, resetBusinessOwnerCredentials, updateBusiness } from "../../services/businessService";
+import { setSelectedBusinessId } from "../../utils/storage";
 import { getItems } from "../../services/itemService";
 import { getLeads } from "../../services/leadService";
 import { getSubscriptions, getPlans, upgradeSubscription } from "../../services/subscriptionService";
@@ -16,6 +17,7 @@ import AdminEduPortalSection from "./AdminEduPortalSection";
 
 export default function BusinessDetailPage() {
   const { id } = useParams();
+  const nav = useNavigate();
   const [biz, setBiz] = useState(null);
   const [items, setItems] = useState([]);
   const [leads, setLeads] = useState([]);
@@ -117,6 +119,17 @@ export default function BusinessDetailPage() {
             <Link to={`/b/${biz.slug}`} target="_blank" rel="noreferrer">
               <Button>Ochiq sahifa</Button>
             </Link>
+            <Button
+              type="primary"
+              ghost
+              onClick={() => {
+                setSelectedBusinessId(Number(id));
+                window.dispatchEvent(new Event("business-changed"));
+                nav("/business/dashboard");
+              }}
+            >
+              Kabinetda boshqarish
+            </Button>
             <Button
               onClick={() => patchBiz({ status: biz.status === "blocked" ? "active" : "blocked" })}
             >

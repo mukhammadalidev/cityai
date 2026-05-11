@@ -1,8 +1,9 @@
 import { Button, Select, Space, Tag } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { GlobalOutlined, MenuOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService";
+import { PUBLIC_SITE_HOME } from "../../utils/authRouting";
 import { getSelectedBusinessId, setSelectedBusinessId } from "../../utils/storage";
 
 export default function Topbar({ title, subtitle, businesses = [], onMenuClick, showBizSelect, adminOverride = false }) {
@@ -35,6 +36,9 @@ export default function Topbar({ title, subtitle, businesses = [], onMenuClick, 
             }}
           />
         )}
+        <Button type="default" icon={<GlobalOutlined />} onClick={() => nav(PUBLIC_SITE_HOME)}>
+          Sayt bosh sahifasi
+        </Button>
         <Button
           icon={<LogOut size={16} />}
           onClick={() => {

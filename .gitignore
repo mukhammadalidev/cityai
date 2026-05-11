@@ -2,6 +2,7 @@
 .env
 .env.local
 deploy/stack.env
+deploy/images.env
 .env.*.local
 !.env.example
 backend/.env

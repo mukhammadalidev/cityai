@@ -44,9 +44,16 @@ class BusinessViewSet(viewsets.ModelViewSet):
             and self.request.user.is_authenticated
             and self.request.user.role in (User.Role.BUSINESS_OWNER, User.Role.MANAGER)
         )
+        # Super admin + mine=1: kabinetda biznes tanlash — barcha holatlar (moderatsiya)
+        mine_super_list = (
+            self.action == "list"
+            and self.request.query_params.get("mine") == "1"
+            and self.request.user.is_authenticated
+            and self.request.user.role == User.Role.SUPER_ADMIN
+        )
         if st:
             qs = qs.filter(status=st)
-        elif mine_owner_list:
+        elif mine_owner_list or mine_super_list:
             pass
         elif not self.request.user.is_authenticated or getattr(self.request.user, "role", None) != User.Role.SUPER_ADMIN:
             qs = qs.filter(status=Business.Status.ACTIVE)

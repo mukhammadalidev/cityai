@@ -2,6 +2,7 @@ import { Menu } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Building2,
+  Briefcase,
   CreditCard,
   FolderTree,
   LayoutDashboard,
@@ -16,6 +17,7 @@ const items = [
   { key: "/admin/cities", icon: MapPin, label: "Shaharlar" },
   { key: "/admin/categories", icon: FolderTree, label: "Kategoriyalar" },
   { key: "/admin/businesses", icon: Building2, label: "Bizneslar" },
+  { key: "/business/select", icon: Briefcase, label: "Biznes kabineti" },
   { key: "/admin/subscriptions", icon: CreditCard, label: "Obunalar" },
   { key: "/admin/invoices", icon: Receipt, label: "Hisob-fakturalar" },
   { key: "/admin/analytics", icon: LineChart, label: "Analitika" },

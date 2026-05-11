@@ -29,9 +29,14 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_USE_RELATIVE_API: "1"
-    # Eski docker-compose v1: ${VAR:-80} ishlamaydi. Boshqa port: masalan "8080:80"
+        VITE_TELEGRAM_BOT_URL: "https://t.me/citybotuz_bot"
+        # docker-compose v1: ${VAR:-default} ba’zan build.args da bo‘sh qoladi — heap ~512MB.
+        # 2 GB RAM VPS: 2048 odatda yetadi; kernel OOM bo‘lsa 1792 yoki 512MB+ swap.
+        NODE_MEMORY_MB: "2048"
+    # Host nginx (deploy/nginx-citybot.uz.conf) upstream: 127.0.0.1:8080.
+    # 80:80 qoldirsangiz proksi 8080 ga tushadi, Docker esa 80 da — sayt eski/bo‘sh joyga ketishi mumkin.
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
     depends_on:
       - backend
     restart: always

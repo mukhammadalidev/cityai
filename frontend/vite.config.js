@@ -14,6 +14,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: "..",
+    /** Ochiq sahifa Telegram: env yoki eski bundle aralashmasin — doim @citybotuz_bot */
+    define: {
+      __CITYBOT_TELEGRAM_URL__: JSON.stringify("https://t.me/citybotuz_bot"),
+    },
     plugins: [react()],
     build: {
       chunkSizeWarningLimit: 650,
