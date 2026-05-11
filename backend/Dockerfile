@@ -1,4 +1,6 @@
-FROM python:3.11-slim
+# bookworm: trixie (python:3.11-slim default) o‘zgarishi va katta gcc zanjiridan qochish.
+# Barcha requirements uchun PyPI da wheel bor — gcc/-dev shart emas; apt minimal.
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
@@ -6,13 +8,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=config.settings
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libjpeg62-turbo-dev zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 COPY . .
 COPY deploy-entrypoint.sh /deploy-entrypoint.sh
