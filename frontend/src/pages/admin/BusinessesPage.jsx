@@ -95,19 +95,23 @@ export default function BusinessesPage() {
         message.error("Owner ID yoki yangi login — bittasini tanlang.");
         return;
       }
-      if (!v.owner && !v.owner_login) {
-        message.error("Owner ID yoki yangi login/parol kiriting.");
-        return;
-      }
       if (v.owner_login && !v.owner_password) {
         message.error("Yangi login uchun parol kiriting.");
         return;
       }
     }
+    const payload = { ...v };
+    if (modal.record) {
+      delete payload.owner;
+      delete payload.owner_login;
+      delete payload.owner_password;
+    } else if (!payload.owner) {
+      delete payload.owner;
+    }
     try {
-      if (modal.record) await updateBusiness(modal.record.id, v);
+      if (modal.record) await updateBusiness(modal.record.id, payload);
       else {
-        const created = await createBusiness(v);
+        const created = await createBusiness(payload);
         if (created?.owner_credentials) {
           Modal.success({
             title: "Owner login yaratildi",

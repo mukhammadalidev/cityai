@@ -9,6 +9,11 @@ class BusinessSerializer(serializers.ModelSerializer):
     city_name = serializers.CharField(source="city.name", read_only=True)
     category_name = serializers.CharField(source="category.name", read_only=True)
     owner_username = serializers.CharField(source="owner.username", read_only=True)
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False,
+        allow_null=True,
+    )
     owner_login = serializers.CharField(write_only=True, required=False, allow_blank=False)
     owner_password = serializers.CharField(write_only=True, required=False, allow_blank=False, min_length=6)
 
@@ -29,10 +34,6 @@ class BusinessSerializer(serializers.ModelSerializer):
                 if owner and owner_login:
                     raise serializers.ValidationError(
                         {"owner_login": "Mavjud owner ID yoki yangi login — faqat bittasini kiriting."}
-                    )
-                if not owner and not owner_login:
-                    raise serializers.ValidationError(
-                        {"owner": "Yangi biznes uchun owner ID yoki yangi login/parol kiriting."}
                     )
                 if owner_login and not owner_password:
                     raise serializers.ValidationError({"owner_password": "Yangi login uchun parol ham kiriting."})
@@ -56,6 +57,10 @@ class BusinessSerializer(serializers.ModelSerializer):
             )
             self.created_owner_credentials = {"username": owner_login, "password": owner_password}
             validated_data["owner"] = owner
+        elif not validated_data.get("owner"):
+            request = self.context.get("request")
+            if request and request.user.is_authenticated:
+                validated_data["owner"] = request.user
         return super().create(validated_data)
 
 
