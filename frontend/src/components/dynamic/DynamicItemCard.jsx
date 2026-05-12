@@ -54,6 +54,25 @@ export default function DynamicItemCard({ item, businessType, onClick }) {
         {m.consultation_price && <span>Narx: {m.consultation_price}</span>}
       </Space>
     );
+  } else if (businessType === "fitness_center") {
+    const available = m.available !== false;
+    extra = (
+      <Space direction="vertical" size={4} style={{ width: "100%" }}>
+        <Space wrap size={4}>
+          <Tag color={available ? "green" : "default"}>{available ? "Mavjud" : "Vaqtincha yo‘q"}</Tag>
+          {m.training_type && <Tag color="geekblue">{m.training_type}</Tag>}
+          {m.level && <Tag>{m.level}</Tag>}
+          {m.gender_group && <Tag>{m.gender_group}</Tag>}
+          {m.has_personal_trainer && <Tag color="purple">Personal trener</Tag>}
+        </Space>
+        <div style={{ fontSize: 13, color: "var(--cs-muted)" }}>
+          {m.duration && <div>⏳ Davomiyligi: {m.duration}</div>}
+          {m.sessions_count != null && <div>🔢 Mashg‘ulotlar: {m.sessions_count}</div>}
+          {m.trainer_name && <div>👨‍🏫 Trener: {m.trainer_name}</div>}
+          {m.schedule && <div>📅 Jadval: {m.schedule}</div>}
+        </div>
+      </Space>
+    );
   } else {
     extra = m.note ? <span style={{ fontSize: 12 }}>{m.note}</span> : null;
   }

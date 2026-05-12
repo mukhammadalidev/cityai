@@ -116,6 +116,17 @@ def _format_new_lead(lead: Lead) -> str:
             f"💬 Xabar: {msg}\n"
             f"🕒 Aloqa vaqti: {meta.get('preferred_contact_time', '—')}\n"
         )
+    if lt == Lead.LeadType.MEMBERSHIP_REQUEST:
+        return (
+            "💪 <b>Yangi abonement arizasi!</b>\n\n"
+            f"🏢 Fitness zal: {bname}\n"
+            f"👤 Ism: {lead.name}\n"
+            f"📞 Telefon: {lead.phone}\n"
+            f"🏋️ Abonement: {item_t}\n"
+            f"📅 Boshlash sanasi: {meta.get('preferred_start_date', '—')}\n"
+            f"🕒 Qulay vaqt: {meta.get('preferred_time', '—')}\n"
+            f"📝 Izoh: {msg}\n"
+        )
     return (
         "📩 <b>Yangi lid</b>\n\n"
         f"🏢: {bname}\n"

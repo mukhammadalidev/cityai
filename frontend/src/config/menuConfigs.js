@@ -4,6 +4,15 @@ export const BOT_MENU_BY_TYPE = {
   education_center: ["Kurslar", "Ro‘yxatdan o‘tish", "Narxlash", "Aloqa"],
   shop: ["Katalog", "Yetkazib berish", "Aloqa"],
   restaurant: ["Menyu", "Bron", "Aloqa"],
+  fitness_center: [
+    "🏋️ Abonementlar",
+    "👨‍🏫 Trenerlar",
+    "🧪 Bepul sinov mashg‘ulot",
+    "📅 Mashg‘ulot jadvali",
+    "💰 Narxlar",
+    "📍 Manzil",
+    "☎️ Admin bilan bog‘lanish",
+  ],
   default: ["Xizmatlar", "Buyurtma", "Aloqa"],
 };
 

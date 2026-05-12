@@ -18,6 +18,12 @@ from apps.city.models import City
 from apps.customers.models import TelegramCustomer
 from apps.knowledge.models import KnowledgeBase
 from apps.leads.models import Lead
+from apps.memberships.models import (
+    BusinessClient,
+    ClientAttendance,
+    ClientMembership,
+    ClientPayment,
+)
 from apps.orders.models import Order, OrderItem
 from apps.service_categories.models import ServiceCategory
 from apps.students.demo_data import DEMO_STUDENTS
@@ -163,6 +169,75 @@ def _demo_item_title_metadata_description(business_type: str, idx: int) -> tuple
         }
         desc = "Zamonaviy jihozlar va dush xonalari."
 
+    elif ct == ServiceCategory.CategoryType.FITNESS_CENTER:
+        presets = [
+            {
+                "title": "1 oylik abonement",
+                "duration": "1 oy",
+                "sessions_count": 12,
+                "trainer_name": "Aliyev Jasur",
+                "training_type": "Fitness",
+                "schedule": "Dushanba, Chorshanba, Juma — 18:00",
+                "level": "Beginner",
+                "gender_group": "Aralash",
+            },
+            {
+                "title": "3 oylik abonement",
+                "duration": "3 oy",
+                "sessions_count": 36,
+                "trainer_name": "Akmal Tojiyev",
+                "training_type": "Fitness",
+                "schedule": "Har kuni — 17:00",
+                "level": "Intermediate",
+                "gender_group": "Aralash",
+            },
+            {
+                "title": "Personal trener paketi",
+                "duration": "1 oy",
+                "sessions_count": 12,
+                "trainer_name": "Sardor Olimov",
+                "training_type": "Personal training",
+                "schedule": "Kelishilgan holda",
+                "level": "Advanced",
+                "gender_group": "Erkaklar",
+                "has_personal_trainer": True,
+            },
+            {
+                "title": "Yoga guruh — 8 dars",
+                "duration": "1 oy",
+                "sessions_count": 8,
+                "trainer_name": "Mavluda Karimova",
+                "training_type": "Yoga",
+                "schedule": "Seshanba, Payshanba — 08:00",
+                "level": "Beginner",
+                "gender_group": "Ayollar",
+            },
+            {
+                "title": "Crossfit kuchli kurs",
+                "duration": "2 oy",
+                "sessions_count": 24,
+                "trainer_name": "Aliyev Jasur",
+                "training_type": "Crossfit",
+                "schedule": "Seshanba, Payshanba, Shanba — 19:00",
+                "level": "Intermediate",
+                "gender_group": "Aralash",
+            },
+        ]
+        preset = presets[i % len(presets)]
+        title = preset["title"]
+        meta = {
+            "duration": preset["duration"],
+            "sessions_count": preset["sessions_count"],
+            "trainer_name": preset["trainer_name"],
+            "training_type": preset["training_type"],
+            "schedule": preset["schedule"],
+            "level": preset["level"],
+            "gender_group": preset["gender_group"],
+            "has_personal_trainer": preset.get("has_personal_trainer", False),
+            "available": True,
+        }
+        desc = f"{preset['duration']}, {preset['sessions_count']} mashg‘ulot. Trener: {preset['trainer_name']}."
+
     elif ct == ServiceCategory.CategoryType.LEGAL_SERVICE:
         title = ["Mehnat huquqi maslahati", "Shartnoma tekshiruvi", "Fuqarolik ishi"][i % 3]
         meta = {
@@ -201,8 +276,52 @@ CATEGORY_DEFS = [
     ("🏠 Uy-joy", ServiceCategory.CategoryType.REAL_ESTATE),
     ("🚕 Taxi / yetkazib berish", ServiceCategory.CategoryType.TAXI_DELIVERY),
     ("🏋️ Fitnes", ServiceCategory.CategoryType.FITNESS),
+    ("🏋️ Fitness zal", ServiceCategory.CategoryType.FITNESS_CENTER),
     ("⚖️ Yuridik xizmat", ServiceCategory.CategoryType.LEGAL_SERVICE),
     ("📷 Foto / video", ServiceCategory.CategoryType.PHOTO_VIDEO),
+]
+
+FITNESS_CENTER_DEMO_BUSINESSES = [
+    "Energy Fitness Buxoro",
+    "Power Gym",
+    "FitLife Sport Club",
+]
+
+FITNESS_CENTER_DEMO_ITEMS = [
+    {
+        "title": "1 oylik abonement",
+        "price": 250_000,
+        "duration": "1 oy",
+        "sessions_count": 12,
+        "trainer_name": "Aliyev Jasur",
+        "training_type": "Fitness",
+        "schedule": "Dushanba, Chorshanba, Juma — 18:00",
+        "level": "Beginner",
+        "gender_group": "Aralash",
+    },
+    {
+        "title": "3 oylik abonement",
+        "price": 650_000,
+        "duration": "3 oy",
+        "sessions_count": 36,
+        "trainer_name": "Akmal Tojiyev",
+        "training_type": "Fitness",
+        "schedule": "Har kuni — 17:00",
+        "level": "Intermediate",
+        "gender_group": "Aralash",
+    },
+    {
+        "title": "Personal trener paketi",
+        "price": 1_200_000,
+        "duration": "1 oy",
+        "sessions_count": 12,
+        "trainer_name": "Sardor Olimov",
+        "training_type": "Personal training",
+        "schedule": "Kelishilgan holda",
+        "level": "Advanced",
+        "gender_group": "Erkaklar",
+        "has_personal_trainer": True,
+    },
 ]
 
 
@@ -535,6 +654,327 @@ class Command(BaseCommand):
                     "order_enabled": False,
                 },
             )
+
+        fitness_center_menu = {
+            "buttons": [
+                ["🏋️ Abonementlar", "👨‍🏫 Trenerlar"],
+                ["🧪 Bepul sinov mashg‘ulot", "📅 Mashg‘ulot jadvali"],
+                ["💰 Narxlar", "📍 Manzil"],
+                ["☎️ Admin bilan bog‘lanish"],
+            ]
+        }
+        fitness_field_config = {
+            "fields": [
+                {"name": "duration", "label": "Davomiyligi", "type": "input"},
+                {"name": "sessions_count", "label": "Mashg‘ulotlar soni", "type": "number"},
+                {"name": "trainer_name", "label": "Trener", "type": "input"},
+                {
+                    "name": "training_type",
+                    "label": "Mashg‘ulot turi",
+                    "type": "select",
+                    "options": [
+                        "Fitness",
+                        "Bodybuilding",
+                        "Crossfit",
+                        "Yoga",
+                        "Cardio",
+                        "Personal training",
+                        "Group training",
+                    ],
+                },
+                {"name": "schedule", "label": "Jadval", "type": "input"},
+                {
+                    "name": "level",
+                    "label": "Daraja",
+                    "type": "select",
+                    "options": ["Beginner", "Intermediate", "Advanced"],
+                },
+                {
+                    "name": "gender_group",
+                    "label": "Guruh turi",
+                    "type": "select",
+                    "options": ["Erkaklar", "Ayollar", "Aralash"],
+                },
+                {"name": "has_personal_trainer", "label": "Personal trener bormi?", "type": "switch"},
+                {"name": "available", "label": "Mavjudmi?", "type": "switch"},
+            ]
+        }
+        BotTemplate.objects.get_or_create(
+            category_type=ServiceCategory.CategoryType.FITNESS_CENTER,
+            name="default",
+            defaults={
+                "menu_config": fitness_center_menu,
+                "field_config": fitness_field_config,
+                "prompt_template": (
+                    "Siz Fitness zal yordamchisisiz. Abonement narxlari, mashg‘ulot jadvali, "
+                    "trenerlar, manzil, ish vaqti haqida o‘zbek tilida qisqa javob bering. "
+                    "Tibbiy maslahat bermang, vazn yo‘qotish/mushak hosil bo‘lishini kafolatlamang. "
+                    "Salomatlik savoli bo‘lsa shifokor yoki professional trener bilan maslahatlashishni tavsiya qiling."
+                ),
+                "lead_types": ["membership_request", "price_question", "contact"],
+                "booking_enabled": True,
+                "order_enabled": False,
+            },
+        )
+
+        fitness_center_cat = next(
+            (c for c in categories if c.category_type == ServiceCategory.CategoryType.FITNESS_CENTER),
+            None,
+        )
+        if fitness_center_cat:
+            fc_businesses: list[Business] = []
+            for idx, fz_name in enumerate(FITNESS_CENTER_DEMO_BUSINESSES):
+                fz_owner = owners[(idx + 7) % len(owners)]
+                fz = Business.objects.create(
+                    owner=fz_owner,
+                    city=city,
+                    category=fitness_center_cat,
+                    name=fz_name,
+                    business_type=Business.BusinessType.FITNESS_CENTER,
+                    description=(
+                        f"{fz_name} — Buxorodagi zamonaviy fitness zal. "
+                        "Abonement, personal trener va guruh mashg‘ulotlari."
+                    ),
+                    phone=f"+99890{random.randint(1000000, 9999999)}",
+                    address=f"Buxoro, Fitness ko‘chasi {idx + 1}",
+                    working_hours="07:00 – 22:00",
+                    telegram_admin_chat_id="",
+                    status=Business.Status.ACTIVE,
+                    is_featured=(idx == 0),
+                    rating=Decimal(f"{4 + random.random():.2f}"),
+                )
+                fc_businesses.append(fz)
+                d0 = date.today()
+                BusinessSubscription.objects.create(
+                    business=fz,
+                    plan=demo_plan,
+                    status=BusinessSubscription.Status.TRIAL,
+                    start_date=d0,
+                    end_date=d0 + timedelta(days=demo_plan.trial_days or 7),
+                    next_payment_date=d0 + timedelta(days=demo_plan.trial_days or 7),
+                )
+                Invoice.objects.create(
+                    business=fz,
+                    amount=demo_plan.monthly_price,
+                    invoice_type=Invoice.InvoiceType.MONTHLY,
+                    status=Invoice.Status.UNPAID,
+                    due_date=date.today() + timedelta(days=14),
+                )
+
+            fc_items: list[Item] = []
+            for fz in fc_businesses:
+                for seq, preset in enumerate(FITNESS_CENTER_DEMO_ITEMS):
+                    meta = {
+                        "duration": preset["duration"],
+                        "sessions_count": preset["sessions_count"],
+                        "trainer_name": preset["trainer_name"],
+                        "training_type": preset["training_type"],
+                        "schedule": preset["schedule"],
+                        "level": preset["level"],
+                        "gender_group": preset["gender_group"],
+                        "has_personal_trainer": preset.get("has_personal_trainer", False),
+                        "available": True,
+                        "demo": True,
+                        "business_type": Business.BusinessType.FITNESS_CENTER,
+                    }
+                    it = Item.objects.create(
+                        business=fz,
+                        title=preset["title"],
+                        slug=f"fz-{fz.pk}-{seq}",
+                        category_name="Abonementlar",
+                        price=Decimal(preset["price"]),
+                        currency="UZS",
+                        description=(
+                            f"{preset['duration']}, {preset['sessions_count']} mashg‘ulot, "
+                            f"trener: {preset['trainer_name']}."
+                        ),
+                        status=Item.Status.ACTIVE,
+                        metadata=meta,
+                    )
+                    fc_items.append(it)
+
+            fc_customers = customers[:6] if len(customers) >= 6 else customers
+            for idx, fz in enumerate(fc_businesses):
+                fz_items = [i for i in fc_items if i.business_id == fz.id]
+                if not fz_items or not fc_customers:
+                    continue
+                # Membership lead namunalari
+                for k in range(2):
+                    cust = fc_customers[(idx * 2 + k) % len(fc_customers)]
+                    item = fz_items[k % len(fz_items)]
+                    Lead.objects.create(
+                        city=city,
+                        business=fz,
+                        customer=cust,
+                        item=item,
+                        category=fitness_center_cat,
+                        lead_type=Lead.LeadType.MEMBERSHIP_REQUEST,
+                        name=cust.first_name or f"Mijoz {k + 1}",
+                        phone=cust.phone or "+998900000000",
+                        message="Abonement haqida ma'lumot kerak.",
+                        status=Lead.Status.NEW if k % 2 == 0 else Lead.Status.CONTACTED,
+                        source=Lead.Source.TELEGRAM_BOT,
+                        metadata={
+                            "preferred_start_date": (date.today() + timedelta(days=3 + k)).isoformat(),
+                            "preferred_time": "18:00",
+                        },
+                    )
+                # Price question lead namunalari
+                cust2 = fc_customers[(idx * 2 + 4) % len(fc_customers)]
+                Lead.objects.create(
+                    city=city,
+                    business=fz,
+                    customer=cust2,
+                    item=fz_items[0],
+                    category=fitness_center_cat,
+                    lead_type=Lead.LeadType.PRICE_QUESTION,
+                    name=cust2.first_name or "Mijoz",
+                    phone=cust2.phone or "+998900000000",
+                    message="Personal trener narxi qancha?",
+                    status=Lead.Status.NEW,
+                    source=Lead.Source.TELEGRAM_BOT,
+                )
+                # Trial mashg‘ulot booking
+                cust3 = fc_customers[(idx * 2 + 1) % len(fc_customers)]
+                Booking.objects.create(
+                    city=city,
+                    business=fz,
+                    customer=cust3,
+                    item=fz_items[0],
+                    booking_type=Booking.BookingType.TRIAL_LESSON,
+                    name=cust3.first_name or "Mijoz",
+                    phone=cust3.phone or "+998900000000",
+                    preferred_date=date.today() + timedelta(days=2),
+                    preferred_time=time(18, 0),
+                    note="Bepul sinov mashg‘ulot",
+                    status=Booking.Status.NEW,
+                    metadata={"training_type": "Fitness", "source": "fitness_trial"},
+                )
+
+            # Fitness ledger: kunlik va oylik klientlar, abonementlar, to'lovlar, davomat
+            monthly_demo_names = [
+                ("Akmal Rashidov", "+998901001001", "male"),
+                ("Dilshoda Karimova", "+998901001002", "female"),
+                ("Sardor Sobirov", "+998901001003", "male"),
+                ("Nigora Tursunova", "+998901001004", "female"),
+                ("Bekzod Yusupov", "+998901001005", "male"),
+                ("Madina Saidova", "+998901001006", "female"),
+                ("Javohir Toshmatov", "+998901001007", "male"),
+                ("Shahnoza Rahimova", "+998901001008", "female"),
+                ("Aziz Norqulov", "+998901001009", "male"),
+                ("Ozoda Boboyeva", "+998901001010", "female"),
+            ]
+            daily_demo_names = [
+                ("Rustam Aliyev", "+998901002001", "male"),
+                ("Gulnora Mirzayeva", "+998901002002", "female"),
+                ("Ulug‘bek Pardayev", "+998901002003", "male"),
+                ("Zarina Holmatova", "+998901002004", "female"),
+                ("Ravshan Otaboyev", "+998901002005", "male"),
+            ]
+            today_d = date.today()
+            for fz_idx, fz in enumerate(fc_businesses):
+                fz_items = [i for i in fc_items if i.business_id == fz.id]
+                if not fz_items:
+                    continue
+                # Oylik klientlar
+                for ci, (cname, cphone, cgender) in enumerate(monthly_demo_names):
+                    client = BusinessClient.objects.create(
+                        business=fz,
+                        full_name=cname,
+                        phone=cphone,
+                        gender=cgender,
+                        client_type=BusinessClient.ClientType.MONTHLY,
+                        status=BusinessClient.Status.ACTIVE,
+                        note="Demo (seed_demo)",
+                    )
+                    item = fz_items[ci % len(fz_items)]
+                    start = today_d - timedelta(days=20 - ci)
+                    end = start + timedelta(days=30)
+                    expected = item.price or Decimal("500000")
+                    if ci % 3 == 0:
+                        paid = Decimal("0")
+                        pstatus = ClientMembership.PaymentStatus.UNPAID
+                    elif ci % 3 == 1:
+                        paid = expected / Decimal("2")
+                        pstatus = ClientMembership.PaymentStatus.PARTIAL
+                    else:
+                        paid = expected
+                        pstatus = ClientMembership.PaymentStatus.PAID
+                    membership = ClientMembership.objects.create(
+                        business=fz,
+                        client=client,
+                        item=item,
+                        title=item.title,
+                        start_date=start,
+                        end_date=end,
+                        expected_amount=expected,
+                        paid_amount=paid,
+                        currency=item.currency or "UZS",
+                        sessions_total=int(item.metadata.get("sessions_count") or 0) if isinstance(item.metadata, dict) else 0,
+                        status=ClientMembership.Status.ACTIVE,
+                        payment_status=pstatus,
+                        note="Demo abonement",
+                    )
+                    if paid > 0:
+                        ClientPayment.objects.create(
+                            business=fz,
+                            client=client,
+                            membership=membership,
+                            amount=paid,
+                            currency=item.currency or "UZS",
+                            payment_date=start,
+                            method=ClientPayment.Method.CASH if ci % 2 == 0 else ClientPayment.Method.CARD,
+                            note="Demo to'lov",
+                        )
+                    # Davomat — oxirgi 14 kunda 4-7 ta tashrif
+                    visits = 4 + (ci % 4)
+                    for v in range(visits):
+                        vd = today_d - timedelta(days=v * 2)
+                        ClientAttendance.objects.create(
+                            business=fz,
+                            client=client,
+                            membership=membership,
+                            visit_date=vd,
+                            visit_time=time(18, 0),
+                            client_type=BusinessClient.ClientType.MONTHLY,
+                            amount_charged=Decimal("0"),
+                            note="Demo tashrif",
+                        )
+                # Kunlik klientlar
+                daily_price = Decimal("30000")
+                for ci, (cname, cphone, cgender) in enumerate(daily_demo_names):
+                    client = BusinessClient.objects.create(
+                        business=fz,
+                        full_name=cname,
+                        phone=cphone,
+                        gender=cgender,
+                        client_type=BusinessClient.ClientType.DAILY,
+                        status=BusinessClient.Status.ACTIVE,
+                        note="Demo (kunlik)",
+                    )
+                    visits = 2 + (ci % 3)
+                    for v in range(visits):
+                        vd = today_d - timedelta(days=v)
+                        amount = daily_price
+                        ClientAttendance.objects.create(
+                            business=fz,
+                            client=client,
+                            visit_date=vd,
+                            visit_time=time(19, 30),
+                            client_type=BusinessClient.ClientType.DAILY,
+                            amount_charged=amount,
+                            note="Kunlik mijoz tashrifi",
+                        )
+                        ClientPayment.objects.create(
+                            business=fz,
+                            client=client,
+                            membership=None,
+                            amount=amount,
+                            currency="UZS",
+                            payment_date=vd,
+                            method=ClientPayment.Method.CASH,
+                            note="Kunlik mijoz to'lovi",
+                        )
 
         for b in businesses[:40]:
             KnowledgeBase.objects.create(

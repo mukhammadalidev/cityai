@@ -149,9 +149,24 @@ class BusinessViewSet(viewsets.ModelViewSet):
             "bookings_service": bookings_qs.filter(booking_type=Booking.BookingType.SERVICE_BOOKING).count(),
             "leads_credit": Lead.objects.filter(business=business, lead_type=Lead.LeadType.CREDIT).count(),
             "leads_trade_in": Lead.objects.filter(business=business, lead_type=Lead.LeadType.TRADE_IN).count(),
+            "leads_membership_request": Lead.objects.filter(
+                business=business, lead_type=Lead.LeadType.MEMBERSHIP_REQUEST
+            ).count(),
             "orders_new": orders_qs.filter(status=Order.Status.NEW).count(),
             "orders_total": orders_qs.count(),
         }
+        if business.business_type == Business.BusinessType.FITNESS_CENTER:
+            data["fitness_trainers_count"] = (
+                Item.objects.filter(business=business, status=Item.Status.ACTIVE)
+                .exclude(metadata__trainer_name__isnull=True)
+                .exclude(metadata__trainer_name__exact="")
+                .values_list("metadata__trainer_name", flat=True)
+                .distinct()
+                .count()
+            )
+            won = Lead.objects.filter(business=business, status=Lead.Status.WON).count()
+            total = Lead.objects.filter(business=business).count() or 1
+            data["fitness_conversion"] = f"{round(won * 100 / total, 1)}%"
         if business.business_type == Business.BusinessType.EDUCATION_CENTER:
             now = timezone.localtime()
             month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)

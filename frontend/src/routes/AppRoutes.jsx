@@ -34,6 +34,11 @@ const TeacherDetailPage = lazy(() => import("../pages/business/TeacherDetailPage
 const MaterialsPage = lazy(() => import("../pages/business/MaterialsPage"));
 const EduQuizzesPage = lazy(() => import("../pages/business/EduQuizzesPage"));
 const BookingsPage = lazy(() => import("../pages/business/BookingsPage"));
+const FitnessClientsPage = lazy(() => import("../pages/business/FitnessClientsPage"));
+const FitnessAttendancePage = lazy(() => import("../pages/business/FitnessAttendancePage"));
+const FitnessPaymentsPage = lazy(() => import("../pages/business/FitnessPaymentsPage"));
+const FitnessAbonementsPage = lazy(() => import("../pages/business/FitnessAbonementsPage"));
+const FitnessGuidePage = lazy(() => import("../pages/business/FitnessGuidePage"));
 const OrdersPage = lazy(() => import("../pages/business/OrdersPage"));
 const KnowledgePage = lazy(() => import("../pages/business/KnowledgePage"));
 const ManagersPage = lazy(() => import("../pages/business/ManagersPage"));
@@ -150,6 +155,11 @@ export default function AppRoutes() {
         <Route path="teachers/:id" element={page(TeacherDetailPage)} />
         <Route path="teachers" element={page(TeachersPage)} />
         <Route path="bookings" element={page(BookingsPage)} />
+        <Route path="fitness/clients" element={page(FitnessClientsPage)} />
+        <Route path="fitness/attendance" element={page(FitnessAttendancePage)} />
+        <Route path="fitness/payments" element={page(FitnessPaymentsPage)} />
+        <Route path="fitness/abonements" element={page(FitnessAbonementsPage)} />
+        <Route path="fitness/guide" element={page(FitnessGuidePage)} />
         <Route path="orders" element={page(OrdersPage)} />
         <Route path="knowledge" element={page(KnowledgePage)} />
         <Route path="managers" element={page(ManagersPage)} />

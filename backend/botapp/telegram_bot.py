@@ -80,6 +80,7 @@ TYPE_LABELS = {
     Business.BusinessType.REAL_ESTATE: "🏠 Ko‘chmas mulk",
     Business.BusinessType.TAXI_DELIVERY: "🚕 Taxi / yetkazib berish",
     Business.BusinessType.FITNESS: "💪 Fitnes",
+    Business.BusinessType.FITNESS_CENTER: "🏋️ Fitness zal",
     Business.BusinessType.LEGAL_SERVICE: "⚖️ Yuridik xizmat",
     Business.BusinessType.PHOTO_VIDEO: "📷 Foto / video",
     Business.BusinessType.CUSTOM: "📌 Boshqa",

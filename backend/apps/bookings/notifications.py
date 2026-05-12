@@ -119,6 +119,13 @@ def _format_admin_new_booking(booking: Booking) -> str:
             f"🚘 Mashina: {_item_title(booking)}\n"
         )
     if bt == Booking.BookingType.TRIAL_LESSON:
+        if meta.get("source") == "fitness_trial":
+            return (
+                "🏋️ <b>Yangi sinov mashg‘ulot arizasi!</b>\n\n"
+                f"🏢 Fitness zal: {bname}\n"
+                f"{base}"
+                f"🏋️ Yo‘nalish: {meta.get('training_type', '—')}\n"
+            )
         return (
             "🧪 <b>Yangi sinov dars arizasi!</b>\n\n"
             f"🏢 Markaz: {bname}\n"

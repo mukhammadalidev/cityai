@@ -23,6 +23,7 @@ class Lead(models.Model):
         PAYMENT_QUESTION = "payment_question", "To‘lov"
         PROPERTY_INTEREST = "property_interest", "Uy qiziqishi"
         PRODUCT_QUESTION = "product_question", "Mahsulot savoli"
+        MEMBERSHIP_REQUEST = "membership_request", "Abonement arizasi"
         CUSTOM = "custom", "Boshqa"
 
     class Status(models.TextChoices):

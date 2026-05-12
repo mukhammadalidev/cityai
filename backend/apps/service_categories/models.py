@@ -16,6 +16,7 @@ class ServiceCategory(models.Model):
         REAL_ESTATE = "real_estate", "Uy-joy"
         TAXI_DELIVERY = "taxi_delivery", "Taxi / yetkazib berish"
         FITNESS = "fitness", "Fitnes"
+        FITNESS_CENTER = "fitness_center", "Fitness zal"
         LEGAL_SERVICE = "legal_service", "Yuridik xizmat"
         PHOTO_VIDEO = "photo_video", "Foto / video"
         EVENT = "event", "Tadbirlar"

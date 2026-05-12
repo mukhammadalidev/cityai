@@ -45,6 +45,7 @@ const STATUS_OPTIONS = Object.keys(BOOKING_STATUS).map((k) => ({
 export default function BookingsPage() {
   const { businessId, business } = useOutletContext();
   const isRestaurant = business?.business_type === "restaurant";
+  const isFitnessCenter = business?.business_type === "fitness_center";
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState();
@@ -57,6 +58,7 @@ export default function BookingsPage() {
     const bt = business?.business_type;
     if (bt === "restaurant") setBtype("table_booking");
     else if (bt === "education_center") setBtype("trial_lesson");
+    else if (bt === "fitness_center") setBtype("trial_lesson");
     else if (bt === "auto_salon") setBtype("test_drive");
     else if (bt === "clinic" || bt === "legal_service") setBtype("consultation");
     else if (bt === "beauty_salon" || bt === "real_estate") setBtype("appointment");
@@ -74,6 +76,7 @@ export default function BookingsPage() {
       const bt = business?.business_type;
       if (bt === "restaurant") params.booking_type = "table_booking";
       else if (bt === "education_center") params.booking_type = "trial_lesson";
+      else if (bt === "fitness_center") params.booking_type = "trial_lesson";
       else if (bt === "auto_salon") params.booking_type = "test_drive";
       else if (bt === "clinic" || bt === "legal_service") params.booking_type = "consultation";
       else if (bt === "beauty_salon" || bt === "real_estate") params.booking_type = "appointment";
@@ -146,10 +149,16 @@ export default function BookingsPage() {
   if (!businessId) return null;
   if (loading && !rows.length) return <LoadingScreen />;
 
-  const title = isRestaurant ? "Stol bronlari" : "Bronlar";
+  const title = isRestaurant
+    ? "Stol bronlari"
+    : isFitnessCenter
+      ? "Sinov mashg‘ulotlar"
+      : "Bronlar";
   const description = isRestaurant
     ? "Telegram orqali kelgan stol bron arizalari."
-    : "Jadval va karta ko‘rinishi.";
+    : isFitnessCenter
+      ? "Telegram orqali kelgan bepul sinov mashg‘ulot arizalari."
+      : "Jadval va karta ko‘rinishi.";
 
   const formatBookingTime = (t) => {
     if (t == null || t === "") return "—";
@@ -269,6 +278,7 @@ export default function BookingsPage() {
     if (m.legal_topic) parts.push(`Mavzu: ${m.legal_topic}`);
     if (m.event_type || m.location) parts.push([m.event_type, m.location].filter(Boolean).join(" · "));
     if (m.service_type) parts.push(`Turi: ${m.service_type}`);
+    if (m.training_type) parts.push(`Yo‘nalish: ${m.training_type}`);
     return parts.length ? parts.join(" | ") : "—";
   };
 

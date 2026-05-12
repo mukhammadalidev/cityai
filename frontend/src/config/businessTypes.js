@@ -82,6 +82,15 @@ export const BUSINESS_TYPE_CONFIG = {
     itemsLabel: "Xizmatlar",
     leadsLabel: "Arizalar",
   },
+  fitness_center: {
+    label: "Fitness zal",
+    color: "#15803d",
+    icon: "Dumbbell",
+    itemLabel: "Abonement",
+    itemsLabel: "Abonementlar",
+    leadsLabel: "Abonement arizalari",
+    bookingsLabel: "Sinov mashg‘ulotlar",
+  },
   legal_service: {
     label: "Yuridik xizmat",
     color: "#595959",

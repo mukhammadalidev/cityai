@@ -1,5 +1,5 @@
-import { Button, Card, Col, Form, Input, Rate, Row, Typography, message } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Card, Col, DatePicker, Form, Input, Rate, Row, Select, Space, Typography, message } from "antd";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import EmptyState from "../../components/ui/EmptyState";
@@ -7,8 +7,22 @@ import DynamicItemCard from "../../components/dynamic/DynamicItemCard";
 import { getBusinessBySlug } from "../../services/businessService";
 import { getItems } from "../../services/itemService";
 import { createLead } from "../../services/leadService";
+import { createBooking } from "../../services/bookingService";
 import { formatPhone, mediaUrl } from "../../utils/formatters";
 import { notifyBusinessDataChanged } from "../../utils/businessEvents";
+
+const FITNESS_TRAINING_TYPES = [
+  "Fitness",
+  "Bodybuilding",
+  "Crossfit",
+  "Yoga",
+  "Cardio",
+  "Personal training",
+];
+
+const TELEGRAM_BOT_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_TELEGRAM_BOT_URL) ||
+  "https://t.me/citybotuz_bot";
 
 export default function PublicBusinessPage() {
   const { businessSlug } = useParams();
@@ -17,6 +31,22 @@ export default function PublicBusinessPage() {
   const [materialItems, setMaterialItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form] = Form.useForm();
+  const [bookingForm] = Form.useForm();
+  const isFitnessCenter = biz?.business_type === "fitness_center";
+  const fitnessTrainers = useMemo(() => {
+    if (!isFitnessCenter) return [];
+    const map = new Map();
+    courseItems.forEach((it) => {
+      const m = it.metadata || {};
+      const name = (m.trainer_name || "").trim();
+      if (!name) return;
+      const entry = map.get(name) || { name, types: new Set(), schedules: new Set() };
+      if (m.training_type) entry.types.add(m.training_type);
+      if (m.schedule) entry.schedules.add(m.schedule);
+      map.set(name, entry);
+    });
+    return Array.from(map.values()).slice(0, 12);
+  }, [isFitnessCenter, courseItems]);
 
   useEffect(() => {
     (async () => {
@@ -48,6 +78,7 @@ export default function PublicBusinessPage() {
   const onLead = async (values) => {
     if (!biz) return;
     try {
+      const isFitness = biz.business_type === "fitness_center";
       await createLead({
         city: biz.city,
         business: biz.id,
@@ -56,10 +87,42 @@ export default function PublicBusinessPage() {
         phone: values.phone,
         message: values.message,
         source: "public_page",
-        lead_type: "general",
+        lead_type: isFitness ? "membership_request" : "general",
+        item: values.interested_abonement || undefined,
       });
       message.success("So‘rovingiz yuborildi.");
       form.resetFields();
+      notifyBusinessDataChanged();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Yuborib bo‘lmadi.");
+    }
+  };
+
+  const onTrialBooking = async (values) => {
+    if (!biz) return;
+    try {
+      const preferredDate = values.preferred_date
+        ? values.preferred_date.format("YYYY-MM-DD")
+        : null;
+      const preferredTime = values.preferred_time
+        ? values.preferred_time.format("HH:mm")
+        : null;
+      await createBooking({
+        city: biz.city,
+        business: biz.id,
+        booking_type: "trial_lesson",
+        name: values.name,
+        phone: values.phone,
+        preferred_date: preferredDate,
+        preferred_time: preferredTime,
+        note: values.note || "",
+        metadata: {
+          training_type: values.training_type || "Fitness",
+          source: "fitness_trial",
+        },
+      });
+      message.success("Sinov mashg‘ulot arizangiz qabul qilindi.");
+      bookingForm.resetFields();
       notifyBusinessDataChanged();
     } catch (err) {
       message.error(err.response?.data?.detail || "Yuborib bo‘lmadi.");
@@ -104,7 +167,96 @@ export default function PublicBusinessPage() {
             </Typography.Paragraph>
           </Col>
         </Row>
-        {biz.business_type === "education_center" ? (
+        {isFitnessCenter ? (
+          <>
+            <Space wrap style={{ marginTop: 16 }}>
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => {
+                  const el = document.getElementById("fitness-trial-form");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Sinov mashg‘ulotga yozilish
+              </Button>
+              <Button
+                size="large"
+                href={TELEGRAM_BOT_URL}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Telegram botga o‘tish
+              </Button>
+            </Space>
+            <Typography.Title level={4} style={{ marginTop: 32 }}>
+              Abonementlar
+            </Typography.Title>
+            <Row gutter={[16, 16]}>
+              {courseItems.map((item) => (
+                <Col xs={24} sm={12} md={8} key={item.id}>
+                  <DynamicItemCard item={item} businessType={biz.business_type} />
+                </Col>
+              ))}
+            </Row>
+            {!courseItems.length && <EmptyState description="Abonementlar hozircha yo‘q." />}
+            <Typography.Title level={4} style={{ marginTop: 32 }}>
+              Trenerlar
+            </Typography.Title>
+            {fitnessTrainers.length ? (
+              <Row gutter={[16, 16]}>
+                {fitnessTrainers.map((t) => (
+                  <Col xs={24} sm={12} md={8} key={t.name}>
+                    <Card title={`👨‍🏫 ${t.name}`}>
+                      <div>🏷 Yo‘nalish: {Array.from(t.types).join(", ") || "—"}</div>
+                      <div>📅 Jadval: {Array.from(t.schedules).join(" · ") || "—"}</div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Typography.Paragraph type="secondary">
+                Hozircha trenerlar haqida ma’lumot kiritilmagan.
+              </Typography.Paragraph>
+            )}
+            <Card
+              id="fitness-trial-form"
+              title="Bepul sinov mashg‘ulotga yozilish"
+              style={{ marginTop: 32 }}
+            >
+              <Form form={bookingForm} layout="vertical" onFinish={onTrialBooking} style={{ maxWidth: 480 }}>
+                <Form.Item name="name" label="Ism" rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+                <Form.Item name="phone" label="Telefon" rules={[{ required: true }]}>
+                  <Input placeholder="+998 ..." />
+                </Form.Item>
+                <Form.Item
+                  name="training_type"
+                  label="Yo‘nalish"
+                  initialValue="Fitness"
+                  rules={[{ required: true }]}
+                >
+                  <Select options={FITNESS_TRAINING_TYPES.map((t) => ({ value: t, label: t }))} />
+                </Form.Item>
+                <Form.Item name="preferred_date" label="Qulay sana" rules={[{ required: true }]}>
+                  <DatePicker style={{ width: "100%" }} format="DD.MM.YYYY" />
+                </Form.Item>
+                <Form.Item name="preferred_time" label="Qulay vaqt" rules={[{ required: true }]}>
+                  <DatePicker.TimePicker style={{ width: "100%" }} format="HH:mm" minuteStep={5} />
+                </Form.Item>
+                <Form.Item name="note" label="Izoh">
+                  <Input.TextArea rows={3} />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Yuborish
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          </>
+        ) : biz.business_type === "education_center" ? (
           <>
             <Typography.Title level={4} style={{ marginTop: 32 }}>
               Kurslar
@@ -146,7 +298,10 @@ export default function PublicBusinessPage() {
             {!courseItems.length && <EmptyState description="Pozitsiyalar hozircha yo‘q." />}
           </>
         )}
-        <Card title="Murojaat qoldirish" style={{ marginTop: 32 }}>
+        <Card
+          title={isFitnessCenter ? "Abonement bo‘yicha so‘rov qoldirish" : "Murojaat qoldirish"}
+          style={{ marginTop: 32 }}
+        >
           <Form form={form} layout="vertical" onFinish={onLead} style={{ maxWidth: 480 }}>
             <Form.Item name="name" label="Ism" rules={[{ required: true }]}>
               <Input />
@@ -154,6 +309,15 @@ export default function PublicBusinessPage() {
             <Form.Item name="phone" label="Telefon" rules={[{ required: true }]}>
               <Input />
             </Form.Item>
+            {isFitnessCenter && (
+              <Form.Item name="interested_abonement" label="Qiziqtirgan abonement">
+                <Select
+                  allowClear
+                  options={courseItems.map((it) => ({ value: it.id, label: it.title }))}
+                  placeholder="Tanlang (ixtiyoriy)"
+                />
+              </Form.Item>
+            )}
             <Form.Item name="message" label="Xabar">
               <Input.TextArea rows={4} />
             </Form.Item>

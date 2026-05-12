@@ -32,6 +32,13 @@ from botapp.bot_constants import (
     ED_SCHED,
     ED_TEACHERS,
     ED_TRIAL,
+    FZ_ABON,
+    FZ_ADDR,
+    FZ_ADM,
+    FZ_PRICE,
+    FZ_SCHED,
+    FZ_TRAINERS,
+    FZ_TRIAL,
     HOME_BUTTON,
     ITEMS_LEGACY,
     ADDRESS_BUTTON,
@@ -87,6 +94,11 @@ def category_intro_extra(business_type: str) -> str:
         return (
             "\n\n⚠️ <i>Bot yakuniy yuridik maslahat bermaydi. "
             "Aniq yechim uchun konsultatsiyaga yoziling.</i>"
+        )
+    if business_type == Business.BusinessType.FITNESS_CENTER:
+        return (
+            "\n\n⚠️ <i>Bot tibbiy maslahat bermaydi va salomatlik natijasini "
+            "kafolatlamaydi. Mashg‘ulot rejimi shifokor yoki trener bilan kelishilsin.</i>"
         )
     return ""
 
@@ -170,6 +182,14 @@ def category_reply_keyboard(business_type: str) -> ReplyKeyboardMarkup:
             [KeyboardButton(text=PH_SVC), KeyboardButton(text=PH_PORT)],
             [KeyboardButton(text=PH_ORD), KeyboardButton(text=PH_PRICE)],
             [KeyboardButton(text=PH_OP)],
+            ch,
+        ]
+    elif business_type == Business.BusinessType.FITNESS_CENTER:
+        rows = [
+            [KeyboardButton(text=FZ_ABON), KeyboardButton(text=FZ_TRAINERS)],
+            [KeyboardButton(text=FZ_TRIAL), KeyboardButton(text=FZ_SCHED)],
+            [KeyboardButton(text=FZ_PRICE), KeyboardButton(text=FZ_ADDR)],
+            [KeyboardButton(text=FZ_ADM)],
             ch,
         ]
     else:

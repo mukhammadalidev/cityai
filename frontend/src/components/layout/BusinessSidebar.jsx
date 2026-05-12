@@ -1,10 +1,15 @@
 import { Menu, Space, Tag } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  BadgeCheck,
   BookOpen,
   Brain,
   Calendar,
+  CalendarCheck,
+  CreditCard,
+  Dumbbell,
   GraduationCap,
+  HelpCircle,
   IdCard,
   Layers,
   LayoutDashboard,
@@ -85,6 +90,15 @@ export default function BusinessSidebar({ collapsed, businessType, plan }) {
                 locked: !showEduMaterials,
               },
               { key: "/business/edu-quizzes", icon: ListChecks, label: "Testlar / quizlar" },
+            ]
+          : []),
+        ...(businessType === "fitness_center"
+          ? [
+              { key: "/business/fitness/guide", icon: HelpCircle, label: "Qo‘llanma" },
+              { key: "/business/fitness/abonements", icon: BadgeCheck, label: "Abonementlar (hisob)" },
+              { key: "/business/fitness/clients", icon: Dumbbell, label: "Klientlar" },
+              { key: "/business/fitness/attendance", icon: CalendarCheck, label: "Davomat" },
+              { key: "/business/fitness/payments", icon: CreditCard, label: "To‘lovlar" },
             ]
           : []),
         { key: "/business/bookings", icon: Calendar, label: cfg.bookingsLabel || "Bronlar" },

@@ -142,6 +142,7 @@ export default function LeadsPage() {
                 { value: "payment_question", label: "To‘lov" },
                 { value: "property_interest", label: "Uy qiziqishi" },
                 { value: "product_question", label: "Mahsulot" },
+                { value: "membership_request", label: "Abonement arizasi" },
                 { value: "order", label: "Buyurtma" },
                 { value: "custom", label: "Boshqa" },
               ]}

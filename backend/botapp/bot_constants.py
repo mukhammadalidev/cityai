@@ -92,6 +92,15 @@ PH_ORD = "📅 Buyurtma berish"
 PH_PRICE = "💰 Narxlar"
 PH_OP = "☎️ Operator"
 
+# Fitness zal (fitness_center)
+FZ_ABON = "🏋️ Abonementlar"
+FZ_TRAINERS = "👨‍🏫 Trenerlar"
+FZ_TRIAL = "🧪 Bepul sinov mashg‘ulot"
+FZ_SCHED = "📅 Mashg‘ulot jadvali"
+FZ_PRICE = "💰 Narxlar"
+FZ_ADDR = "📍 Manzil"
+FZ_ADM = "☎️ Admin bilan bog‘lanish"
+
 # Sun’iy intellekt (Telegram bot)
 AI_ASSIST_BUTTON = "🤖 AI yordamchi"
 

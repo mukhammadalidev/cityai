@@ -167,3 +167,20 @@ class PhotoBookFlow(StatesGroup):
     time = State()
     location = State()
     note = State()
+
+
+class FitnessTrialFlow(StatesGroup):
+    name = State()
+    phone = State()
+    training_type = State()
+    date = State()
+    time = State()
+    note = State()
+
+
+class FitnessMembershipFlow(StatesGroup):
+    name = State()
+    phone = State()
+    start_date = State()
+    time = State()
+    note = State()

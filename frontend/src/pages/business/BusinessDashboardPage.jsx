@@ -13,6 +13,7 @@ import { getBusinessAnalytics } from "../../services/analyticsService";
 import { getLeads } from "../../services/leadService";
 import { getAIUsage } from "../../services/aiUsageService";
 import { getBookings } from "../../services/bookingService";
+import { getFitnessLedgerSummary } from "../../services/membershipService";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
 import { BOOKING_STATUS } from "../../config/statusConfigs";
@@ -23,6 +24,7 @@ export default function BusinessDashboardPage() {
   const { businessId, business, plan } = useOutletContext();
   const isRestaurant = business?.business_type === "restaurant";
   const isEducation = business?.business_type === "education_center";
+  const isFitnessCenter = business?.business_type === "fitness_center";
   const [dash, setDash] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [allLeads, setAllLeads] = useState([]);
@@ -30,6 +32,7 @@ export default function BusinessDashboardPage() {
   const [aiList, setAiList] = useState([]);
   const [aiMonthSummary, setAiMonthSummary] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
+  const [fitnessLedger, setFitnessLedger] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -39,12 +42,14 @@ export default function BusinessDashboardPage() {
       const tasks = [getBusinessDashboard(businessId), getLeads({ business_id: businessId }), getAIUsage({ business_id: businessId })];
       if (isRestaurant) {
         tasks.push(getBookings({ business_id: businessId, booking_type: "table_booking" }));
+      } else if (isFitnessCenter) {
+        tasks.push(getBookings({ business_id: businessId, booking_type: "trial_lesson" }));
       }
       const results = await Promise.all(tasks);
       const d = results[0];
       const leads = results[1];
       const aiPack = results[2];
-      const bookings = isRestaurant ? results[3] : null;
+      const bookings = isRestaurant || isFitnessCenter ? results[3] : null;
 
       let a = null;
       if (plan?.has_analytics) {
@@ -61,7 +66,17 @@ export default function BusinessDashboardPage() {
       setLeadRows(leads.slice(0, 8));
       setAiList(aiPack.rows || []);
       setAiMonthSummary(aiPack.monthSummary || null);
-      setRecentBookings(isRestaurant ? (bookings || []).slice(0, 8) : []);
+      setRecentBookings(isRestaurant || isFitnessCenter ? (bookings || []).slice(0, 8) : []);
+      if (isFitnessCenter) {
+        try {
+          const ledger = await getFitnessLedgerSummary({ business_id: businessId });
+          setFitnessLedger(ledger);
+        } catch {
+          setFitnessLedger(null);
+        }
+      } else {
+        setFitnessLedger(null);
+      }
     } catch {
       message.error("Ma’lumotlarni yuklashda xatolik yuz berdi.");
       setDash(null);
@@ -71,10 +86,11 @@ export default function BusinessDashboardPage() {
       setAiList([]);
       setAiMonthSummary(null);
       setRecentBookings([]);
+      setFitnessLedger(null);
     } finally {
       setLoading(false);
     }
-  }, [businessId, isRestaurant, plan?.has_analytics]);
+  }, [businessId, isRestaurant, isFitnessCenter, plan?.has_analytics]);
 
   useEffect(() => {
     load();
@@ -120,11 +136,27 @@ export default function BusinessDashboardPage() {
   if (!businessId) return null;
   if (loading && !dash) return <LoadingScreen />;
 
-  const stats = { ...(dash || {}), ...(analytics || {}) };
+  const stats = {
+    ...(dash || {}),
+    ...(analytics || {}),
+    ...(fitnessLedger ? { fitness_ledger: fitnessLedger } : {}),
+  };
 
   return (
     <>
-      <PageHeader title="Dashboard" description="Biznesingizning real vaqtdagi ko‘rinishi." />
+      <PageHeader
+        title="Dashboard"
+        description="Biznesingizning real vaqtdagi ko‘rinishi."
+        extra={
+          isFitnessCenter ? (
+            <Link to="/business/fitness/guide">
+              <Typography.Text style={{ color: "#0891b2", fontWeight: 600 }}>
+                Qo‘llanma →
+              </Typography.Text>
+            </Link>
+          ) : null
+        }
+      />
       <DynamicBusinessDashboard stats={stats} businessType={business?.business_type} />
       {isEducation ? (
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
@@ -265,6 +297,91 @@ export default function BusinessDashboardPage() {
               { title: "Ism", dataIndex: "name" },
               { title: "Telefon", dataIndex: "phone", render: formatPhone },
               { title: "Kishi soni", dataIndex: "guests_count", render: (v) => v ?? "—" },
+              { title: "Sana", dataIndex: "preferred_date", render: formatDate },
+              { title: "Vaqt", dataIndex: "preferred_time" },
+              {
+                title: "Status",
+                dataIndex: "status",
+                render: (v) => <StatusTag map={BOOKING_STATUS} value={v} />,
+              },
+            ]}
+          />
+        </Card>
+      )}
+      {isFitnessCenter && fitnessLedger ? (
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          <Col xs={24} lg={12}>
+            <Card title="Qarzdor klientlar" size="small">
+              {fitnessLedger.debtors?.length ? (
+                <Table
+                  size="small"
+                  rowKey="membership_id"
+                  pagination={false}
+                  dataSource={fitnessLedger.debtors}
+                  columns={[
+                    { title: "Klient", dataIndex: "client_name" },
+                    { title: "Abonement", dataIndex: "title", render: (v) => v || "—" },
+                    {
+                      title: "Qarz",
+                      dataIndex: "debt",
+                      render: (v) => (
+                        <Typography.Text type="danger">
+                          {formatPrice(Number(v || 0))}
+                        </Typography.Text>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <Typography.Text type="secondary">Qarzdor yo‘q.</Typography.Text>
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Muddati tugayotgan abonementlar" size="small">
+              {fitnessLedger.expiring?.length ? (
+                <Table
+                  size="small"
+                  rowKey="membership_id"
+                  pagination={false}
+                  dataSource={fitnessLedger.expiring}
+                  columns={[
+                    { title: "Klient", dataIndex: "client_name" },
+                    { title: "Abonement", dataIndex: "title", render: (v) => v || "—" },
+                    { title: "Tugash", dataIndex: "end_date" },
+                    {
+                      title: "Qolgan kun",
+                      dataIndex: "days_left",
+                      render: (v) => (
+                        <Typography.Text type={Number(v) <= 2 ? "danger" : "warning"}>
+                          {v ?? "—"}
+                        </Typography.Text>
+                      ),
+                    },
+                  ]}
+                />
+              ) : (
+                <Typography.Text type="secondary">Yaqin muddatli abonement yo‘q.</Typography.Text>
+              )}
+            </Card>
+          </Col>
+        </Row>
+      ) : null}
+      {isFitnessCenter && (
+        <Card title="Oxirgi sinov mashg‘ulot arizalari" style={{ marginTop: 16 }}>
+          <Table
+            size="small"
+            rowKey="id"
+            dataSource={recentBookings}
+            pagination={false}
+            columns={[
+              { title: "Ism", dataIndex: "name" },
+              { title: "Telefon", dataIndex: "phone", render: formatPhone },
+              {
+                title: "Yo‘nalish",
+                key: "training_type",
+                render: (_, r) => r.metadata?.training_type || "—",
+              },
               { title: "Sana", dataIndex: "preferred_date", render: formatDate },
               { title: "Vaqt", dataIndex: "preferred_time" },
               {
