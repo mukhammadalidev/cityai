@@ -118,14 +118,21 @@ export default function TeachersPage() {
 
   const columns = useMemo(
     () => [
-      { title: "Tartib", dataIndex: "sort_order", width: 72 },
+      { title: "Tartib", dataIndex: "sort_order", width: 72, responsive: ["sm"] },
       {
         title: "F.I.Sh.",
         dataIndex: "full_name",
+        ellipsis: true,
         render: (text, row) => <Link to={`/business/teachers/${row.id}`}>{text}</Link>,
       },
-      { title: "Telefon", dataIndex: "phone", render: formatPhone },
-      { title: "Fanlar / yo‘nalish", dataIndex: "subjects", ellipsis: true, render: (v) => v || "—" },
+      { title: "Telefon", dataIndex: "phone", width: 132, render: formatPhone },
+      {
+        title: "Fanlar / yo‘nalish",
+        dataIndex: "subjects",
+        ellipsis: true,
+        responsive: ["md"],
+        render: (v) => v || "—",
+      },
       {
         title: "Holat",
         dataIndex: "status",
@@ -135,14 +142,15 @@ export default function TeachersPage() {
           return <Tag color={t.color}>{t.label}</Tag>;
         },
       },
-      { title: "Guruhlar", dataIndex: "groups_count", width: 90 },
-      { title: "O‘quvchilar", dataIndex: "students_in_groups_count", width: 110 },
+      { title: "Guruhlar", dataIndex: "groups_count", width: 90, responsive: ["md"] },
+      { title: "O‘quvchilar", dataIndex: "students_in_groups_count", width: 110, responsive: ["md"] },
       ...(hasEduPortals
         ? [
             {
               title: "Kabinet login",
               key: "portal",
               width: 140,
+              responsive: ["lg"],
               render: (_, row) =>
                 row.portal_username ? (
                   <Typography.Text copyable>{row.portal_username}</Typography.Text>
@@ -166,7 +174,7 @@ export default function TeachersPage() {
         key: "act",
         width: 200,
         render: (_, row) => (
-          <Space wrap>
+          <Space wrap size={[4, 4]}>
             <Link to={`/business/teachers/${row.id}`}>Profil</Link>
             <Button type="link" size="small" onClick={() => openEdit(row)}>
               Tahrirlash
@@ -204,8 +212,15 @@ export default function TeachersPage() {
       {rows.length === 0 ? (
         <EmptyState title="Hozircha ustoz yo‘q" description="Birinchi ustoz profilini yarating." />
       ) : (
-        <Card size="small">
-          <Table rowKey="id" dataSource={rows} pagination={false} columns={columns} />
+        <Card size="small" className="cs-teachers-table-card">
+          <Table
+            rowKey="id"
+            dataSource={rows}
+            pagination={false}
+            columns={columns}
+            scroll={{ x: "max-content" }}
+            className="cs-teachers-table"
+          />
         </Card>
       )}
 
