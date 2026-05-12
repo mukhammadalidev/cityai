@@ -59,10 +59,15 @@ export default function StudentsPage() {
   const isEdu = business?.business_type === "education_center";
   const hasEduAttendance = Boolean(plan?.has_edu_attendance);
   const hasEduPortals = Boolean(plan?.has_edu_portals);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const groupFromUrl = searchParams.get("group");
+  const tabFromUrl = searchParams.get("tab");
 
-  const [tab, setTab] = useState("students");
+  const [tab, setTab] = useState(() => {
+    if (typeof window === "undefined") return "students";
+    const t = new URLSearchParams(window.location.search).get("tab");
+    return t === "attendance" ? "attendance" : "students";
+  });
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -88,6 +93,15 @@ export default function StudentsPage() {
       setGroupFilter(groupFromUrl === "none" ? "none" : groupFromUrl);
     }
   }, [groupFromUrl]);
+
+  useEffect(() => {
+    if (tabFromUrl === "attendance" && hasEduAttendance) {
+      setTab("attendance");
+    }
+    if (tabFromUrl === "students") {
+      setTab("students");
+    }
+  }, [tabFromUrl, hasEduAttendance]);
 
   const loadStudents = useCallback(async () => {
     if (!businessId) return;
@@ -148,8 +162,32 @@ export default function StudentsPage() {
   useEffect(() => {
     if (!hasEduAttendance && tab === "attendance") {
       setTab("students");
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          p.delete("tab");
+          return p;
+        },
+        { replace: true },
+      );
     }
-  }, [hasEduAttendance, tab]);
+  }, [hasEduAttendance, tab, setSearchParams]);
+
+  const onTabChange = (key) => {
+    setTab(key);
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (key === "attendance") {
+          p.set("tab", "attendance");
+        } else {
+          p.delete("tab");
+        }
+        return p;
+      },
+      { replace: true },
+    );
+  };
 
   const loadDayStatuses = useCallback(async () => {
     if (!hasEduAttendance || !businessId || !students.length) {
@@ -161,7 +199,10 @@ export default function StudentsPage() {
       const recs = await getStudentAttendance({ business_id: businessId, date: d });
       const next = {};
       for (const s of students) {
-        const r = recs.find((x) => x.student === s.id);
+        const r = recs.find((x) => {
+          const sid = x.student_id ?? x.student;
+          return Number(sid) === Number(s.id);
+        });
         next[s.id] = r?.status ?? "present";
       }
       setStatusByStudent(next);
@@ -482,7 +523,7 @@ export default function StudentsPage() {
 
       <Tabs
         activeKey={tab}
-        onChange={setTab}
+        onChange={onTabChange}
         tabBarExtraContent={
           tab === "students" ? (
             <Button type="primary" onClick={openCreate}>
@@ -533,6 +574,7 @@ export default function StudentsPage() {
                           rowKey="id"
                           dataSource={students}
                           pagination={false}
+                          scroll={{ x: "max-content" }}
                           columns={[
                             {
                               title: "O‘quvchi",
@@ -552,7 +594,7 @@ export default function StudentsPage() {
                                 <Select
                                   style={{ minWidth: 140 }}
                                   options={ATT_OPTIONS}
-                                  value={statusByStudent[row.id]}
+                                  value={statusByStudent[row.id] ?? "present"}
                                   onChange={(v) => setStatusByStudent((prev) => ({ ...prev, [row.id]: v }))}
                                 />
                               ),

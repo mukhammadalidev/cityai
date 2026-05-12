@@ -164,7 +164,8 @@ export default function StudentGroupsPage() {
                 width: 220,
                 render: (_, row) => (
                   <Space wrap>
-                    <Link to={`/business/students?group=${row.id}`}>O‘quvchilar</Link>
+                    <Link to={`/business/students?group=${row.id}`}>Ro‘yxat</Link>
+                    <Link to={`/business/students?group=${row.id}&tab=attendance`}>Davomat</Link>
                     <Button type="link" size="small" onClick={() => openEdit(row)}>
                       Tahrirlash
                     </Button>

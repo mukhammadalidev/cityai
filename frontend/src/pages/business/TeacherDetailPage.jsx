@@ -115,8 +115,11 @@ export default function TeacherDetailPage() {
             renderItem={(g) => (
               <List.Item
                 actions={[
-                  <Link key="s" to={`/business/students?group=${g.id}`}>
-                    O‘quvchilar
+                  <Link key="list" to={`/business/students?group=${g.id}`}>
+                    Ro‘yxat
+                  </Link>,
+                  <Link key="att" to={`/business/students?group=${g.id}&tab=attendance`}>
+                    Davomat
                   </Link>,
                 ]}
               >
