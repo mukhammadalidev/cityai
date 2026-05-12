@@ -28,10 +28,18 @@ class UserSerializer(serializers.ModelSerializer):
             "portal_teacher",
             "portal_student",
             "portal_parent",
+            "portal_business_client",
             "portal_business_id",
             "portal_business_name",
         )
-        read_only_fields = ("id", "created_at", "portal_teacher", "portal_student", "portal_parent")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "portal_teacher",
+            "portal_student",
+            "portal_parent",
+            "portal_business_client",
+        )
 
     def get_portal_business_id(self, obj):
         if obj.portal_teacher_id:
@@ -40,6 +48,8 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.portal_student.business_id
         if obj.portal_parent_id:
             return obj.portal_parent.business_id
+        if obj.portal_business_client_id:
+            return obj.portal_business_client.business_id
         return None
 
     def get_portal_business_name(self, obj):
@@ -49,6 +59,8 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.portal_student.business.name
         if obj.portal_parent_id:
             return obj.portal_parent.business.name
+        if obj.portal_business_client_id:
+            return obj.portal_business_client.business.name
         return None
 
 

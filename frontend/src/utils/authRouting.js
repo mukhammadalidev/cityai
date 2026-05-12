@@ -5,6 +5,7 @@ export function getDashboardPathForRole(role) {
   if (role === "edu_teacher") return "/portal/teacher";
   if (role === "edu_student") return "/portal/student";
   if (role === "edu_parent") return "/portal/parent";
+  if (role === "business_client") return "/portal/fitness";
   return "/business/select";
 }
 

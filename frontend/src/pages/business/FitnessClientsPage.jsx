@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -7,6 +8,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Modal,
   Popconfirm,
   Row,
   Select,
@@ -24,6 +26,10 @@ import { Navigate, useOutletContext } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import EmptyState from "../../components/ui/EmptyState";
+import {
+  createBusinessClientPortal,
+  resetBusinessClientPortal,
+} from "../../services/authService";
 import {
   createClient,
   createMembership,
@@ -77,6 +83,9 @@ export default function FitnessClientsPage() {
   const [membershipDrawer, setMembershipDrawer] = useState({ open: false, client: null });
   const [membershipForm] = Form.useForm();
   const [clientMemberships, setClientMemberships] = useState([]);
+
+  const [portalModal, setPortalModal] = useState({ open: false, client: null, result: null });
+  const [portalForm] = Form.useForm();
 
   const load = useCallback(async () => {
     if (!businessId) return;
@@ -202,6 +211,52 @@ export default function FitnessClientsPage() {
     }
   };
 
+  const openPortal = (client) => {
+    portalForm.resetFields();
+    const fallback = (client.full_name || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .slice(0, 12);
+    portalForm.setFieldsValue({
+      username: client.portal_username || (fallback ? `${fallback}${client.id}` : `client${client.id}`),
+      password: "",
+    });
+    setPortalModal({ open: true, client, result: null });
+  };
+
+  const submitPortal = async () => {
+    const v = await portalForm.validateFields();
+    const client = portalModal.client;
+    if (!client) return;
+    try {
+      let res;
+      if (client.portal_username) {
+        res = await resetBusinessClientPortal({
+          client_id: client.id,
+          username: v.username,
+          password: v.password,
+        });
+      } else {
+        res = await createBusinessClientPortal({
+          client_id: client.id,
+          username: v.username,
+          password: v.password,
+        });
+      }
+      message.success(
+        client.portal_username ? "Kabinet yangilandi." : "Kabinet yaratildi.",
+      );
+      setPortalModal({
+        open: true,
+        client,
+        result: { username: res.username || v.username, password: res.password || v.password },
+      });
+      load();
+    } catch (e) {
+      message.error(e.response?.data?.detail || "Kabinet yaratib bo'lmadi.");
+    }
+  };
+
   const cancelMembership = async (m) => {
     try {
       await updateMembership(m.id, { status: "cancelled" });
@@ -290,6 +345,24 @@ export default function FitnessClientsPage() {
         dataIndex: "last_visit_date",
         width: 130,
         render: (v) => (v ? dayjs(v).format("YYYY-MM-DD") : "—"),
+      },
+      {
+        title: "Kabinet",
+        dataIndex: "portal_username",
+        width: 140,
+        render: (v, row) =>
+          v ? (
+            <Space direction="vertical" size={0}>
+              <Tag color="green">@{v}</Tag>
+              <Button type="link" size="small" style={{ padding: 0 }} onClick={() => openPortal(row)}>
+                Parolni yangilash
+              </Button>
+            </Space>
+          ) : (
+            <Button type="link" size="small" onClick={() => openPortal(row)}>
+              Kabinet yaratish
+            </Button>
+          ),
       },
       {
         title: "",
@@ -475,11 +548,106 @@ export default function FitnessClientsPage() {
               ]}
             />
           </Form.Item>
-          <Form.Item name="note" label="Izoh">
-            <Input.TextArea rows={3} />
+          <Form.Item name="note" label="Ichki izoh (faqat admin ko'radi)">
+            <Input.TextArea rows={3} placeholder="Masalan: tibbiy cheklov, individual mashg'ulot va h.k." />
+          </Form.Item>
+          <Form.Item
+            name="announcement"
+            label="Klient kabinetida ko'rinadigan xabar"
+            tooltip="Klient o'z kabinetiga kirsa ushbu matn ko'rinadi"
+          >
+            <Input.TextArea
+              rows={3}
+              placeholder="Masalan: Abonementingiz 3 kundan keyin tugaydi, iltimos uzaytiring."
+            />
           </Form.Item>
         </Form>
       </Drawer>
+
+      <Modal
+        title={
+          portalModal.client?.portal_username
+            ? "Klient kabineti — parol yangilash"
+            : "Klient kabineti — login yaratish"
+        }
+        open={portalModal.open}
+        onCancel={() => setPortalModal({ open: false, client: null, result: null })}
+        footer={
+          portalModal.result
+            ? [
+                <Button
+                  key="ok"
+                  type="primary"
+                  onClick={() => setPortalModal({ open: false, client: null, result: null })}
+                >
+                  Yopish
+                </Button>,
+              ]
+            : [
+                <Button
+                  key="cancel"
+                  onClick={() => setPortalModal({ open: false, client: null, result: null })}
+                >
+                  Bekor
+                </Button>,
+                <Button key="ok" type="primary" onClick={submitPortal}>
+                  {portalModal.client?.portal_username ? "Yangilash" : "Yaratish"}
+                </Button>,
+              ]
+        }
+      >
+        {portalModal.result ? (
+          <Alert
+            type="success"
+            showIcon
+            message="Tayyor! Quyidagi ma'lumotlarni klientga bering."
+            description={
+              <div>
+                <div>
+                  <strong>Sayt:</strong> {window.location.origin}/login
+                </div>
+                <div>
+                  <strong>Login:</strong> <code>{portalModal.result.username}</code>
+                </div>
+                <div>
+                  <strong>Parol:</strong> <code>{portalModal.result.password}</code>
+                </div>
+                <Typography.Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0 }}>
+                  Klient bu login bilan saytga kirib, abonementi va davomatini ko'radi. Parolni
+                  saqlab qo'ying — qaytadan ko'rsatilmaydi.
+                </Typography.Paragraph>
+              </div>
+            }
+          />
+        ) : (
+          <Form form={portalForm} layout="vertical">
+            <Typography.Paragraph type="secondary">
+              {portalModal.client?.full_name} uchun login va parol o'rnating. Klient saytga shu
+              ma'lumotlar bilan kiradi.
+            </Typography.Paragraph>
+            <Form.Item
+              name="username"
+              label="Login"
+              rules={[
+                { required: true, message: "Login kiriting" },
+                { min: 3, message: "Kamida 3 ta belgi" },
+              ]}
+            >
+              <Input autoComplete="off" />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label={portalModal.client?.portal_username ? "Yangi parol" : "Parol"}
+              rules={[
+                { required: true, message: "Parol kiriting" },
+                { min: 6, message: "Kamida 6 ta belgi" },
+              ]}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
 
       <Drawer
         title={membershipDrawer.client ? `${membershipDrawer.client.full_name} — abonementlar` : "Abonement"}

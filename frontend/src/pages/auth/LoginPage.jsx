@@ -15,7 +15,12 @@ export default function LoginPage() {
     if (!token) return;
     const u = getStoredUser();
     const go = (role) => {
-      if (role === "edu_teacher" || role === "edu_student" || role === "edu_parent") {
+      if (
+        role === "edu_teacher" ||
+        role === "edu_student" ||
+        role === "edu_parent" ||
+        role === "business_client"
+      ) {
         setSelectedBusinessId(null);
       }
       nav(getDashboardPathForRole(role), { replace: true });
@@ -35,7 +40,12 @@ export default function LoginPage() {
       const data = await loginWithMe(v.username, v.password);
       message.success("Muvaffaqiyatli kirdingiz");
       const role = data.user?.role || getStoredUser()?.role;
-      if (role === "edu_teacher" || role === "edu_student" || role === "edu_parent") {
+      if (
+        role === "edu_teacher" ||
+        role === "edu_student" ||
+        role === "edu_parent" ||
+        role === "business_client"
+      ) {
         setSelectedBusinessId(null);
       }
       nav(getDashboardPathForRole(role));
@@ -69,7 +79,7 @@ export default function LoginPage() {
         style={{ marginTop: 16 }}
         type="info"
         showIcon
-        message="Demo: admin / admin12345; biznes0 / demo12345; ta'lim uchun ustoz_demo va oquvchi_demo / demo12345 (seed_demo dan keyin). Boshqa ustoz/o‘quvchi/ota-onani markaz kabinetidan yaratish mumkin."
+        message="Demo: admin / admin12345; biznes0 / demo12345; ta'lim — ustoz_demo va oquvchi_demo / demo12345; fitness klient — klient_demo / demo12345 (seed_demo dan keyin). Boshqa kabinetlarni biznes panelidan yaratish mumkin."
       />
     </Card>
   );

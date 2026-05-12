@@ -44,3 +44,26 @@ export async function createEduPortalUser(body) {
   const { data } = await api.post("/auth/portal/education/create-user/", body);
   return data;
 }
+
+export async function createBusinessClientPortal({ client_id, username, password }) {
+  const { data } = await api.post("/auth/portal/business-client/create/", {
+    client_id,
+    username,
+    password,
+  });
+  return data;
+}
+
+export async function resetBusinessClientPortal({ client_id, username, password }) {
+  const { data } = await api.post("/auth/portal/business-client/reset/", {
+    client_id,
+    username,
+    password,
+  });
+  return data;
+}
+
+export async function getFitnessClientPortalSummary() {
+  const { data } = await api.get("/auth/portal/fitness/me/");
+  return data;
+}

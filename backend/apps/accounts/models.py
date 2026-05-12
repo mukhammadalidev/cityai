@@ -10,6 +10,7 @@ class User(AbstractUser):
         EDU_TEACHER = "edu_teacher", "O‘quv markaz ustozi"
         EDU_STUDENT = "edu_student", "O‘quv markaz o‘quvchisi"
         EDU_PARENT = "edu_parent", "O‘quv markaz ota-onasi"
+        BUSINESS_CLIENT = "business_client", "Biznes klienti"
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.BUSINESS_OWNER)
     full_name = models.CharField(max_length=255, blank=True)
@@ -38,6 +39,13 @@ class User(AbstractUser):
         null=True,
         blank=True,
         related_name="parent_portal_accounts",
+    )
+    portal_business_client = models.OneToOneField(
+        "memberships.BusinessClient",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="portal_user_account",
     )
 
     class Meta:

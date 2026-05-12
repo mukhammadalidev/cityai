@@ -462,6 +462,237 @@ class TeacherPortalSummaryView(APIView):
         )
 
 
+class BusinessClientPortalSummaryView(APIView):
+    """Fitness/biznes klienti kabineti: abonement muddati, qolgan kun/mashg'ulot, davomat, to'lov."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from decimal import Decimal as _Dec
+        from apps.memberships.models import (
+            BusinessClient,
+            ClientAttendance,
+            ClientMembership,
+            ClientPayment,
+        )
+
+        user = request.user
+        if user.role != User.Role.BUSINESS_CLIENT or not user.portal_business_client_id:
+            return Response({"detail": "Faqat klient kabineti."}, status=403)
+        client = (
+            BusinessClient.objects.select_related("business", "business__city")
+            .filter(pk=user.portal_business_client_id)
+            .first()
+        )
+        if not client:
+            return Response({"detail": "Profil topilmadi."}, status=404)
+
+        # Yangilanish izlari
+        user.last_login = timezone.now()
+        user.save(update_fields=["last_login"])
+
+        today = date.today()
+        memberships = (
+            ClientMembership.objects.filter(client=client)
+            .select_related("item")
+            .order_by("-start_date", "-id")
+        )
+        active_m = memberships.filter(status=ClientMembership.Status.ACTIVE).first()
+        active_payload = None
+        if active_m:
+            days_left = (
+                (active_m.end_date - today).days
+                if active_m.end_date and active_m.end_date >= today
+                else None
+            )
+            sessions_left = None
+            if active_m.sessions_total:
+                sessions_left = max(0, (active_m.sessions_total or 0) - (active_m.sessions_used or 0))
+            active_payload = {
+                "id": active_m.id,
+                "title": active_m.title or (active_m.item.title if active_m.item_id else "Abonement"),
+                "start_date": active_m.start_date.isoformat() if active_m.start_date else None,
+                "end_date": active_m.end_date.isoformat() if active_m.end_date else None,
+                "days_left": days_left,
+                "is_expired": bool(active_m.end_date and active_m.end_date < today),
+                "expected_amount": str(active_m.expected_amount or _Dec("0")),
+                "paid_amount": str(active_m.paid_amount or _Dec("0")),
+                "debt_amount": str(active_m.debt_amount),
+                "currency": active_m.currency,
+                "payment_status": active_m.payment_status,
+                "sessions_total": active_m.sessions_total or 0,
+                "sessions_used": active_m.sessions_used or 0,
+                "sessions_left": sessions_left,
+            }
+
+        # Davomat
+        att_qs = ClientAttendance.objects.filter(client=client).order_by("-visit_date", "-id")
+        recent_att = list(att_qs[:30])
+        month_start = today.replace(day=1)
+        att_this_month = att_qs.filter(visit_date__gte=month_start).count()
+        att_total = att_qs.count()
+
+        # To'lovlar
+        pay_qs = ClientPayment.objects.filter(client=client).order_by("-payment_date", "-id")
+        recent_pay = list(pay_qs[:30])
+        total_paid = sum((p.amount or _Dec("0") for p in pay_qs), _Dec("0"))
+
+        # Jami qarz
+        total_debt = sum((m.debt_amount for m in memberships), _Dec("0"))
+
+        return Response(
+            {
+                "business": {
+                    "id": client.business_id,
+                    "name": client.business.name,
+                    "city": client.business.city.name if client.business.city_id else "",
+                    "phone": client.business.phone,
+                    "address": client.business.address,
+                    "working_hours": client.business.working_hours,
+                },
+                "client": {
+                    "id": client.id,
+                    "full_name": client.full_name,
+                    "phone": client.phone,
+                    "client_type": client.client_type,
+                    "status": client.status,
+                    "announcement": client.announcement,
+                    "created_at": client.created_at.isoformat() if client.created_at else None,
+                },
+                "active_membership": active_payload,
+                "memberships": [
+                    {
+                        "id": m.id,
+                        "title": m.title or (m.item.title if m.item_id else "Abonement"),
+                        "start_date": m.start_date.isoformat() if m.start_date else None,
+                        "end_date": m.end_date.isoformat() if m.end_date else None,
+                        "expected_amount": str(m.expected_amount or _Dec("0")),
+                        "paid_amount": str(m.paid_amount or _Dec("0")),
+                        "debt_amount": str(m.debt_amount),
+                        "status": m.status,
+                        "payment_status": m.payment_status,
+                    }
+                    for m in memberships
+                ],
+                "attendance_summary": {
+                    "total": att_total,
+                    "this_month": att_this_month,
+                },
+                "recent_attendance": [
+                    {
+                        "id": a.id,
+                        "visit_date": a.visit_date.isoformat() if a.visit_date else None,
+                        "visit_time": a.visit_time.strftime("%H:%M") if a.visit_time else None,
+                        "client_type": a.client_type,
+                        "amount_charged": str(a.amount_charged or _Dec("0")),
+                    }
+                    for a in recent_att
+                ],
+                "total_paid": str(total_paid),
+                "total_debt": str(total_debt),
+                "recent_payments": [
+                    {
+                        "id": p.id,
+                        "payment_date": p.payment_date.isoformat() if p.payment_date else None,
+                        "amount": str(p.amount or _Dec("0")),
+                        "currency": p.currency,
+                        "method": p.method,
+                        "note": p.note,
+                    }
+                    for p in recent_pay
+                ],
+            }
+        )
+
+
+class CreateBusinessClientPortalSerializer(serializers.Serializer):
+    client_id = serializers.IntegerField()
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Bu login band.")
+        return value
+
+
+class CreateBusinessClientPortalView(APIView):
+    """Admin/biznes egasi klientga login/parol yaratadi (yoki yangilaydi)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from apps.memberships.models import BusinessClient
+
+        ser = CreateBusinessClientPortalSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        d = ser.validated_data
+        client = BusinessClient.objects.select_related("business").filter(pk=d["client_id"]).first()
+        if not client:
+            return Response({"detail": "Klient topilmadi."}, status=404)
+        if not can_edit_business(request.user, client.business) and request.user.role != User.Role.SUPER_ADMIN:
+            return Response({"detail": "Ruxsat yo'q."}, status=403)
+        if User.objects.filter(portal_business_client=client).exists():
+            return Response({"detail": "Bu klientda kabinet allaqachon mavjud."}, status=400)
+        user = User.objects.create_user(
+            username=d["username"],
+            password=d["password"],
+            role=User.Role.BUSINESS_CLIENT,
+            full_name=client.full_name,
+            phone=client.phone or "",
+        )
+        user.portal_business_client = client
+        user.save(update_fields=["portal_business_client"])
+        return Response(
+            {"username": user.username, "role": user.role, "client_id": client.id},
+            status=201,
+        )
+
+
+class ResetBusinessClientPortalSerializer(serializers.Serializer):
+    client_id = serializers.IntegerField()
+    username = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+
+class ResetBusinessClientPortalView(APIView):
+    """Admin: mavjud klient kabineti login yoki parolini yangilash."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        import secrets
+        from apps.memberships.models import BusinessClient
+
+        ser = ResetBusinessClientPortalSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        d = ser.validated_data
+        client = BusinessClient.objects.select_related("business").filter(pk=d["client_id"]).first()
+        if not client:
+            return Response({"detail": "Klient topilmadi."}, status=404)
+        if not can_edit_business(request.user, client.business) and request.user.role != User.Role.SUPER_ADMIN:
+            return Response({"detail": "Ruxsat yo'q."}, status=403)
+        portal_user = User.objects.filter(portal_business_client=client).first()
+        if not portal_user:
+            return Response({"detail": "Bu klientda hali kabinet yo'q."}, status=404)
+        new_username = (d.get("username") or "").strip()
+        if new_username and new_username != portal_user.username:
+            if User.objects.filter(username=new_username).exists():
+                return Response({"detail": "Bu login band."}, status=400)
+            portal_user.username = new_username
+        new_password = (d.get("password") or "").strip() or secrets.token_urlsafe(8)
+        portal_user.set_password(new_password)
+        portal_user.save(update_fields=["username", "password"])
+        return Response(
+            {
+                "username": portal_user.username,
+                "password": new_password,
+                "client_id": client.id,
+                "detail": "Kabinet login/parol yangilandi.",
+            }
+        )
+
+
 class StudentQuizSubmitSerializer(serializers.Serializer):
     quiz_id = serializers.IntegerField(min_value=1)
     answers = serializers.ListField(

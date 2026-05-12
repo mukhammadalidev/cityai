@@ -107,6 +107,20 @@ const STEPS = [
     ],
     tip: "Qarzdor klientlar va muddati tugayotgan abonementlar Dashboard pastida jadval ko'rinishida chiqadi.",
   },
+  {
+    n: 7,
+    title: "Klientga shaxsiy kabinet bering",
+    desc: "Klient o'zining abonementi, qolgan kunlari, qolgan mashg'ulotlari va to'lovlarini o'zi ko'rib turishi uchun unga login va parol yarating.",
+    actions: [
+      {
+        to: "/business/fitness/clients",
+        icon: Dumbbell,
+        label: "Klientlar → Kabinet yaratish",
+        hint: "Klient ustida 'Kabinet yaratish' tugmasi",
+      },
+    ],
+    tip: "Klientga ichki eslatma (faqat siz ko'rasiz) va kabinet xabari (klient ko'radi) — ikkita alohida maydon mavjud. Klient kabineti orqali siz har bir klientga shaxsiy xabar yetkazishingiz mumkin.",
+  },
 ];
 
 const FAQ = [
@@ -133,6 +147,14 @@ const FAQ = [
   {
     q: "Botdan kelgan abonement arizalari nima bo'ladi?",
     a: "Telegram botdan abonement arizasi kelganda u 'Leads' bo'limida saqlanadi. Siz u bilan bog'lanasiz va kelishilsa, Klientlar sahifasidan klient sifatida qo'shasiz.",
+  },
+  {
+    q: "Klient o'zining abonementini ko'ra olishi uchun nima qilaman?",
+    a: "Klientlar sahifasida har bir klient qatorida 'Kabinet yaratish' tugmasi bor. Login va parol kiriting → klientga bering. Klient sayt /login orqali kirib o'zining abonementi, qolgan kunlari, mashg'ulotlari, davomati va to'lovlarini ko'radi. Demo: klient_demo / demo12345.",
+  },
+  {
+    q: "Klientga eslatma yozsam, u qaerda ko'radi?",
+    a: "Klientni tahrirlashda ikki xil maydon bor: 'Ichki izoh' (faqat admin ko'radi) va 'Kabinet xabari' (klient kabinetiga kirsa ekranning yuqorisida ko'rinadi). Masalan: 'Abonementingiz 3 kundan keyin tugaydi, uzaytiring' deb yozib qo'ying.",
   },
 ];
 

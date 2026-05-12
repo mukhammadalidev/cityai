@@ -203,8 +203,18 @@ export default function FitnessAttendancePage() {
       },
       {
         title: "Abonement",
-        dataIndex: "membership_title",
-        render: (v) => v || "—",
+        key: "membership_title",
+        render: (_, r) => {
+          if (r.membership_title) return r.membership_title;
+          if (r.client_type === "daily") {
+            return (
+              <Typography.Text type="secondary" italic>
+                Kunlik tashrif
+              </Typography.Text>
+            );
+          }
+          return "—";
+        },
       },
       {
         title: "To'lov",

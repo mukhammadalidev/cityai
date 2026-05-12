@@ -18,6 +18,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
     total_debt = serializers.SerializerMethodField()
     last_visit_date = serializers.SerializerMethodField()
     visits_this_month = serializers.SerializerMethodField()
+    portal_username = serializers.SerializerMethodField()
 
     class Meta:
         model = BusinessClient
@@ -32,6 +33,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "client_type",
             "status",
             "note",
+            "announcement",
             "metadata",
             "created_at",
             "updated_at",
@@ -40,8 +42,13 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "total_debt",
             "last_visit_date",
             "visits_this_month",
+            "portal_username",
         ]
         read_only_fields = ("id", "created_at", "updated_at")
+
+    def get_portal_username(self, obj):
+        from apps.accounts.models import User
+        return User.objects.filter(portal_business_client=obj).values_list("username", flat=True).first()
 
     def get_active_memberships_count(self, obj):
         cached = getattr(obj, "active_memberships_count_cached", None)
@@ -139,12 +146,19 @@ class ClientMembershipSerializer(serializers.ModelSerializer):
             validated_data["expected_amount"] = item.price or Decimal("0")
         if item and not validated_data.get("currency"):
             validated_data["currency"] = item.currency or "UZS"
+        if not validated_data.get("title"):
+            validated_data["title"] = "Abonement"
         instance = super().create(validated_data)
         instance.recalc_payment_status()
         instance.save(update_fields=["payment_status"])
         return instance
 
     def update(self, instance, validated_data):
+        item = validated_data.get("item", instance.item)
+        if item and not validated_data.get("title") and not instance.title:
+            validated_data["title"] = item.title
+        if not validated_data.get("title") and not instance.title:
+            validated_data["title"] = "Abonement"
         instance = super().update(instance, validated_data)
         instance.recalc_payment_status()
         instance.save(update_fields=["payment_status"])
@@ -189,7 +203,8 @@ class ClientPaymentSerializer(serializers.ModelSerializer):
 class ClientAttendanceSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source="client.full_name", read_only=True)
     client_phone = serializers.CharField(source="client.phone", read_only=True)
-    membership_title = serializers.CharField(source="membership.title", read_only=True)
+    client_type_resolved = serializers.SerializerMethodField()
+    membership_title = serializers.SerializerMethodField()
 
     class Meta:
         model = ClientAttendance
@@ -204,6 +219,7 @@ class ClientAttendanceSerializer(serializers.ModelSerializer):
             "visit_date",
             "visit_time",
             "client_type",
+            "client_type_resolved",
             "amount_charged",
             "currency",
             "note",
@@ -211,6 +227,31 @@ class ClientAttendanceSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ("id", "created_at")
+
+    def get_client_type_resolved(self, obj):
+        if obj.client_type:
+            return obj.client_type
+        return obj.client.client_type if obj.client_id else ""
+
+    def get_membership_title(self, obj):
+        if obj.membership_id and obj.membership and obj.membership.title:
+            return obj.membership.title
+        if obj.membership_id and obj.membership and obj.membership.item_id:
+            return obj.membership.item.title
+        # Fallback: klientning hozirgi faol abonementi
+        if obj.client_id:
+            active = (
+                ClientMembership.objects
+                .filter(client_id=obj.client_id, status=ClientMembership.Status.ACTIVE)
+                .order_by("-start_date", "-id")
+                .first()
+            )
+            if active:
+                if active.title:
+                    return active.title
+                if active.item_id:
+                    return active.item.title
+        return ""
 
     def validate(self, attrs):
         client = attrs.get("client") or getattr(self.instance, "client", None)
@@ -222,4 +263,19 @@ class ClientAttendanceSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Davomat klient va abonementga mos emas.")
         if client and not attrs.get("client_type"):
             attrs["client_type"] = client.client_type
+        # Oylik klient uchun abonement tanlanmagan bo'lsa, faol abonementni avtomatik biriktirish
+        if (
+            client
+            and client.client_type == BusinessClient.ClientType.MONTHLY
+            and not attrs.get("membership")
+            and not (self.instance and self.instance.membership_id)
+        ):
+            active = (
+                ClientMembership.objects
+                .filter(client=client, status=ClientMembership.Status.ACTIVE)
+                .order_by("-start_date", "-id")
+                .first()
+            )
+            if active:
+                attrs["membership"] = active
         return attrs

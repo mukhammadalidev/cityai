@@ -50,6 +50,7 @@ const PortalTeacherPage = lazy(() => import("../pages/portal/PortalTeacherPage")
 const PortalTeacherStudentPage = lazy(() => import("../pages/portal/PortalTeacherStudentPage"));
 const PortalStudentPage = lazy(() => import("../pages/portal/PortalStudentPage"));
 const PortalParentPage = lazy(() => import("../pages/portal/PortalParentPage"));
+const PortalFitnessClientPage = lazy(() => import("../pages/portal/PortalFitnessClientPage"));
 const PublicCityPage = lazy(() => import("../pages/public/PublicCityPage"));
 const PublicCategoryPage = lazy(() => import("../pages/public/PublicCategoryPage"));
 const PublicBusinessPage = lazy(() => import("../pages/public/PublicBusinessPage"));
@@ -100,6 +101,14 @@ export default function AppRoutes() {
           element={
             <RoleRoute roles={["edu_parent"]}>
               {page(PortalParentPage)}
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="fitness"
+          element={
+            <RoleRoute roles={["business_client"]}>
+              {page(PortalFitnessClientPage)}
             </RoleRoute>
           }
         />

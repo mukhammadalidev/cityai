@@ -34,7 +34,11 @@ class BusinessClient(models.Model):
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True
     )
-    note = models.TextField(blank=True)
+    note = models.TextField(blank=True, help_text="Ichki eslatma (faqat admin ko'radi).")
+    announcement = models.TextField(
+        blank=True,
+        help_text="Klient kabinetida ko'rinadigan xabar (eslatma, e'lon, tilak).",
+    )
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -2,8 +2,11 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .portal_views import (
+    BusinessClientPortalSummaryView,
+    CreateBusinessClientPortalView,
     CreateEduPortalUserView,
     ParentPortalSummaryView,
+    ResetBusinessClientPortalView,
     StudentPortalSummaryView,
     StudentQuizSubmitView,
     TeacherPortalSummaryView,
@@ -21,4 +24,7 @@ urlpatterns = [
     path("portal/education/student-summary/", StudentPortalSummaryView.as_view(), name="edu_student_portal"),
     path("portal/education/student-quiz-submit/", StudentQuizSubmitView.as_view(), name="edu_student_quiz_submit"),
     path("portal/education/parent-summary/", ParentPortalSummaryView.as_view(), name="edu_parent_portal"),
+    path("portal/fitness/me/", BusinessClientPortalSummaryView.as_view(), name="fitness_client_portal"),
+    path("portal/business-client/create/", CreateBusinessClientPortalView.as_view(), name="business_client_portal_create"),
+    path("portal/business-client/reset/", ResetBusinessClientPortalView.as_view(), name="business_client_portal_reset"),
 ]

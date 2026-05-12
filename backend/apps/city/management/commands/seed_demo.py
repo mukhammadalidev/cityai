@@ -926,6 +926,24 @@ class Command(BaseCommand):
                             method=ClientPayment.Method.CASH if ci % 2 == 0 else ClientPayment.Method.CARD,
                             note="Demo to'lov",
                         )
+                    # Demo: birinchi fitness biznesining birinchi klientiga portal kabineti
+                    if fz_idx == 0 and ci == 0:
+                        client.announcement = (
+                            "Salom! Sizning abonementingiz faol. Tashrif vaqti: har kuni 18:00. "
+                            "Savolingiz bo'lsa, administratorga murojaat qiling."
+                        )
+                        client.save(update_fields=["announcement"])
+                        portal_username = "klient_demo"
+                        if not User.objects.filter(username=portal_username).exists():
+                            portal_user = User.objects.create_user(
+                                username=portal_username,
+                                password="demo12345",
+                                role=User.Role.BUSINESS_CLIENT,
+                                full_name=client.full_name,
+                                phone=client.phone or "",
+                            )
+                            portal_user.portal_business_client = client
+                            portal_user.save(update_fields=["portal_business_client"])
                     # Davomat — oxirgi 14 kunda 4-7 ta tashrif
                     visits = 4 + (ci % 4)
                     for v in range(visits):
