@@ -48,6 +48,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Desktop (Electron)
+desktop/node_modules/
+desktop/dist/
+desktop/out/
+
 # Lokal backuplar (tar, DB va .env nusxalari)
 backups/
 

@@ -22,6 +22,7 @@ from aiogram.types import (
     Message,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
+    WebAppInfo,
 )
 from asgiref.sync import sync_to_async
 from dotenv import load_dotenv
@@ -158,8 +159,30 @@ def _ai_context_for_business(business_id: int) -> tuple[str, str]:
     return biz_block, "\n\n".join(kb_chunks)
 
 
+DEFAULT_WEB_APP_URL = "https://citybot.uz/"
+WEB_APP_BUTTON_LABEL = "🌆 CityBot — saytni ochish"
+
+
+def _web_app_url() -> str:
+    """Telegram WebApp uchun HTTPS URL — env yoki default citybot.uz."""
+    url = (os.getenv("TELEGRAM_WEB_APP_URL") or DEFAULT_WEB_APP_URL).strip()
+    if not url:
+        return DEFAULT_WEB_APP_URL
+    if not url.startswith("https://"):
+        return DEFAULT_WEB_APP_URL
+    return url
+
+
 def business_type_keyboard() -> InlineKeyboardMarkup:
-    rows = []
+    rows: list[list[InlineKeyboardButton]] = []
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text=WEB_APP_BUTTON_LABEL,
+                web_app=WebAppInfo(url=_web_app_url()),
+            )
+        ]
+    )
     for key, label in TYPE_LABELS.items():
         rows.append([InlineKeyboardButton(text=label, callback_data=f"t:{key}")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -378,10 +401,13 @@ async def start_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     text = (
         "Assalomu alaykum! 👋\n\n"
+        "🌆 <b>CityBot</b> — shahar xizmatlari va bizneslar bitta joyda.\n"
+        "Tepadagi <b>«CityBot — saytni ochish»</b> tugmasi orqali to‘liq saytni "
+        "Telegramning o‘zida ochishingiz mumkin.\n\n"
+        "Yoki botda davom eting:\n"
         "<b>1-qadam:</b> biznes turini tanlang.\n"
         "<b>2-qadam:</b> biznesni tanlang.\n"
-        "<b>3-qadam:</b> bo‘limni tanlab, narxlar ro‘yxatini ko‘ring.\n\n"
-        "Pastdagi tugmalardan boshlang:"
+        "<b>3-qadam:</b> bo‘limni tanlab, narxlar ro‘yxatini ko‘ring."
     )
     await message.answer(text, reply_markup=business_type_keyboard())
 
@@ -1248,11 +1274,28 @@ async def fallback_handler(message: Message, state: FSMContext) -> None:
     )
 
 
+async def _set_default_menu_button(bot: Bot) -> None:
+    """Chat oynasidagi 'Menu' tugmasini saytga ochiladigan WebApp qilib sozlaymiz."""
+    from aiogram.types import MenuButtonWebApp
+
+    try:
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="🌆 CityBot",
+                web_app=WebAppInfo(url=_web_app_url()),
+            )
+        )
+        logger.info("Default chat menu button -> WebApp (%s)", _web_app_url())
+    except Exception:  # noqa: BLE001
+        logger.exception("Default menu tugmasini sozlab bo‘lmadi")
+
+
 async def run() -> None:
     token = (os.getenv("TELEGRAM_BOT_TOKEN") or "").strip()
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN .env faylida yo‘q.")
     bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    await _set_default_menu_button(bot)
     await dp.start_polling(bot)
 
 
