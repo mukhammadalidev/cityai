@@ -27,6 +27,11 @@ export async function updateStudent(id, body) {
   return data;
 }
 
+export async function enrollStudentFace(id, formData) {
+  const { data } = await api.post(`/students/${id}/face-enroll/`, formData);
+  return data;
+}
+
 export async function deleteStudent(id) {
   await api.delete(`/students/${id}/`);
 }
@@ -43,5 +48,10 @@ export async function getStudentAttendance(params) {
 
 export async function bulkAttendanceDay(body) {
   const { data } = await api.post("/student-attendance/bulk-day/", body);
+  return data;
+}
+
+export async function faceCheckIn(body) {
+  const { data } = await api.post("/student-attendance/face-check-in/", body);
   return data;
 }

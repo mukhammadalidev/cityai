@@ -53,6 +53,9 @@ class Student(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=30, blank=True)
     notes = models.TextField(blank=True)
+    face_photo = models.ImageField(upload_to="students/faces/", null=True, blank=True)
+    face_consent = models.BooleanField(default=False)
+    face_registered_at = models.DateTimeField(null=True, blank=True)
     # Abonement: shu sanagacha (shu kun boshqacha) to‘langan deb hisoblanadi.
     tuition_paid_until = models.DateField(null=True, blank=True, db_index=True)
     tuition_payment_note = models.CharField(max_length=500, blank=True)

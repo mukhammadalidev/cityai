@@ -146,6 +146,63 @@
   box-shadow: var(--cs-shadow-hover);
 }
 
+.cs-face-camera {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #0b1220;
+}
+
+.cs-face-camera__video {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  max-height: 62vh;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.cs-face-camera__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.cs-face-student {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-face-student__photo,
+.cs-face-student__placeholder {
+  flex: 0 0 auto;
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.cs-face-student__placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--cs-muted);
+  background: rgba(15, 23, 42, 0.06);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cs-face-student__meta {
+  margin: 3px 0;
+  color: var(--cs-muted);
+  font-size: 13px;
+}
+
 .cs-pwa-install {
   position: fixed;
   right: 18px;

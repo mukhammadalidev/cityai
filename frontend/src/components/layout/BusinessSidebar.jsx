@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   BookOpen,
   Brain,
+  Camera,
   Calendar,
   CalendarCheck,
   CreditCard,
@@ -80,6 +81,7 @@ export default function BusinessSidebar({ collapsed, businessType, plan, onNavig
         ...(businessType === "education_center"
           ? [
               { key: "/business/students", icon: GraduationCap, label: "O‘quvchilar va davomat" },
+              { key: "/business/face-attendance", icon: Camera, label: "Face davomat" },
               { key: "/business/student-ratings", icon: Trophy, label: "Baholar va reyting" },
               { key: "/business/student-groups", icon: Layers, label: "O‘quv guruhlari" },
               { key: "/business/teachers", icon: IdCard, label: "Ustozlar" },

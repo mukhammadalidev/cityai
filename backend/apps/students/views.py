@@ -3,7 +3,8 @@ from datetime import date
 
 from django.db import transaction
 from django.db.models import Avg, Count, OuterRef, Subquery
-from rest_framework import permissions, viewsets
+from django.utils import timezone
+from rest_framework import parsers, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -172,6 +173,25 @@ class StudentViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         _ensure_business_access(self.request, instance.business_id)
         instance.delete()
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="face-enroll",
+        permission_classes=[permissions.IsAuthenticated],
+        parser_classes=[parsers.MultiPartParser, parsers.FormParser],
+    )
+    def face_enroll(self, request, pk=None):
+        student = self.get_object()
+        _ensure_student_crm_access(request, student)
+        photo = request.FILES.get("face_photo")
+        if not photo:
+            raise ValidationError({"face_photo": "Rasm fayli majburiy"})
+        student.face_photo = photo
+        student.face_consent = str(request.data.get("face_consent", "true")).lower() in ("1", "true", "yes", "on")
+        student.face_registered_at = timezone.now()
+        student.save(update_fields=["face_photo", "face_consent", "face_registered_at", "updated_at"])
+        return Response(StudentSerializer(student, context={"request": request}).data)
 
     @action(detail=False, methods=["get"], url_path="attendance-stats")
     def attendance_stats(self, request):
@@ -506,3 +526,45 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
                 if prev_status != obj.status:
                     notify_parents_student_attendance(obj, previous_status=prev_status)
         return Response({"date": d.isoformat(), "created": created, "updated": updated})
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="face-check-in",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def face_check_in(self, request):
+        business_id = request.data.get("business_id")
+        student_id = request.data.get("student_id")
+        if business_id is None or student_id is None:
+            raise ValidationError({"detail": "business_id va student_id kerak"})
+        bid = int(business_id)
+        sid = int(student_id)
+        _ensure_business_access(request, bid)
+        _require_edu_attendance_plan(request, bid)
+
+        student = Student.objects.filter(id=sid, business_id=bid).first()
+        if not student:
+            raise ValidationError({"student_id": "O‘quvchi topilmadi"})
+        if not student.face_photo:
+            raise ValidationError({"student_id": "Bu o‘quvchida face rasm ro‘yxatdan o‘tmagan"})
+
+        today = timezone.localdate()
+        prev = StudentAttendance.objects.filter(student=student, date=today).first()
+        prev_status = prev.status if prev else None
+        note = "Face davomat: kompyuter kamerasi orqali belgilandi"
+        obj, created = StudentAttendance.objects.update_or_create(
+            student=student,
+            date=today,
+            defaults={"status": StudentAttendance.Status.PRESENT, "note": note},
+        )
+        if created or prev_status != obj.status:
+            notify_parents_student_attendance(obj, previous_status=prev_status)
+        return Response(
+            {
+                "created": created,
+                "date": today.isoformat(),
+                "student": StudentSerializer(student, context={"request": request}).data,
+                "attendance": StudentAttendanceSerializer(obj).data,
+            }
+        )

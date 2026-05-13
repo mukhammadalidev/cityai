@@ -26,6 +26,7 @@ const ItemFormPage = lazy(() => import("../pages/business/ItemFormPage"));
 const ItemDetailPage = lazy(() => import("../pages/business/ItemDetailPage"));
 const LeadsPage = lazy(() => import("../pages/business/LeadsPage"));
 const StudentsPage = lazy(() => import("../pages/business/StudentsPage"));
+const FaceAttendancePage = lazy(() => import("../pages/business/FaceAttendancePage"));
 const StudentDetailPage = lazy(() => import("../pages/business/StudentDetailPage"));
 const StudentGroupsPage = lazy(() => import("../pages/business/StudentGroupsPage"));
 const StudentRatingsPage = lazy(() => import("../pages/business/StudentRatingsPage"));
@@ -159,6 +160,7 @@ export default function AppRoutes() {
         <Route path="leads" element={page(LeadsPage)} />
         <Route path="students/:id" element={page(StudentDetailPage)} />
         <Route path="students" element={page(StudentsPage)} />
+        <Route path="face-attendance" element={page(FaceAttendancePage)} />
         <Route path="student-ratings" element={page(StudentRatingsPage)} />
         <Route path="student-groups" element={page(StudentGroupsPage)} />
         <Route path="teachers/:id" element={page(TeacherDetailPage)} />
