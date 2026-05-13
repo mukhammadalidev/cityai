@@ -32,12 +32,12 @@ export default function AdminLayout() {
       <Layout className="cs-content">
         <Topbar title="Admin panel" subtitle="Platforma boshqaruvi" onMenuClick={() => setMobileOpen(true)} />
         <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)}>
-          <div style={{ background: "#0b1220", minHeight: "100%" }}>
+          <div className="cs-mobile-sidebar__inner">
             <div className="cs-sider-brand">
               <BrandLogo height={34} className="cs-sider-brand__logo" />
               <div className="cs-sider-brand__title">City Services AI</div>
             </div>
-            <AdminSidebar />
+            <AdminSidebar onNavigate={() => setMobileOpen(false)} />
           </div>
         </MobileSidebar>
         <div className="cs-page">

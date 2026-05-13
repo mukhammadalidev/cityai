@@ -24,7 +24,7 @@ const items = [
   { key: "/admin/settings", icon: Settings, label: "Sozlamalar" },
 ];
 
-export default function AdminSidebar({ collapsed }) {
+export default function AdminSidebar({ collapsed, onNavigate }) {
   const nav = useNavigate();
   const loc = useLocation();
   const selected =
@@ -39,7 +39,10 @@ export default function AdminSidebar({ collapsed }) {
       inlineCollapsed={collapsed}
       className="cs-sider-menu"
       style={{ border: "none", background: "transparent", flex: 1, overflow: "auto" }}
-      onClick={({ key }) => nav(key)}
+      onClick={({ key }) => {
+        nav(key);
+        onNavigate?.();
+      }}
       items={items.map((m) => ({
         key: m.key,
         icon: <m.icon size={18} />,

@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { getBusinessTypeConfig } from "../../config/businessTypes";
 
-export default function BusinessSidebar({ collapsed, businessType, plan }) {
+export default function BusinessSidebar({ collapsed, businessType, plan, onNavigate }) {
   const cfg = getBusinessTypeConfig(businessType);
   const nav = useNavigate();
   const loc = useLocation();
@@ -142,9 +142,11 @@ export default function BusinessSidebar({ collapsed, businessType, plan }) {
         const target = items.find((m) => m.key === key);
         if (target?.locked) {
           nav("/business/billing");
+          onNavigate?.();
           return;
         }
         nav(key);
+        onNavigate?.();
       }}
       items={items.map((m) => ({
         key: m.key,

@@ -13,7 +13,7 @@ export default function Topbar({ title, subtitle, businesses = [], onMenuClick, 
   return (
     <header className="cs-topbar">
       <Space align="start" size={12}>
-        <Button type="text" icon={<MenuOutlined />} onClick={onMenuClick} className="mobile-only" />
+        {onMenuClick ? <Button type="text" icon={<MenuOutlined />} onClick={onMenuClick} className="mobile-only" /> : null}
         <div>
           <div className="cs-topbar__title">{title}</div>
           {subtitle && <div className="cs-topbar__subtitle">{subtitle}</div>}
