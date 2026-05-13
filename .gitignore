@@ -6,7 +6,7 @@ deploy/images.env
 .env.*.local
 !.env.example
 backend/.env
-
+desktop
 # Python
 __pycache__/
 *.py[cod]
