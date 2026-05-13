@@ -181,6 +181,12 @@
   background: rgba(15, 23, 42, 0.06);
 }
 
+.cs-pwa-install__help {
+  margin-bottom: 0 !important;
+  color: var(--cs-muted);
+  line-height: 1.65;
+}
+
 @media (max-width: 575px) {
   .cs-pwa-install {
     right: 12px;
