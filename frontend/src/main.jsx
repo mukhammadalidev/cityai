@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { ConfigProvider, theme } from "antd";
 import uzUZ from "antd/locale/uz_UZ";
 import App from "./App";
+import { registerServiceWorker } from "./pwa/registerServiceWorker";
 import "./styles/global.css";
 import "./styles/layouts.css";
 import "./styles/components.css";
@@ -80,3 +81,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ConfigProvider>
   </React.StrictMode>,
 );
+
+registerServiceWorker();

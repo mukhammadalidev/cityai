@@ -146,6 +146,49 @@
   box-shadow: var(--cs-shadow-hover);
 }
 
+.cs-pwa-install {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--cs-shadow-hover);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.cs-pwa-install__close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--cs-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cs-pwa-install__close:hover {
+  color: var(--cs-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+@media (max-width: 575px) {
+  .cs-pwa-install {
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100vw - 24px);
+  }
+}
+
 /* Kanban */
 .cs-kanban-col {
   min-width: 260px;

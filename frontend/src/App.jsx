@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import PwaInstallButton from "./components/pwa/PwaInstallButton";
 import AppRoutes from "./routes/AppRoutes";
 
 function TelegramWebAppInit() {
@@ -27,6 +28,7 @@ export default function App() {
     <BrowserRouter>
       <TelegramWebAppInit />
       <AppRoutes />
+      <PwaInstallButton />
     </BrowserRouter>
   );
 }
