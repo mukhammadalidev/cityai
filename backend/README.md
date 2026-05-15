@@ -19,6 +19,7 @@
 | analytics | AIUsage, platform/biznes analitikasi |
 | marketing | Marketing kontent (demo generator) |
 | billing | Hisob-fakturalar |
+| attendance | Hikvision FaceID avtomatik davomat (`Attendance`), webhook |
 
 ## API (qisqacha)
 
@@ -30,5 +31,6 @@
 - `GET/POST /api/leads/` (yaratish ochiq — bot uchun)
 - `GET /api/analytics/platform/`, `GET /api/analytics/business/{id}/`
 - `GET /api/category-types/`
+- `POST /api/attendance/hikvision/event/` — Hikvision listener (FaceID) webhook; `AllowAny`, ixtiyoriy `X-Hikvision-Secret`
 
 To‘liq ro‘yxat uchun `config/urls.py` ni ko‘ring.

@@ -1,5 +1,9 @@
-from django.contrib import admin
+import json
+
+from django.contrib import admin, messages
 from django.utils.html import format_html
+
+from apps.attendance.integrations.hikvision.device_client import sync_student_to_hikvision
 
 from .models import Student, StudentAttendance, StudentGroup, StudentRating
 
@@ -21,10 +25,56 @@ class StudentRatingInline(admin.TabularInline):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "phone", "business", "group", "course", "status", "created_at")
+    list_display = (
+        "id",
+        "name",
+        "phone",
+        "hikvision_employee_no",
+        "business",
+        "group",
+        "course",
+        "status",
+        "created_at",
+    )
     list_filter = ("status", "business")
-    search_fields = ("name", "phone")
+    search_fields = ("name", "phone", "hikvision_employee_no")
     inlines = (StudentRatingInline,)
+    actions = ("push_to_hikvision_device",)
+
+    @admin.action(description="Tanlanganlarni Hikvision qurilmasiga yuborish (UserInfo)")
+    def push_to_hikvision_device(self, request, queryset):
+        ok_n = 0
+        for student in queryset:
+            try:
+                res = sync_student_to_hikvision(student)
+            except Exception as exc:
+                self.message_user(
+                    request,
+                    f"{student} — xato: {exc}",
+                    level=messages.ERROR,
+                )
+                continue
+            if res.get("ok"):
+                ok_n += 1
+                self.message_user(
+                    request,
+                    f"{student} — Hikvision ga yuborildi (employeeNo={student.hikvision_employee_no}).",
+                    level=messages.SUCCESS,
+                )
+            else:
+                detail = res.get("error") or ""
+                att = res.get("attempts")
+                if att:
+                    detail = detail + " | " + json.dumps(att, ensure_ascii=False, default=str)[:4000]
+                else:
+                    detail = detail + " | " + str(res)
+                self.message_user(
+                    request,
+                    f"{student} — Hikvision rad etdi: {detail}",
+                    level=messages.WARNING,
+                )
+        if ok_n and queryset.count() > 1:
+            self.message_user(request, f"Jami muvaffaqiyatli: {ok_n} ta.", level=messages.INFO)
 
 
 @admin.register(StudentAttendance)

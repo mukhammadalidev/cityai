@@ -6,6 +6,7 @@ import {
   Drawer,
   Form,
   Input,
+  List,
   Modal,
   Popconfirm,
   Row,
@@ -40,6 +41,9 @@ import { formatDateTime, formatPhone } from "../../utils/formatters";
 import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
 import { tuitionPaymentTagProps } from "../../utils/tuitionPayment";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
+import useIsMobile from "../../hooks/useIsMobile";
+
+const { Text } = Typography;
 
 const STUDENT_STATUS = {
   active: { label: "Faol", color: "green" },
@@ -87,6 +91,7 @@ export default function StudentsPage() {
   const [parentPortalOpen, setParentPortalOpen] = useState(false);
   const [parentPortalStudentId, setParentPortalStudentId] = useState(null);
   const [parentPortalForm] = Form.useForm();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (groupFromUrl) {
@@ -419,20 +424,31 @@ export default function StudentsPage() {
     <>
       <PageHeader
         title="O‘quvchilar va davomat"
-        description="CRM: ro‘yxat. Davomat va kabinetlar tarifga qarab (Start — davomat+materiallar; Business+ — kabinetlar)."
+        description={
+          isMobile
+            ? "Ro‘yxat va kunlik davomat — telefon uchun soddalashtirilgan."
+            : "CRM: ro‘yxat. Davomat va kabinetlar tarifga qarab (Start — davomat+materiallar; Business+ — kabinetlar)."
+        }
         extra={
           <Link to="/business/student-groups">
-            <Button>O‘quv guruhlari</Button>
+            <Button block={isMobile} style={isMobile ? { width: "100%" } : undefined}>
+              O‘quv guruhlari
+            </Button>
           </Link>
         }
       />
 
-      <Space wrap style={{ marginBottom: 16 }}>
-        <span>Guruh bo‘yicha:</span>
+      <Space
+        wrap
+        direction={isMobile ? "vertical" : "horizontal"}
+        style={{ marginBottom: 16, width: isMobile ? "100%" : undefined }}
+        align={isMobile ? "stretch" : "center"}
+      >
+        <span style={{ flexShrink: 0 }}>Guruh bo‘yicha:</span>
         <Select
           allowClear
           placeholder="Barcha guruhlar"
-          style={{ minWidth: 240 }}
+          style={{ minWidth: isMobile ? "100%" : 240, width: isMobile ? "100%" : undefined }}
           value={groupFilter}
           onChange={(v) => setGroupFilter(v)}
           options={filterGroupOptions}
@@ -493,40 +509,82 @@ export default function StudentsPage() {
 
       {hasEduAttendance && stats?.by_student?.length ? (
         <Card title="O‘quvchi bo‘yicha oylik ko‘rsatkichlar" size="small" style={{ marginBottom: 16 }}>
-          <Table
-            size="small"
-            rowKey="student_id"
-            pagination={false}
-            dataSource={stats.by_student}
-            columns={[
-              {
-                title: "Ism",
-                dataIndex: "name",
-                render: (text, row) => (
-                  <Link to={`/business/students/${row.student_id}`}>{text}</Link>
-                ),
-              },
-              { title: "Guruh", dataIndex: "group_name", render: (v) => v || "—" },
-              { title: "Kunlar (belgilangan)", dataIndex: "marked_days" },
-              { title: "Keldi (+ kechikdi)", dataIndex: "present_days" },
-              { title: "Kelmadi", dataIndex: "absent_days" },
-              { title: "Sababli", dataIndex: "excused_days" },
-              {
-                title: "Foiz",
-                dataIndex: "rate_percent",
-                render: (v) => (v != null ? `${v}%` : "—"),
-              },
-            ]}
-          />
+          {isMobile ? (
+            <List
+              dataSource={stats.by_student}
+              renderItem={(row) => (
+                <List.Item key={row.student_id} style={{ padding: "12px 0", display: "block" }}>
+                  <Card size="small" styles={{ body: { padding: 12 } }}>
+                    <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                      <Link to={`/business/students/${row.student_id}`}>
+                        <Text strong style={{ fontSize: 16 }}>
+                          {row.name}
+                        </Text>
+                      </Link>
+                      <Text type="secondary">Guruh: {row.group_name || "—"}</Text>
+                      <Row gutter={[8, 8]}>
+                        <Col xs={12} sm={8}>
+                          <Statistic title="Belgilan" value={row.marked_days} />
+                        </Col>
+                        <Col xs={12} sm={8}>
+                          <Statistic title="Keldi (+kech)" value={row.present_days} />
+                        </Col>
+                        <Col xs={12} sm={8}>
+                          <Statistic title="Kelmadi" value={row.absent_days} />
+                        </Col>
+                        <Col xs={12} sm={8}>
+                          <Statistic title="Sababli" value={row.excused_days} />
+                        </Col>
+                        <Col xs={12} sm={8}>
+                          <Statistic
+                            title="Foiz"
+                            value={row.rate_percent != null ? `${row.rate_percent}%` : "—"}
+                          />
+                        </Col>
+                      </Row>
+                    </Space>
+                  </Card>
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Table
+              size="small"
+              rowKey="student_id"
+              pagination={false}
+              dataSource={stats.by_student}
+              columns={[
+                {
+                  title: "Ism",
+                  dataIndex: "name",
+                  render: (text, row) => (
+                    <Link to={`/business/students/${row.student_id}`}>{text}</Link>
+                  ),
+                },
+                { title: "Guruh", dataIndex: "group_name", render: (v) => v || "—" },
+                { title: "Kunlar (belgilangan)", dataIndex: "marked_days" },
+                { title: "Keldi (+ kechikdi)", dataIndex: "present_days" },
+                { title: "Kelmadi", dataIndex: "absent_days" },
+                { title: "Sababli", dataIndex: "excused_days" },
+                {
+                  title: "Foiz",
+                  dataIndex: "rate_percent",
+                  render: (v) => (v != null ? `${v}%` : "—"),
+                },
+              ]}
+            />
+          )}
         </Card>
       ) : null}
 
       <Tabs
         activeKey={tab}
         onChange={onTabChange}
+        centered={isMobile}
+        size={isMobile ? "large" : "middle"}
         tabBarExtraContent={
           tab === "students" ? (
-            <Button type="primary" onClick={openCreate}>
+            <Button type="primary" onClick={openCreate} size={isMobile ? "middle" : "middle"}>
               O‘quvchi qo‘shish
             </Button>
           ) : null
@@ -538,6 +596,95 @@ export default function StudentsPage() {
             children:
               students.length === 0 ? (
                 <EmptyState title="Hozircha o‘quvchi yo‘q" description="Yangi o‘quvchi qo‘shing." />
+              ) : isMobile ? (
+                <List
+                  dataSource={students}
+                  renderItem={(row) => {
+                    const p = tuitionPaymentTagProps(row);
+                    return (
+                      <List.Item key={row.id} style={{ padding: "10px 0", display: "block" }}>
+                        <Card size="small" styles={{ body: { padding: 14 } }}>
+                          <Space direction="vertical" size={10} style={{ width: "100%" }}>
+                            <div>
+                              <Link to={`/business/students/${row.id}`}>
+                                <Text strong style={{ fontSize: 16 }}>
+                                  {row.name}
+                                </Text>
+                              </Link>
+                            </div>
+                            <Text type="secondary">{formatPhone(row.phone) || "—"}</Text>
+                            <div>
+                              <Text type="secondary">Kurs: </Text>
+                              <Text>{row.course_title || "—"}</Text>
+                            </div>
+                            <div>
+                              <Text type="secondary">Guruh: </Text>
+                              <Text>{row.group_name || "—"}</Text>
+                            </div>
+                            <Space wrap>
+                              <Tag color={STUDENT_STATUS[row.status]?.color || "default"}>
+                                {STUDENT_STATUS[row.status]?.label ?? row.status}
+                              </Tag>
+                              <Tag color={p.color}>{p.children}</Tag>
+                            </Space>
+                            {row.hikvision_employee_no ? (
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                Face ID: {row.hikvision_employee_no}
+                              </Text>
+                            ) : null}
+                            {hasEduPortals ? (
+                              <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                                {row.portal_username ? (
+                                  <Text copyable style={{ fontSize: 13 }}>
+                                    Kabinet: {row.portal_username}
+                                  </Text>
+                                ) : (
+                                  <Button
+                                    size="small"
+                                    block
+                                    onClick={() => {
+                                      setPortalStudentId(row.id);
+                                      portalForm.resetFields();
+                                      setPortalOpen(true);
+                                    }}
+                                  >
+                                    Kabinet yaratish
+                                  </Button>
+                                )}
+                                <Button
+                                  size="small"
+                                  block
+                                  onClick={() => {
+                                    setParentPortalStudentId(row.id);
+                                    parentPortalForm.resetFields();
+                                    setParentPortalOpen(true);
+                                  }}
+                                >
+                                  Ota-ona login
+                                </Button>
+                              </Space>
+                            ) : null}
+                            <Space wrap style={{ width: "100%" }}>
+                              <Link to={`/business/students/${row.id}`}>
+                                <Button size="small" block={isMobile} style={{ minWidth: 88 }}>
+                                  Profil
+                                </Button>
+                              </Link>
+                              <Button size="small" type="primary" ghost block={isMobile} onClick={() => openEdit(row)}>
+                                Tahrirlash
+                              </Button>
+                              <Popconfirm title="O‘chirilsinmi?" onConfirm={() => removeStudent(row)}>
+                                <Button size="small" danger block={isMobile}>
+                                  O‘chirish
+                                </Button>
+                              </Popconfirm>
+                            </Space>
+                          </Space>
+                        </Card>
+                      </List.Item>
+                    );
+                  }}
+                />
               ) : (
                 <Table
                   rowKey="id"
@@ -555,20 +702,73 @@ export default function StudentsPage() {
                   label: "Kunlik davomat",
                   children: (
                     <Space direction="vertical" style={{ width: "100%" }} size="middle">
-                      <Space wrap>
-                        <span>Sana:</span>
-                        <DatePicker value={selectedDay} onChange={(v) => v && setSelectedDay(v)} />
+                      <Space
+                        wrap
+                        direction={isMobile ? "vertical" : "horizontal"}
+                        style={{ width: isMobile ? "100%" : undefined }}
+                        align={isMobile ? "stretch" : "center"}
+                      >
+                        <Space wrap align="center">
+                          <span>Sana:</span>
+                          <DatePicker
+                            value={selectedDay}
+                            onChange={(v) => v && setSelectedDay(v)}
+                            style={{ width: isMobile ? "100%" : undefined }}
+                          />
+                        </Space>
                         <Button
                           type="primary"
                           onClick={saveDayAttendance}
                           loading={savingDay}
                           disabled={!students.length}
+                          block={isMobile}
+                          size={isMobile ? "large" : "middle"}
                         >
                           Kun davomatini saqlash
                         </Button>
                       </Space>
                       {!students.length ? (
                         <EmptyState title="Avval o‘quvchi qo‘shing" />
+                      ) : isMobile ? (
+                        <List
+                          dataSource={students}
+                          renderItem={(row) => (
+                            <List.Item key={row.id} style={{ padding: "10px 0", display: "block" }}>
+                              <Card size="small" styles={{ body: { padding: 14 } }}>
+                                <Space direction="vertical" size={10} style={{ width: "100%" }}>
+                                  <Link to={`/business/students/${row.id}`}>
+                                    <Text strong style={{ fontSize: 16 }}>
+                                      {row.name}
+                                    </Text>
+                                  </Link>
+                                  <Text type="secondary">Guruh: {row.group_name || "—"}</Text>
+                                  {hasEduPortals ? (
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                      Ota-ona:{" "}
+                                      {row.parent_portal_last_login
+                                        ? formatDateTime(row.parent_portal_last_login)
+                                        : "—"}
+                                    </Text>
+                                  ) : null}
+                                  <div>
+                                    <Text type="secondary" style={{ display: "block", marginBottom: 6 }}>
+                                      Davomat
+                                    </Text>
+                                    <Select
+                                      style={{ width: "100%" }}
+                                      size="large"
+                                      options={ATT_OPTIONS}
+                                      value={statusByStudent[row.id] ?? "present"}
+                                      onChange={(v) =>
+                                        setStatusByStudent((prev) => ({ ...prev, [row.id]: v }))
+                                      }
+                                    />
+                                  </div>
+                                </Space>
+                              </Card>
+                            </List.Item>
+                          )}
+                        />
                       ) : (
                         <Table
                           rowKey="id"
@@ -585,6 +785,7 @@ export default function StudentsPage() {
                             {
                               title: "Ota-ona oxirgi kirishi",
                               dataIndex: "parent_portal_last_login",
+                              responsive: ["md"],
                               render: (v) => (v ? formatDateTime(v) : "—"),
                             },
                             {
@@ -614,7 +815,7 @@ export default function StudentsPage() {
         title={drawer.record ? "O‘quvchini tahrirlash" : "Yangi o‘quvchi"}
         open={drawer.open}
         onClose={() => setDrawer({ open: false, record: null })}
-        width={520}
+        width={isMobile ? "100%" : 520}
         styles={{ body: { paddingBottom: 24 } }}
         extra={
           <Space>

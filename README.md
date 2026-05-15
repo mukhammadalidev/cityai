@@ -167,9 +167,42 @@ Men sizning serveringizga ulanib deploy qila olmayman; quyidagilar tayyor:
 
 SQLite va yuklangan fayllar **volume**da saqlanadi (`app_data`, `app_media`). HTTPS uchun server oldidan **Caddy** yoki **nginx** bilan reverse proxy qo‘shing.
 
+## Hikvision FaceID Attendance Setup
+
+**Eng oddiy yo‘l (3 qadam):** [`backend/docs/HIKVISION_ODD_QADAM.md`](backend/docs/HIKVISION_ODD_QADAM.md) — bitta skript `./scripts/start-hikvision-attendance.sh`, admin da `hikvision_employee_no`, **Attendances** da «keldi».
+
+**To‘liq qo‘llanma:** [`backend/docs/HIKVISION_AUTOMATIK_DAVOMAT.md`](backend/docs/HIKVISION_AUTOMATIK_DAVOMAT.md)
+
+Hikvision turniket / FaceID qurilmasidan kelgan voqealar `apps.attendance` orqali `Attendance` jadvaliga yoziladi. Yuz rasmi yoki biometrika bazada **saqlanmaydi** — faqat raqam, vaqt va cheklangan `raw_data`.
+
+1. Hikvision va kompyuterni **bir LAN** ga ulang (masalan, qurilma `192.168.1.10`).
+2. Kompyuter va qurilma **bir xil subnet**da bo‘lsin (masalan, ikkalasi ham `192.168.1.x`).
+3. Tekshirish: `ping 192.168.1.10`
+4. Brauzerda qurilma veb-interfeysi: `http://192.168.1.10`
+5. Loyiha ildizidagi `.env` ga qo‘shing (parolni koddaga yozmang):
+
+   ```
+   HIKVISION_IP=192.168.1.10
+   HIKVISION_USERNAME=admin
+   HIKVISION_PASSWORD=your_password
+   DJANGO_ATTENDANCE_API_URL=http://127.0.0.1:8000/api/attendance/hikvision/event/
+   # ixtiyoriy: to‘g‘ri kalit bo‘lmasa 403
+   # HIKVISION_WEBHOOK_SECRET=some-secret-key
+   ```
+
+6. Migratsiya: `cd backend && source marta/bin/activate` (yoki o‘z venv) → `python manage.py makemigrations` (agar kerak bo‘lsa) → `python manage.py migrate`
+7. Admin yoki API orqali o‘quvchilarga `hikvision_employee_no` qiymatini biriktiring (Hikvisiondagi `employeeNo` bilan bir xil satr bo‘lishi mumkin). **Qurilmada odam yo‘q bo‘lsa:** admin → **Students** ro‘yxatida o‘quvchini belgilab pastdan **«Tanlanganlarni Hikvision qurilmasiga yuborish (UserInfo)»** harakatini bosing — foydalanuvchi ACS qurilmasiga `ISAPI/AccessControl/UserInfo` orqali yuboriladi (yuz shablonini alohida qurilma yoki FaceDataRecord bilan qo‘shing).
+8. Django: `python manage.py runserver`
+9. Listener (alohida terminal): `python manage.py listen_hikvision`
+10. Qurilmada yuzni o‘tkazing → Django admin: **Attendance (FaceID)** yozuvlari.
+
+**API:** `POST /api/attendance/hikvision/event/` — listener shu manzilga JSON yuboradi. `HIKVISION_WEBHOOK_SECRET` o‘rnatilgan bo‘lsa, so‘rovda `X-Hikvision-Secret` sarlavhasi majburiy.
+
+**Xavfsizlik:** qurilmani ochiq internetga chiqarmang; webhook kalitini ishlating; `.env` ni repoga qo‘shmang.
+
 ## Loyiha tuzilishi (qisqa)
 
-- **`backend/`** — Django ilovalari: `accounts`, `businesses`, `catalog`, `leads`, `bookings`, `orders`, `students`, `teachers`, `subscriptions`, `billing`, `analytics`, `knowledge`, `bot_engine` va hokazo. Telegram mantiq `botapp/`.
+- **`backend/`** — Django ilovalari: `accounts`, `businesses`, `catalog`, `leads`, `bookings`, `orders`, `students`, `attendance` (Hikvision FaceID), `teachers`, `subscriptions`, `billing`, `analytics`, `knowledge`, `bot_engine` va hokazo. Telegram mantiq `botapp/`.
 - **`frontend/`** — React: `/admin` (platforma), `/business` (kabinet), `/portal` (ta’lim rollari), ochiq sahifalar `/c/...`, `/b/...`.
 
 ## Git va GitHub

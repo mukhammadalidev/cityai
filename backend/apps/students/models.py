@@ -52,6 +52,8 @@ class Student(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="students")
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=30, blank=True)
+    # Hikvision FaceID / turniketdagi "employeeNo" — CRM dagi o‘quvchi bilan bog‘lash uchun.
+    hikvision_employee_no = models.CharField(max_length=50, unique=True, null=True, blank=True)
     notes = models.TextField(blank=True)
     face_photo = models.ImageField(upload_to="students/faces/", null=True, blank=True)
     face_consent = models.BooleanField(default=False)
