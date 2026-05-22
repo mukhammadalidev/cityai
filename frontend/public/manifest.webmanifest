@@ -1,16 +1,16 @@
 {
   "id": "/",
-  "name": "Citybot — Shahar xizmatlari",
-  "short_name": "Citybot",
-  "description": "Shahardagi xizmatlar, bizneslar va Telegram bot — bitta platformada.",
+  "name": "CityBot CRM",
+  "short_name": "CityBot",
+  "description": "O'quv markaz, fitness zal va bizneslar uchun boshqaruv platformasi.",
   "lang": "uz",
   "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#0c0f1a",
-  "background_color": "#eef1f8",
+  "theme_color": "#2563EB",
+  "background_color": "#F5F7FB",
   "categories": ["business", "productivity", "utilities"],
   "icons": [
     {

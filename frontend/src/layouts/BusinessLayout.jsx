@@ -98,7 +98,7 @@ export default function BusinessLayout() {
       <Sider width={260} collapsedWidth={0} collapsed={collapsed} breakpoint="lg" className="cs-sider" trigger={null}>
         <div className="cs-sider-inner">
           <div className="cs-sider-brand">
-            <BrandLogo height={36} className="cs-sider-brand__logo" />
+            <BrandLogo height={56} variant="onDark" className="cs-sider-brand__logo" />
             <div className="cs-sider-brand__title">Biznes kabineti</div>
             <div className="cs-sider-brand__sub">{biz?.name || "—"}</div>
           </div>

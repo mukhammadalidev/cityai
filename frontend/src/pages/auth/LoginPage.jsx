@@ -60,8 +60,8 @@ export default function LoginPage() {
 
   return (
     <Card className={`cs-auth-card${fitnessLogin ? " cs-auth-card--fitness" : ""}`} bordered={false}>
-      <div style={{ marginBottom: 12 }}>
-        <BrandLogo height={64} />
+      <div className="cs-auth-logo-wrap">
+        <BrandLogo height={72} variant="onLight" />
       </div>
       <div className="cs-auth-brand">{fitnessLogin ? "Fitness CRM" : "CityBot tizimiga kirish"}</div>
       <div className="cs-auth-tag">

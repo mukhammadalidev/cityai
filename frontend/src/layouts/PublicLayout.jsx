@@ -14,7 +14,7 @@ export default function PublicLayout() {
     <div className="cs-public-shell">
       <nav className="cs-public-nav" aria-label="Asosiy navigatsiya">
         <Link to="/" className="cs-public-nav__brand" title="CityBot CRM">
-          <BrandLogo height={34} className="cs-brand-img--public" />
+          <BrandLogo height={40} variant="onDark" />
         </Link>
         <Space wrap className="cs-public-nav__actions" size="middle">
           <a
