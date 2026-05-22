@@ -27,7 +27,31 @@ import {
 } from "lucide-react";
 import { getBusinessTypeConfig } from "../../config/businessTypes";
 
-export default function BusinessSidebar({ collapsed, businessType, plan, onNavigate }) {
+function MenuItemLabel({ label, locked, mobile }) {
+  if (!locked) return label;
+  if (mobile) {
+    return (
+      <span className="cs-menu-item-label">
+        <span className="cs-menu-item-label__text">{label}</span>
+        <span className="cs-menu-item-label__badge">
+          <Lock size={12} />
+          Premium
+        </span>
+      </span>
+    );
+  }
+  return (
+    <Space size={6} className="cs-menu-item-label--desktop">
+      <span>{label}</span>
+      <Lock size={13} />
+      <Tag color="gold" style={{ marginInlineEnd: 0 }}>
+        Premium
+      </Tag>
+    </Space>
+  );
+}
+
+export default function BusinessSidebar({ collapsed, mobile, businessType, plan, onNavigate }) {
   const cfg = getBusinessTypeConfig(businessType);
   const nav = useNavigate();
   const loc = useLocation();
@@ -47,18 +71,7 @@ export default function BusinessSidebar({ collapsed, businessType, plan, onNavig
     businessType === "taxi_delivery" ||
     businessType === "photo_video";
 
-  const withLock = (label, locked) =>
-    locked ? (
-      <Space size={6}>
-        <span>{label}</span>
-        <Lock size={13} />
-        <Tag color="gold" style={{ marginInlineEnd: 0 }}>
-          Premium
-        </Tag>
-      </Space>
-    ) : (
-      label
-    );
+  const withLock = (label, locked) => <MenuItemLabel label={label} locked={locked} mobile={mobile} />;
 
   const items = isRestaurant
     ? [
@@ -146,8 +159,8 @@ export default function BusinessSidebar({ collapsed, businessType, plan, onNavig
       theme="dark"
       mode="inline"
       selectedKeys={[selected]}
-      inlineCollapsed={collapsed}
-      className="cs-sider-menu"
+      inlineCollapsed={mobile ? false : collapsed}
+      className={`cs-sider-menu${mobile ? " cs-sider-menu--mobile" : ""}`}
       style={{ border: "none", background: "transparent", flex: 1, overflow: "auto" }}
       onClick={({ key }) => {
         const target = items.find((m) => m.key === key);

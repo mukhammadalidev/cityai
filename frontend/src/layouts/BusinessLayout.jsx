@@ -72,6 +72,10 @@ export default function BusinessLayout() {
     return () => window.removeEventListener(BUSINESS_DATA_CHANGED, h);
   }, [reloadPlan]);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [loc.pathname]);
+
   if (loc.pathname !== "/business/select" && !bid) {
     return <Navigate to="/business/select" replace />;
   }
@@ -115,14 +119,18 @@ export default function BusinessLayout() {
           adminOverride={isSuperAdmin}
           onMenuClick={() => setMobileOpen(true)}
         />
-        <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)}>
-          <div className="cs-mobile-sidebar__inner">
-            <div className="cs-sider-brand">
-              <BrandLogo height={34} className="cs-sider-brand__logo" />
-              <div className="cs-sider-brand__title">Menyu</div>
-            </div>
-            <BusinessSidebar businessType={biz?.business_type} plan={plan} onNavigate={() => setMobileOpen(false)} />
-          </div>
+        <MobileSidebar
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          title="Biznes kabineti"
+          subtitle={biz?.name}
+        >
+          <BusinessSidebar
+            mobile
+            businessType={biz?.business_type}
+            plan={plan}
+            onNavigate={() => setMobileOpen(false)}
+          />
         </MobileSidebar>
         <div className="cs-page">
           <Outlet

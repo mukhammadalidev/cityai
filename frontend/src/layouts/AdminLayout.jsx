@@ -1,6 +1,6 @@
 import { Layout, Button } from "antd";
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "../components/layout/AdminSidebar";
 import Topbar from "../components/layout/Topbar";
 import MobileSidebar from "../components/layout/MobileSidebar";
@@ -9,8 +9,13 @@ import BrandLogo from "../components/ui/BrandLogo";
 const { Sider } = Layout;
 
 export default function AdminLayout() {
+  const loc = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [loc.pathname]);
 
   return (
     <Layout className="cs-app-layout">
@@ -31,14 +36,13 @@ export default function AdminLayout() {
       </Sider>
       <Layout className="cs-content">
         <Topbar title="Admin panel" subtitle="Platforma boshqaruvi" onMenuClick={() => setMobileOpen(true)} />
-        <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)}>
-          <div className="cs-mobile-sidebar__inner">
-            <div className="cs-sider-brand">
-              <BrandLogo height={34} className="cs-sider-brand__logo" />
-              <div className="cs-sider-brand__title">City Services AI</div>
-            </div>
-            <AdminSidebar onNavigate={() => setMobileOpen(false)} />
-          </div>
+        <MobileSidebar
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          title="City Services AI"
+          subtitle="Super administrator"
+        >
+          <AdminSidebar mobile onNavigate={() => setMobileOpen(false)} />
         </MobileSidebar>
         <div className="cs-page">
           <Outlet />
