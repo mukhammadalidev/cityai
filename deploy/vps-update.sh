@@ -10,6 +10,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# docker compose v2 (plugin) yoki eski docker-compose v1
+if docker compose version >/dev/null 2>&1; then
+  DC="docker compose"
+else
+  DC="docker-compose"
+fi
+
 echo "== Tarmoq (git va docker build uchun) =="
 if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
   echo "   OK: ping 8.8.8.8"
@@ -48,28 +55,28 @@ echo "== git pull =="
 git pull
 
 echo "== Docker: backend keshsiz build (sekin internetda 15–40+ daqiqa — jim turishi normal) =="
-docker-compose build --no-cache backend
+$DC build --no-cache backend
 
 echo "== Docker: frontend keshsiz build (npm + vite — yana uzoq bo‘lishi mumkin) =="
-docker-compose build --no-cache frontend
+$DC build --no-cache frontend
 
 echo "== qayta ishga tushirish (yangi image majburan konteynerga) =="
-docker-compose up -d --force-recreate --remove-orphans
+$DC up -d --force-recreate --remove-orphans
 
 echo "== Django migratsiyalar =="
-docker-compose exec -T backend python manage.py migrate --noinput
+$DC exec -T backend python manage.py migrate --noinput
 
 echo "== API health (backend ishlayaptimi?) =="
 if curl -sfS --max-time 12 "http://127.0.0.1:8080/api/health/" | head -c 200; then
   echo ""
   echo "OK: /api/health/ javob berdi"
 else
-  echo "XATO: /api/health/ ishlamadi. Log: docker-compose logs backend --tail 80"
+  echo "XATO: /api/health/ ishlamadi. Log: $DC logs backend --tail 80"
   exit 1
 fi
 
 echo "== tayyor. Brauzerda Cmd+Shift+R / Ctrl+Shift+R =="
-docker-compose ps
+$DC ps
 
 echo ""
 echo "== VPSda yangi UI bormi? (build vaqti HTML oxirida) =="

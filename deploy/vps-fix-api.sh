@@ -4,8 +4,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-DC="docker compose"
-command -v docker-compose >/dev/null 2>&1 && DC="docker-compose" || true
+if docker compose version >/dev/null 2>&1; then
+  DC="docker compose"
+else
+  DC="docker-compose"
+fi
 
 echo "== .env \$ muammosi (uvpn4) =="
 [ -f .env ] && grep -q '\$' .env && mv -v .env .env.local || echo "OK"
