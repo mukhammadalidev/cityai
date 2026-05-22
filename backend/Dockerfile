@@ -29,4 +29,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 ENTRYPOINT ["/deploy-entrypoint.sh"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# SQLite: bir nechta worker yozuvlarni bloklaydi — productionda 1 worker.
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "1", "--timeout", "120"]

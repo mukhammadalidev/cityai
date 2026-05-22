@@ -39,6 +39,7 @@ import {
 } from "../../services/studentService";
 import { formatDateTime, formatPhone } from "../../utils/formatters";
 import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
+import { formatApiError } from "../../utils/apiErrorMessage";
 import { tuitionPaymentTagProps } from "../../utils/tuitionPayment";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -238,6 +239,10 @@ export default function StudentsPage() {
   };
 
   const saveStudent = async () => {
+    if (!businessId) {
+      message.error("Biznes tanlanmagan. Yuqoridagi menyudan biznesni tanlang.");
+      return;
+    }
     const v = await form.validateFields();
     const payload = {
       ...v,
@@ -259,7 +264,8 @@ export default function StudentsPage() {
       loadStats();
       notifyBusinessDataChanged();
     } catch (e) {
-      message.error(e.response?.data?.detail || "Xatolik.");
+      console.error("[Students] save failed", e.response?.status, e.response?.data);
+      message.error(formatApiError(e, "O‘quvchini saqlab bo‘lmadi."));
     }
   };
 

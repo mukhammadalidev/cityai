@@ -18,6 +18,14 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     console.error("API error:", error.response?.data || error.message);
+    if (!error.response) {
+      console.error(
+        "[API] Serverga ulanib bo‘lmadi. Backend ishlamayapti yoki tarmoq xatosi (502/503).",
+      );
+    } else if (error.response.status >= 500) {
+      const detail = error.response.data?.detail || error.response.data;
+      console.error("[API] Server xatosi:", detail || error.response.status);
+    }
     if (error.response?.status === 401) {
       clearSession();
       const p = typeof window !== "undefined" ? window.location.pathname : "";
