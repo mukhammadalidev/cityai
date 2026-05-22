@@ -175,7 +175,7 @@ export default function BusinessSidebar({ collapsed, mobile, businessType, plan,
       }}
       items={items.map((m) => ({
         key: m.key,
-        icon: <m.icon size={18} />,
+        icon: <m.icon size={17} strokeWidth={2} />,
         label: m.label,
       }))}
     />

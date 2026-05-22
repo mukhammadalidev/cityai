@@ -2,11 +2,14 @@ import logo from "../../assets/citybot-logo.png";
 
 /**
  * @param {"onDark"|"onLight"|"plain"} variant
- *   onDark — qorong‘u sidebar / mobil menyu (oq karta fon)
- *   onLight — login, landing (yengil soya)
- *   plain — fon yo‘q
+ * @param {boolean} compact — sidebar: kichik logo, to‘liq kenglik emas
  */
-export default function BrandLogo({ height = 52, className = "", variant = "onLight" }) {
+export default function BrandLogo({
+  height = 52,
+  className = "",
+  variant = "onLight",
+  compact = false,
+}) {
   const wrap =
     variant === "onDark"
       ? "cs-brand-logo-wrap cs-brand-logo-wrap--on-dark"
@@ -15,7 +18,7 @@ export default function BrandLogo({ height = 52, className = "", variant = "onLi
         : "cs-brand-logo-wrap cs-brand-logo-wrap--on-light";
 
   return (
-    <span className={`${wrap} ${className}`.trim()}>
+    <span className={`${wrap}${compact ? " cs-brand-logo-wrap--compact" : ""} ${className}`.trim()}>
       <img
         src={logo}
         alt="CityBot CRM"

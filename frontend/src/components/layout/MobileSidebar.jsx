@@ -32,7 +32,7 @@ export default function MobileSidebar({ open, onClose, title, subtitle, children
     >
       <div className="cs-mobile-sidebar__head">
         <div className="cs-mobile-sidebar__head-text">
-          <BrandLogo height={48} variant="onDark" className="cs-mobile-sidebar__logo" />
+          <BrandLogo height={34} variant="onDark" compact className="cs-mobile-sidebar__logo" />
           {subtitle ? <div className="cs-mobile-sidebar__sub">{subtitle}</div> : null}
           {subtitle ? <div className="cs-mobile-sidebar__sub">{subtitle}</div> : null}
         </div>

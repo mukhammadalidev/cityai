@@ -1,4 +1,4 @@
-import { Layout, Button } from "antd";
+import { Layout } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import BusinessSidebar from "../components/layout/BusinessSidebar";
@@ -98,15 +98,16 @@ export default function BusinessLayout() {
       <Sider width={260} collapsedWidth={0} collapsed={collapsed} breakpoint="lg" className="cs-sider" trigger={null}>
         <div className="cs-sider-inner">
           <div className="cs-sider-brand">
-            <BrandLogo height={56} variant="onDark" className="cs-sider-brand__logo" />
-            <div className="cs-sider-brand__title">Biznes kabineti</div>
-            <div className="cs-sider-brand__sub">{biz?.name || "—"}</div>
+            <BrandLogo height={32} variant="onDark" compact className="cs-sider-brand__logo" />
+            <p className="cs-sider-brand__biz" title={biz?.name}>
+              {biz?.name || "Biznes tanlang"}
+            </p>
           </div>
           <BusinessSidebar collapsed={collapsed} businessType={biz?.business_type} plan={plan} />
           <div className="cs-sider-footer">
-            <Button type="link" style={{ color: "rgba(255,255,255,0.65)", padding: 0 }} onClick={() => setCollapsed(!collapsed)}>
-              {collapsed ? "»" : "«"}
-            </Button>
+            <button type="button" className="cs-sider-collapse" onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? "Menyuni ochish" : "Menyuni yig‘ish"}
+            </button>
           </div>
         </div>
       </Sider>

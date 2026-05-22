@@ -45,7 +45,7 @@ export default function AdminSidebar({ collapsed, mobile, onNavigate }) {
       }}
       items={items.map((m) => ({
         key: m.key,
-        icon: <m.icon size={18} />,
+        icon: <m.icon size={17} strokeWidth={2} />,
         label: m.label,
       }))}
     />
