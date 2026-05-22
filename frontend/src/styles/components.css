@@ -456,8 +456,8 @@
   box-shadow: 0 4px 20px rgba(91, 82, 240, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Drawer / Modal shaffof */
-.ant-drawer .ant-drawer-content {
+/* Drawer / Modal shaffof (mobil sidebar bundan mustasno) */
+.ant-drawer:not(.cs-mobile-sidebar) .ant-drawer-content {
   background: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: blur(28px) saturate(1.4);
   -webkit-backdrop-filter: blur(28px) saturate(1.4);

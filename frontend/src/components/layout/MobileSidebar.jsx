@@ -16,8 +16,17 @@ export default function MobileSidebar({ open, onClose, title, subtitle, children
       maskClosable
       styles={{
         header: { display: "none" },
-        body: { padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" },
-        content: { background: "#0b1220" },
+        body: {
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          background: "transparent",
+        },
+        content: {
+          background: "linear-gradient(180deg, #020617 0%, #0f172a 100%)",
+          color: "#e2e8f0",
+        },
       }}
     >
       <div className="cs-mobile-sidebar__head">
