@@ -55,7 +55,12 @@ else
 fi
 
 echo ""
-echo "== 7) Tavsiya (backend Exited / 502 / 400) =="
+echo "== 7) Backend unhealthy (healthcheck) =="
+echo "  docker compose logs backend --tail 100"
+echo "  docker compose up -d --force-recreate backend"
+echo ""
+echo "== 8) Tavsiya (backend Exited / 502 / 400) =="
+echo "  [ -f .env ] && grep -q '\\\$' .env && mv .env .env.local"
 echo "  docker compose up -d --force-recreate --remove-orphans"
 echo "  docker compose exec backend python manage.py migrate --noinput"
 echo "  deploy/stack.env da DJANGO_ALLOWED_HOSTS=citybot.uz,www.citybot.uz,185.191.141.207,frontend,backend"

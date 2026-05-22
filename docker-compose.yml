@@ -5,9 +5,6 @@
 # 2. docker compose up -d --build
 # 3. Superuser: docker compose exec backend python manage.py createsuperuser
 #
-# Juda eski docker-compose faqat 3.3 (yoki 2.2) ni qabul qiladi — 3.8 "unsupported" beradi.
-version: "3.3"
-
 services:
   backend:
     build:
@@ -25,16 +22,18 @@ services:
     volumes:
       - app_data:/data
       - app_media:/app/media
+    # HTTP /api/health/ ba’zan ALLOWED_HOSTS yoki sekin migrate tufayli muvaffaqiyatsiz —
+    # faqat 8000-port ochiqmi tekshiramiz (gunicorn tayyor).
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')\"",
+          "python -c \"import socket; s=socket.create_connection(('127.0.0.1',8000),3); s.close()\"",
         ]
-      interval: 15s
-      timeout: 8s
-      retries: 5
-      start_period: 90s
+      interval: 20s
+      timeout: 5s
+      retries: 8
+      start_period: 120s
     restart: always
 
   frontend:
@@ -52,8 +51,7 @@ services:
     ports:
       - "127.0.0.1:8080:80"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     restart: always
 
 volumes:
