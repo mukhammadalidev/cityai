@@ -25,7 +25,7 @@ export default function LandingNavbar() {
     <header className="lp-nav">
       <div className="lp-container lp-nav__inner">
         <a href="#bosh" className="lp-nav__brand" onClick={(e) => { e.preventDefault(); scrollTo("#bosh"); }}>
-          <BrandLogo height={44} className="lp-nav__brand-img" />
+          <BrandLogo height={40} variant="onDark" />
         </a>
 
         <ul className="lp-nav__links">

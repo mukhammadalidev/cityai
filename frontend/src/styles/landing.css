@@ -92,13 +92,29 @@
   letter-spacing: -0.02em;
 }
 
-.lp-nav__brand-img {
-  display: block;
-  height: 44px;
-  width: auto;
-  max-width: min(200px, 42vw);
-  object-fit: contain;
-  filter: drop-shadow(0 2px 12px rgba(37, 99, 235, 0.25));
+.lp-nav__brand {
+  padding: 4px 0;
+}
+
+.lp-nav__brand .cs-brand-logo-wrap--on-dark {
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: linear-gradient(165deg, #ffffff 0%, #f0f7ff 100%);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.lp-nav__brand .cs-brand-logo__img {
+  height: 40px !important;
+  max-width: min(180px, 40vw);
+}
+
+.lp-footer .cs-brand-logo-wrap--on-dark {
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.lp-footer .cs-brand-logo__img {
+  height: 36px !important;
 }
 
 .lp-nav__links {

@@ -10,7 +10,7 @@ export default function LandingFooter() {
         <div className="lp-footer__grid">
           <div>
             <a href="#bosh" className="lp-nav__brand" onClick={(e) => { e.preventDefault(); scrollTo("#bosh"); }}>
-              <BrandLogo height={40} className="lp-nav__brand-img" />
+              <BrandLogo height={36} variant="onDark" />
             </a>
             <p style={{ color: "var(--lp-muted)", marginTop: 12, fontSize: "0.9rem", lineHeight: 1.6 }}>
               O&apos;quv markazlar, fitness zallar va bizneslar uchun zamonaviy boshqaruv platformasi.

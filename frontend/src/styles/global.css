@@ -100,6 +100,16 @@ video {
   background: rgba(6, 182, 212, 0.1);
 }
 
+.cs-auth-logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.cs-auth-logo-wrap .cs-brand-logo__img {
+  max-width: min(280px, 85vw);
+}
+
 .cs-auth-card {
   position: relative;
   z-index: 1;

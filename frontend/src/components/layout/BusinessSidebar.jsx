@@ -99,6 +99,7 @@ export default function BusinessSidebar({ collapsed, mobile, businessType, plan,
           ? [
               { key: "/business/students", icon: GraduationCap, label: "O‘quvchilar va davomat" },
               { key: "/business/student-payments", icon: CreditCard, label: "To'lovlar" },
+              { key: "/business/edu-reports", icon: BarChart3, label: "Hisobotlar" },
               { key: "/business/student-ratings", icon: Trophy, label: "Baholar va reyting" },
               { key: "/business/student-groups", icon: Layers, label: "O‘quv guruhlari" },
               { key: "/business/teachers", icon: IdCard, label: "Ustozlar" },
