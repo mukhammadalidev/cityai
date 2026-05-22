@@ -25,6 +25,16 @@ services:
     volumes:
       - app_data:/data
       - app_media:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')\"",
+        ]
+      interval: 15s
+      timeout: 8s
+      retries: 5
+      start_period: 90s
     restart: always
 
   frontend:
@@ -42,7 +52,8 @@ services:
     ports:
       - "127.0.0.1:8080:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
 
 volumes:

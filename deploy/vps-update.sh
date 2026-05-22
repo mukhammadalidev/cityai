@@ -59,6 +59,15 @@ docker-compose up -d --force-recreate --remove-orphans
 echo "== Django migratsiyalar =="
 docker-compose exec -T backend python manage.py migrate --noinput
 
+echo "== API health (backend ishlayaptimi?) =="
+if curl -sfS --max-time 12 "http://127.0.0.1:8080/api/health/" | head -c 200; then
+  echo ""
+  echo "OK: /api/health/ javob berdi"
+else
+  echo "XATO: /api/health/ ishlamadi. Log: docker-compose logs backend --tail 80"
+  exit 1
+fi
+
 echo "== tayyor. Brauzerda Cmd+Shift+R / Ctrl+Shift+R =="
 docker-compose ps
 
