@@ -1,7 +1,18 @@
-import { Card, Col, Row, Table, Typography, message } from "antd";
+import { Col, Row, Table, Typography, message } from "antd";
+import {
+  Building2,
+  FolderTree,
+  MapPin,
+  MessageSquare,
+  Package,
+  Receipt,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import PageHeader from "../../components/ui/PageHeader";
+import DashboardHero from "../../components/ui/DashboardHero";
+import SectionCard from "../../components/ui/SectionCard";
 import StatCard from "../../components/ui/StatCard";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import LeadsChart from "../../components/charts/LeadsChart";
@@ -81,61 +92,118 @@ export default function PlatformDashboardPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Platforma" title="Boshqaruv paneli" description="Shahar xizmatlari AI — yig‘ma ko‘rsatkichlar." />
+      <DashboardHero
+        eyebrow="CityBot"
+        title="CityBot boshqaruv paneli"
+        description="Shahar xizmatlari, bizneslar, arizalar va obunalarni bitta joydan boshqaring."
+      />
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Jami shaharlar" value={data?.cities_total ?? "—"} />
+          <StatCard
+            title="Jami shaharlar"
+            value={data?.cities_total ?? "—"}
+            hint="Platformadagi shaharlar"
+            icon={MapPin}
+            iconColor="#2563EB"
+            iconBg="rgba(37, 99, 235, 0.1)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Kategoriyalar" value={data?.categories_total ?? 0} />
+          <StatCard
+            title="Kategoriyalar"
+            value={data?.categories_total ?? 0}
+            hint="Xizmat yo‘nalishlari"
+            icon={FolderTree}
+            iconColor="#7C3AED"
+            iconBg="rgba(124, 58, 237, 0.1)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Jami bizneslar" value={bizTotal} />
+          <StatCard
+            title="Jami bizneslar"
+            value={bizTotal}
+            hint="Ro‘yxatdan o‘tgan"
+            icon={Building2}
+            iconColor="#0EA5E9"
+            iconBg="rgba(14, 165, 233, 0.1)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Aktiv bizneslar" value={activeBizCount} />
+          <StatCard
+            title="Aktiv bizneslar"
+            value={activeBizCount}
+            hint="Ishlayotgan"
+            icon={TrendingUp}
+            iconColor="#16A34A"
+            iconBg="rgba(22, 163, 74, 0.1)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Jami leadlar" value={data?.leads_total ?? 0} />
+          <StatCard
+            title="Jami leadlar"
+            value={data?.leads_total ?? 0}
+            hint="Barcha murojaatlar"
+            icon={MessageSquare}
+            iconColor="#F59E0B"
+            iconBg="rgba(245, 158, 11, 0.12)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Telegram userlar" value={data?.customers_total ?? 0} />
+          <StatCard
+            title="Telegram userlar"
+            value={data?.customers_total ?? 0}
+            hint="Bot foydalanuvchilari"
+            icon={Users}
+            iconColor="#06B6D4"
+            iconBg="rgba(6, 182, 212, 0.12)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Aktiv obunalar" value={data?.subscriptions_active ?? 0} />
+          <StatCard
+            title="Aktiv obunalar"
+            value={data?.subscriptions_active ?? 0}
+            hint="To‘lovli tariflar"
+            icon={Receipt}
+            iconColor="#2563EB"
+            iconBg="rgba(37, 99, 235, 0.1)"
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Mahsulotlar / pozitsiyalar" value={data?.items_total ?? 0} />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Oylik daromad (demo)" value={formatPrice(0)} />
+          <StatCard
+            title="Mahsulotlar"
+            value={data?.items_total ?? 0}
+            hint="Kurs, menyu, mashina…"
+            icon={Package}
+            iconColor="#64748B"
+            iconBg="rgba(100, 116, 139, 0.12)"
+          />
         </Col>
       </Row>
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
-          <Card title="Leadlar kunlar bo‘yicha">
+          <SectionCard title="Leadlar kunlar bo‘yicha">
             <LeadsChart data={data?.leads_by_day} />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Daromad (demo)">
+          <SectionCard title="Daromad (demo)">
             <RevenueChart data={[]} />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Bizneslar kategoriya bo‘yicha">
+          <SectionCard title="Bizneslar kategoriya bo‘yicha">
             <CategoryChart data={data?.businesses_by_category} />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Obunalar (tarif bo‘yicha)">
+          <SectionCard title="Obunalar (tarif bo‘yicha)">
             <ConversionChart data={planPie.length ? planPie : [{ name: "—", value: 1 }]} />
-          </Card>
+          </SectionCard>
         </Col>
       </Row>
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={8}>
-          <Card title="Oxirgi bizneslar">
+          <SectionCard title="Oxirgi bizneslar">
             <Table
               size="small"
               rowKey="id"
@@ -154,10 +222,10 @@ export default function PlatformDashboardPage() {
                 },
               ]}
             />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="Oxirgi leadlar">
+          <SectionCard title="Oxirgi leadlar">
             <Table
               size="small"
               rowKey="id"
@@ -168,10 +236,10 @@ export default function PlatformDashboardPage() {
                 { title: "Telefon", dataIndex: "phone" },
               ]}
             />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="To‘lov muddati yaqin (7 kun)">
+          <SectionCard title="To‘lov muddati yaqin (7 kun)">
             <Table
               size="small"
               rowKey="id"
@@ -188,7 +256,7 @@ export default function PlatformDashboardPage() {
                 },
               ]}
             />
-          </Card>
+          </SectionCard>
         </Col>
       </Row>
       <Typography.Paragraph type="secondary" style={{ marginTop: 24 }}>

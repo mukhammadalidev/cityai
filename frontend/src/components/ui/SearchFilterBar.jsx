@@ -1,9 +1,9 @@
 import { Input, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
-export default function SearchFilterBar({ placeholder, value, onChange, extra }) {
+export default function SearchFilterBar({ placeholder, value, onChange, extra, embedded }) {
   return (
-    <Space wrap style={{ marginBottom: 16, width: "100%" }}>
+    <Space wrap style={{ marginBottom: embedded ? 0 : 16, width: "100%" }}>
       <Input
         allowClear
         prefix={<SearchOutlined />}

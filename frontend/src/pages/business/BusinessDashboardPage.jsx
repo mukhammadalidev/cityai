@@ -1,9 +1,13 @@
-import { Card, Col, Row, Statistic, Table, Typography, message } from "antd";
+import { Button, Col, Row, Table, Typography, message } from "antd";
+import { CreditCard, Receipt, Users, Wallet } from "lucide-react";
 import EducationCoursesChart from "../../components/charts/EducationCoursesChart";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
-import PageHeader from "../../components/ui/PageHeader";
+import { Link, Navigate, useOutletContext } from "react-router-dom";
+import DashboardHero from "../../components/ui/DashboardHero";
+import SectionCard from "../../components/ui/SectionCard";
+import StatCard from "../../components/ui/StatCard";
 import LoadingScreen from "../../components/ui/LoadingScreen";
+import { getBusinessTypeConfig } from "../../config/businessTypes";
 import DynamicBusinessDashboard from "../../components/dynamic/DynamicBusinessDashboard";
 import LeadsChart from "../../components/charts/LeadsChart";
 import UsageChart from "../../components/charts/UsageChart";
@@ -13,18 +17,21 @@ import { getBusinessAnalytics } from "../../services/analyticsService";
 import { getLeads } from "../../services/leadService";
 import { getAIUsage } from "../../services/aiUsageService";
 import { getBookings } from "../../services/bookingService";
-import { getFitnessLedgerSummary } from "../../services/membershipService";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED } from "../../utils/businessEvents";
-import { BOOKING_STATUS } from "../../config/statusConfigs";
+import { BOOKING_STATUS, LEAD_STATUS } from "../../config/statusConfigs";
 import StatusTag from "../../components/ui/StatusTag";
 import { formatDate, formatDateTime, formatPhone, formatPrice, formatUsd } from "../../utils/formatters";
+import { monthLabelUz } from "../../utils/monthNamesUz";
 
 export default function BusinessDashboardPage() {
   const { businessId, business, plan } = useOutletContext();
-  const isRestaurant = business?.business_type === "restaurant";
-  const isEducation = business?.business_type === "education_center";
-  const isFitnessCenter = business?.business_type === "fitness_center";
+  const bt = business?.business_type;
+  const isRestaurant = bt === "restaurant";
+  const isEducation = bt === "education_center";
+  const isFitnessCenter = bt === "fitness_center";
+  const typeCfg = getBusinessTypeConfig(bt);
+
   const [dash, setDash] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [allLeads, setAllLeads] = useState([]);
@@ -32,7 +39,6 @@ export default function BusinessDashboardPage() {
   const [aiList, setAiList] = useState([]);
   const [aiMonthSummary, setAiMonthSummary] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
-  const [fitnessLedger, setFitnessLedger] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -42,14 +48,12 @@ export default function BusinessDashboardPage() {
       const tasks = [getBusinessDashboard(businessId), getLeads({ business_id: businessId }), getAIUsage({ business_id: businessId })];
       if (isRestaurant) {
         tasks.push(getBookings({ business_id: businessId, booking_type: "table_booking" }));
-      } else if (isFitnessCenter) {
-        tasks.push(getBookings({ business_id: businessId, booking_type: "trial_lesson" }));
       }
       const results = await Promise.all(tasks);
       const d = results[0];
       const leads = results[1];
       const aiPack = results[2];
-      const bookings = isRestaurant || isFitnessCenter ? results[3] : null;
+      const bookings = isRestaurant ? results[3] : null;
 
       let a = null;
       if (plan?.has_analytics) {
@@ -66,19 +70,9 @@ export default function BusinessDashboardPage() {
       setLeadRows(leads.slice(0, 8));
       setAiList(aiPack.rows || []);
       setAiMonthSummary(aiPack.monthSummary || null);
-      setRecentBookings(isRestaurant || isFitnessCenter ? (bookings || []).slice(0, 8) : []);
-      if (isFitnessCenter) {
-        try {
-          const ledger = await getFitnessLedgerSummary({ business_id: businessId });
-          setFitnessLedger(ledger);
-        } catch {
-          setFitnessLedger(null);
-        }
-      } else {
-        setFitnessLedger(null);
-      }
+      setRecentBookings(isRestaurant ? (bookings || []).slice(0, 8) : []);
     } catch {
-      message.error("Ma’lumotlarni yuklashda xatolik yuz berdi.");
+      message.error("Ma'lumotlarni yuklashda xatolik yuz berdi.");
       setDash(null);
       setAnalytics(null);
       setAllLeads([]);
@@ -86,11 +80,10 @@ export default function BusinessDashboardPage() {
       setAiList([]);
       setAiMonthSummary(null);
       setRecentBookings([]);
-      setFitnessLedger(null);
     } finally {
       setLoading(false);
     }
-  }, [businessId, isRestaurant, isFitnessCenter, plan?.has_analytics]);
+  }, [businessId, isRestaurant, plan?.has_analytics]);
 
   useEffect(() => {
     load();
@@ -134,281 +127,265 @@ export default function BusinessDashboardPage() {
   }, [aiList]);
 
   if (!businessId) return null;
+  if (isFitnessCenter) {
+    return <Navigate to="/business/fitness/dashboard" replace />;
+  }
   if (loading && !dash) return <LoadingScreen />;
 
-  const stats = {
-    ...(dash || {}),
-    ...(analytics || {}),
-    ...(fitnessLedger ? { fitness_ledger: fitnessLedger } : {}),
-  };
+  const stats = { ...(dash || {}), ...(analytics || {}) };
+
+  const quickLinks = (
+    <div className="cs-dash-quick-links">
+      <Link to="/business/leads">
+        <Button>{typeCfg.leadsLabel || "Lidlar"}</Button>
+      </Link>
+      <Link to="/business/bookings">
+        <Button>{typeCfg.bookingsLabel || "Bronlar"}</Button>
+      </Link>
+      <Link to="/business/items">
+        <Button>{typeCfg.itemsLabel || "Katalog"}</Button>
+      </Link>
+      {isEducation ? (
+        <Link to="/business/student-payments">
+          <Button icon={<CreditCard size={14} />}>Oylik to&apos;lovlarni ko&apos;rish</Button>
+        </Link>
+      ) : null}
+      {typeCfg.ordersLabel ? (
+        <Link to="/business/orders">
+          <Button>{typeCfg.ordersLabel}</Button>
+        </Link>
+      ) : null}
+    </div>
+  );
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description="Biznesingizning real vaqtdagi ko‘rinishi."
-        extra={
-          isFitnessCenter ? (
-            <Link to="/business/fitness/guide">
-              <Typography.Text style={{ color: "#0891b2", fontWeight: 600 }}>
-                Qo‘llanma →
-              </Typography.Text>
-            </Link>
-          ) : null
-        }
+      <DashboardHero
+        eyebrow={typeCfg.label}
+        title={business?.name || typeCfg.dashboardTitle}
+        description="Arizalar, bronlar, buyurtmalar va mijozlarni kuzatib boring."
+        gradient={typeCfg.gradient}
+        actions={quickLinks}
       />
-      <DynamicBusinessDashboard stats={stats} businessType={business?.business_type} />
-      {isEducation ? (
+
+      <DynamicBusinessDashboard stats={stats} businessType={bt} />
+
+      {isEducation && (stats.edu_monthly_paid_count != null || stats.edu_monthly_income) ? (
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-          <Col xs={24} sm={8}>
-            <Link to="/business/students">
-              <Card size="small" hoverable title="Abonement: to‘langan">
-                <Statistic
+          <Col xs={24} sm={12} lg={6}>
+            <Link to="/business/student-payments">
+              <StatCard
+                title="Shu oy to'laganlar"
+                value={stats.edu_monthly_paid_count ?? 0}
+                hint={`${stats.edu_monthly_month ? monthLabelUz(stats.edu_monthly_month) : ""} ${stats.edu_monthly_year || ""}`}
+                icon={Wallet}
+                iconColor="#16A34A"
+                iconBg="rgba(22, 163, 74, 0.1)"
+              />
+            </Link>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Link to="/business/student-payments">
+              <StatCard
+                title="Shu oy to'lamaganlar"
+                value={stats.edu_monthly_unpaid_count ?? 0}
+                icon={Receipt}
+                iconColor="#DC2626"
+                iconBg="rgba(220, 38, 38, 0.1)"
+              />
+            </Link>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Link to="/business/student-payments">
+              <StatCard
+                title="Qarzdorlar"
+                value={stats.edu_monthly_debt_count ?? 0}
+                icon={CreditCard}
+                iconColor="#64748B"
+                iconBg="rgba(100, 116, 139, 0.12)"
+              />
+            </Link>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Link to="/business/student-payments">
+              <StatCard
+                title="Shu oy tushumi"
+                value={formatPrice(stats.edu_monthly_income || 0)}
+                icon={Wallet}
+                iconColor="#7C3AED"
+                iconBg="rgba(124, 58, 237, 0.1)"
+              />
+            </Link>
+          </Col>
+        </Row>
+      ) : null}
+      {isEducation ? (
+        <>
+          <div className="cs-dash-section-label">O&apos;quv markaz — abonement (muddat)</div>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={8}>
+              <Link to="/business/students">
+                <StatCard
+                  title="To'langan"
                   value={stats.edu_tuition_paid_active ?? 0}
-                  suffix="faol o‘q."
-                  valueStyle={{ color: "#16a34a", fontWeight: 800 }}
+                  suffix="faol o'q."
+                  hint="Muddat bugun yoki keyin"
+                  icon={Wallet}
+                  iconColor="#16A34A"
+                  iconBg="rgba(22, 163, 74, 0.1)"
                 />
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  Muddat bugun yoki keyin
-                </Typography.Text>
-              </Card>
-            </Link>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Link to="/business/students">
-              <Card size="small" hoverable title="Abonement: to‘lanmagan">
-                <Statistic
+              </Link>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Link to="/business/students">
+                <StatCard
+                  title="To'lanmagan"
                   value={stats.edu_tuition_unpaid_active ?? 0}
-                  suffix="faol o‘q."
-                  valueStyle={{ color: "#dc2626", fontWeight: 800 }}
+                  suffix="faol o'q."
+                  hint="Muddat o'tgan"
+                  icon={Receipt}
+                  iconColor="#DC2626"
+                  iconBg="rgba(220, 38, 38, 0.1)"
                 />
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  Muddat o‘tgan
-                </Typography.Text>
-              </Card>
-            </Link>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Link to="/business/students">
-              <Card size="small" hoverable title="Abonement: kiritilmagan">
-                <Statistic
+              </Link>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Link to="/business/students">
+                <StatCard
+                  title="Kiritilmagan"
                   value={stats.edu_tuition_unset_active ?? 0}
-                  suffix="faol o‘q."
-                  valueStyle={{ color: "#64748b", fontWeight: 800 }}
+                  suffix="faol o'q."
+                  hint="Muddat qo'yilmagan"
+                  icon={Users}
+                  iconColor="#64748B"
+                  iconBg="rgba(100, 116, 139, 0.12)"
                 />
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  Muddat qo‘yilmagan
-                </Typography.Text>
-              </Card>
-            </Link>
-          </Col>
-        </Row>
+              </Link>
+            </Col>
+          </Row>
+          <SectionCard title="Ota-ona kabineti faolligi" className="cs-mt-16">
+            <Typography.Paragraph style={{ marginBottom: 4 }}>
+              Oxirgi kirish: <b>{formatDateTime(stats.edu_parent_portal_last_login)}</b>
+            </Typography.Paragraph>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Ota-ona portali sahifasiga kirganda vaqt yangilanadi.
+            </Typography.Text>
+          </SectionCard>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} lg={12}>
+              <SectionCard title="Kurslar bo'yicha o'quvchilar">
+                <EducationCoursesChart data={stats?.edu_course_breakdown} metric="students" />
+              </SectionCard>
+            </Col>
+            <Col xs={24} lg={12}>
+              <SectionCard title="Kurs narxi × faol o'quvchi">
+                <EducationCoursesChart data={stats?.edu_course_breakdown} metric="subtotal" />
+              </SectionCard>
+            </Col>
+          </Row>
+          {stats?.edu_course_breakdown?.length ? (
+            <SectionCard title="Kurslar bo'yicha batafsil" className="cs-mt-16">
+              <div className="cs-table-scroll">
+                <Table
+                  size="small"
+                  rowKey="course_id"
+                  dataSource={stats.edu_course_breakdown}
+                  pagination={false}
+                  scroll={{ x: 560 }}
+                  columns={[
+                    { title: "Kurs", dataIndex: "title" },
+                    { title: "O'quvchilar", dataIndex: "students", width: 100 },
+                    {
+                      title: "Narx",
+                      dataIndex: "price",
+                      render: (v, r) => formatPrice(v, r.currency || "UZS"),
+                    },
+                    {
+                      title: "Jami",
+                      dataIndex: "subtotal",
+                      render: (v, r) => formatPrice(v, r.currency || "UZS"),
+                    },
+                  ]}
+                />
+              </div>
+            </SectionCard>
+          ) : null}
+        </>
       ) : null}
-      {isEducation ? (
-        <Card
-          size="small"
-          style={{ marginTop: 16 }}
-          title="Ota-ona kabineti faolligi"
-        >
-          <Typography.Paragraph style={{ marginBottom: 4 }}>
-            Oxirgi ota-ona kirishi:{" "}
-            <b>{formatDateTime(stats.edu_parent_portal_last_login)}</b>
-          </Typography.Paragraph>
-          <Typography.Paragraph type="secondary" style={{ marginBottom: 0, fontSize: 12 }}>
-            Ota-ona portali sahifasiga kirganda so‘nggi kirish vaqti yangilanadi.
-          </Typography.Paragraph>
-        </Card>
-      ) : null}
-      {isEducation ? (
-        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-          <Col xs={24} lg={12}>
-            <Card title="Analitika: kurslar bo‘yicha o‘quvchilar soni">
-              <EducationCoursesChart data={stats?.edu_course_breakdown} metric="students" />
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Analitika: kurs narxi × faol o‘quvchi (yig‘indi)">
-              <EducationCoursesChart data={stats?.edu_course_breakdown} metric="subtotal" />
-            </Card>
-          </Col>
-        </Row>
-      ) : null}
-      {isEducation ? (
-        <Typography.Paragraph type="secondary" style={{ marginTop: 8 }}>
-          Summa: faol o‘quvchilar biriktirilgan kurs narxlari yig‘indisi. Oy/yil — shu davrda yaratilgan o‘quvchilar
-          (kurs biriktirilgan) narxlari yig‘indisi. Haqiqiy to‘lovlar hisobi alohida.
-        </Typography.Paragraph>
-      ) : null}
-      {isEducation && stats?.edu_course_breakdown?.length ? (
-        <Card title="Kurslar bo‘yicha batafsil" style={{ marginTop: 16 }}>
-          <Table
-            size="small"
-            rowKey="course_id"
-            dataSource={stats.edu_course_breakdown}
-            pagination={false}
-            columns={[
-              { title: "Kurs", dataIndex: "title" },
-              { title: "Faol o‘quvchilar", dataIndex: "students" },
-              {
-                title: "Kurs narxi",
-                dataIndex: "price",
-                render: (v, r) => formatPrice(v, r.currency || "UZS"),
-              },
-              {
-                title: "Jami (narx × son)",
-                dataIndex: "subtotal",
-                render: (v, r) => formatPrice(v, r.currency || "UZS"),
-              },
-            ]}
-          />
-        </Card>
-      ) : null}
+
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
-          <Card title="Leadlar (kunlar bo‘yicha)">
+          <SectionCard title={typeCfg.leadsLabel || "Leadlar"} extra={<Link to="/business/leads">Barchasi →</Link>}>
             <LeadsChart data={leadsByDay} />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Leadlar turlari">
+          <SectionCard title="Leadlar turlari">
             <ConversionChart data={leadTypePie.length ? leadTypePie : [{ name: "—", value: 1 }]} />
-          </Card>
+          </SectionCard>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="AI tokenlar (kunlar)">
+          <SectionCard title="AI ishlatilishi">
             {aiMonthSummary ? (
-              <Typography.Paragraph type="secondary" style={{ marginBottom: 8 }}>
-                Joriy oy ({aiMonthSummary.month}): taxminiy AI sarfi {formatUsd(aiMonthSummary.total_estimated_cost_usd)} ·{" "}
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 8, fontSize: 13 }}>
+                {aiMonthSummary.month}: {formatUsd(aiMonthSummary.total_estimated_cost_usd)} ·{" "}
                 {aiMonthSummary.total_tokens} token
               </Typography.Paragraph>
             ) : null}
             <UsageChart data={tokenBars} />
-          </Card>
+          </SectionCard>
         </Col>
       </Row>
-      {isRestaurant && (
-        <Card title="Oxirgi bronlar" style={{ marginTop: 16 }}>
-          <Table
-            size="small"
-            rowKey="id"
-            dataSource={recentBookings}
-            pagination={false}
-            columns={[
-              { title: "Ism", dataIndex: "name" },
-              { title: "Telefon", dataIndex: "phone", render: formatPhone },
-              { title: "Kishi soni", dataIndex: "guests_count", render: (v) => v ?? "—" },
-              { title: "Sana", dataIndex: "preferred_date", render: formatDate },
-              { title: "Vaqt", dataIndex: "preferred_time" },
-              {
-                title: "Status",
-                dataIndex: "status",
-                render: (v) => <StatusTag map={BOOKING_STATUS} value={v} />,
-              },
-            ]}
-          />
-        </Card>
-      )}
-      {isFitnessCenter && fitnessLedger ? (
-        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-          <Col xs={24} lg={12}>
-            <Card title="Qarzdor klientlar" size="small">
-              {fitnessLedger.debtors?.length ? (
-                <Table
-                  size="small"
-                  rowKey="membership_id"
-                  pagination={false}
-                  dataSource={fitnessLedger.debtors}
-                  columns={[
-                    { title: "Klient", dataIndex: "client_name" },
-                    { title: "Abonement", dataIndex: "title", render: (v) => v || "—" },
-                    {
-                      title: "Qarz",
-                      dataIndex: "debt",
-                      render: (v) => (
-                        <Typography.Text type="danger">
-                          {formatPrice(Number(v || 0))}
-                        </Typography.Text>
-                      ),
-                    },
-                  ]}
-                />
-              ) : (
-                <Typography.Text type="secondary">Qarzdor yo‘q.</Typography.Text>
-              )}
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Muddati tugayotgan abonementlar" size="small">
-              {fitnessLedger.expiring?.length ? (
-                <Table
-                  size="small"
-                  rowKey="membership_id"
-                  pagination={false}
-                  dataSource={fitnessLedger.expiring}
-                  columns={[
-                    { title: "Klient", dataIndex: "client_name" },
-                    { title: "Abonement", dataIndex: "title", render: (v) => v || "—" },
-                    { title: "Tugash", dataIndex: "end_date" },
-                    {
-                      title: "Qolgan kun",
-                      dataIndex: "days_left",
-                      render: (v) => (
-                        <Typography.Text type={Number(v) <= 2 ? "danger" : "warning"}>
-                          {v ?? "—"}
-                        </Typography.Text>
-                      ),
-                    },
-                  ]}
-                />
-              ) : (
-                <Typography.Text type="secondary">Yaqin muddatli abonement yo‘q.</Typography.Text>
-              )}
-            </Card>
-          </Col>
-        </Row>
+
+      {isRestaurant && recentBookings.length ? (
+        <SectionCard
+          title={typeCfg.bookingsLabel || "Oxirgi bronlar"}
+          extra={<Link to="/business/bookings">Barchasi →</Link>}
+          className="cs-mt-16"
+        >
+          <div className="cs-table-scroll">
+            <Table
+              size="small"
+              rowKey="id"
+              dataSource={recentBookings}
+              pagination={false}
+              scroll={{ x: 640 }}
+              columns={[
+                { title: "Ism", dataIndex: "name" },
+                { title: "Telefon", dataIndex: "phone", render: formatPhone },
+                { title: "Kishi", dataIndex: "guests_count", width: 70 },
+                { title: "Sana", dataIndex: "preferred_date", render: formatDate },
+                { title: "Holat", dataIndex: "status", render: (v) => <StatusTag map={BOOKING_STATUS} value={v} /> },
+              ]}
+            />
+          </div>
+        </SectionCard>
       ) : null}
-      {isFitnessCenter && (
-        <Card title="Oxirgi sinov mashg‘ulot arizalari" style={{ marginTop: 16 }}>
-          <Table
-            size="small"
-            rowKey="id"
-            dataSource={recentBookings}
-            pagination={false}
-            columns={[
-              { title: "Ism", dataIndex: "name" },
-              { title: "Telefon", dataIndex: "phone", render: formatPhone },
-              {
-                title: "Yo‘nalish",
-                key: "training_type",
-                render: (_, r) => r.metadata?.training_type || "—",
-              },
-              { title: "Sana", dataIndex: "preferred_date", render: formatDate },
-              { title: "Vaqt", dataIndex: "preferred_time" },
-              {
-                title: "Status",
-                dataIndex: "status",
-                render: (v) => <StatusTag map={BOOKING_STATUS} value={v} />,
-              },
-            ]}
-          />
-        </Card>
-      )}
-      <Card title="Oxirgi leadlar" style={{ marginTop: 16 }}>
-        <Table
-          size="small"
-          rowKey="id"
-          dataSource={leadRows}
-          pagination={false}
-          columns={[
-            { title: "Ism", dataIndex: "name" },
-            { title: "Telefon", dataIndex: "phone" },
-            { title: "Holat", dataIndex: "status" },
-          ]}
-        />
-      </Card>
-      <Typography.Paragraph type="secondary" style={{ marginTop: 16 }}>
-        * Grafiklar joriy biznes filtriga asoslangan.
-      </Typography.Paragraph>
+
+      <SectionCard
+        title={`Oxirgi ${(typeCfg.leadsLabel || "lidlar").toLowerCase()}`}
+        extra={<Link to="/business/leads">Barchasi →</Link>}
+        className="cs-mt-16"
+      >
+        {leadRows.length ? (
+          <div className="cs-table-scroll">
+            <Table
+              size="small"
+              rowKey="id"
+              dataSource={leadRows}
+              pagination={false}
+              scroll={{ x: 520 }}
+              columns={[
+                { title: "Ism", dataIndex: "name" },
+                { title: "Telefon", dataIndex: "phone", render: formatPhone },
+                { title: "Holat", dataIndex: "status", render: (v) => <StatusTag map={LEAD_STATUS} value={v} /> },
+              ]}
+            />
+          </div>
+        ) : (
+          <Typography.Text type="secondary">Hozircha lid yo&apos;q.</Typography.Text>
+        )}
+      </SectionCard>
     </>
   );
 }

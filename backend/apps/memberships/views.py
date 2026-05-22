@@ -20,12 +20,19 @@ from .models import (
     ClientAttendance,
     ClientMembership,
     ClientPayment,
+    FitnessClassEnrollment,
+    FitnessClassSession,
+    FitnessTrainer,
 )
+from .notifications import notify_member_created, notify_payment_received
 from .serializers import (
     BusinessClientSerializer,
     ClientAttendanceSerializer,
     ClientMembershipSerializer,
     ClientPaymentSerializer,
+    FitnessClassEnrollmentSerializer,
+    FitnessClassSessionSerializer,
+    FitnessTrainerSerializer,
 )
 
 
@@ -93,7 +100,11 @@ class BusinessClientViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         biz = serializer.validated_data["business"]
         _ensure_business_access(self.request, biz.id)
-        serializer.save()
+        client = serializer.save()
+        try:
+            notify_member_created(client)
+        except Exception:
+            pass
 
     def perform_update(self, serializer):
         biz = serializer.validated_data.get("business", serializer.instance.business)
@@ -192,6 +203,10 @@ class ClientPaymentViewSet(viewsets.ModelViewSet):
             )
             membership.recalc_payment_status()
             membership.save(update_fields=["paid_amount", "payment_status", "updated_at"])
+        try:
+            notify_payment_received(payment)
+        except Exception:
+            pass
 
     @transaction.atomic
     def perform_update(self, serializer):
@@ -264,6 +279,14 @@ class ClientAttendanceViewSet(viewsets.ModelViewSet):
         _ensure_business_access(self.request, biz.id)
         serializer.save()
 
+    @action(detail=True, methods=["post"], url_path="check-out")
+    def check_out(self, request, pk=None):
+        att = self.get_object()
+        _ensure_business_access(request, att.business_id)
+        att.check_out_time = timezone.now()
+        att.save(update_fields=["check_out_time"])
+        return Response(ClientAttendanceSerializer(att, context={"request": request}).data)
+
     def perform_update(self, serializer):
         biz = serializer.validated_data.get("business", serializer.instance.business)
         _ensure_business_access(self.request, biz.id)
@@ -272,6 +295,134 @@ class ClientAttendanceViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         _ensure_business_access(self.request, instance.business_id)
         instance.delete()
+
+
+class FitnessDebtorsView(APIView):
+    """GET /api/debtors/ — qarzdorlar ro'yxati."""
+
+    def get(self, request):
+        business_id = request.query_params.get("business_id")
+        if not business_id:
+            raise ValidationError({"business_id": "business_id majburiy."})
+        business_id_i = int(business_id)
+        _ensure_business_access(request, business_id_i)
+        debt_qs = (
+            ClientMembership.objects.filter(business_id=business_id_i)
+            .filter(expected_amount__gt=F("paid_amount"))
+            .select_related("client")
+            .order_by("-id")
+        )
+        return Response(
+            {
+                "debtors": [
+                    {
+                        "member_id": m.client_id,
+                        "membership_id": m.id,
+                        "member": m.client_id,
+                        "member_name": m.client.full_name,
+                        "phone": m.client.phone,
+                        "total_amount": str(m.expected_amount),
+                        "paid_amount": str(m.paid_amount),
+                        "debt_amount": str(m.debt_amount),
+                        "due_date": m.end_date.isoformat() if m.end_date else None,
+                        "status": m.payment_status,
+                    }
+                    for m in debt_qs
+                ]
+            }
+        )
+
+
+class FitnessTrainerViewSet(viewsets.ModelViewSet):
+    serializer_class = FitnessTrainerSerializer
+
+    def get_queryset(self):
+        qs = FitnessTrainer.objects.select_related("business")
+        business_id = self.request.query_params.get("business_id")
+        status_param = self.request.query_params.get("status")
+        search = self.request.query_params.get("search")
+        if business_id:
+            qs = qs.filter(business_id=business_id)
+        if status_param:
+            qs = qs.filter(status=status_param)
+        if search:
+            qs = qs.filter(Q(full_name__icontains=search) | Q(phone__icontains=search))
+        qs = _scope_to_user(qs, self.request)
+        return qs.order_by("full_name", "id")
+
+    def perform_create(self, serializer):
+        biz = serializer.validated_data["business"]
+        _ensure_business_access(self.request, biz.id)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        biz = serializer.validated_data.get("business", serializer.instance.business)
+        _ensure_business_access(self.request, biz.id)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        _ensure_business_access(self.request, instance.business_id)
+        instance.delete()
+
+
+class FitnessClassSessionViewSet(viewsets.ModelViewSet):
+    serializer_class = FitnessClassSessionSerializer
+
+    def get_queryset(self):
+        qs = FitnessClassSession.objects.select_related("business", "trainer").prefetch_related(
+            "enrollments__client"
+        )
+        business_id = self.request.query_params.get("business_id")
+        trainer_id = self.request.query_params.get("trainer_id")
+        session_date = self.request.query_params.get("date")
+        if business_id:
+            qs = qs.filter(business_id=business_id)
+        if trainer_id:
+            qs = qs.filter(trainer_id=trainer_id)
+        if session_date:
+            qs = qs.filter(session_date=session_date)
+        qs = _scope_to_user(qs, self.request)
+        return qs.order_by("session_date", "start_time", "id")
+
+    def perform_create(self, serializer):
+        biz = serializer.validated_data["business"]
+        _ensure_business_access(self.request, biz.id)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        biz = serializer.validated_data.get("business", serializer.instance.business)
+        _ensure_business_access(self.request, biz.id)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        _ensure_business_access(self.request, instance.business_id)
+        instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="enroll")
+    def enroll(self, request, pk=None):
+        session = self.get_object()
+        _ensure_business_access(request, session.business_id)
+        client_id = request.data.get("client_id") or request.data.get("member_id")
+        if not client_id:
+            raise ValidationError({"client_id": "client_id majburiy."})
+        client = BusinessClient.objects.filter(pk=client_id, business_id=session.business_id).first()
+        if not client:
+            raise NotFound("A'zo topilmadi.")
+        if session.current_members >= session.max_members:
+            raise ValidationError("Mashg'ulot to'ldi.")
+        enrollment, created = FitnessClassEnrollment.objects.get_or_create(session=session, client=client)
+        return Response(
+            FitnessClassEnrollmentSerializer(enrollment).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["post"], url_path="unenroll")
+    def unenroll(self, request, pk=None):
+        session = self.get_object()
+        _ensure_business_access(request, session.business_id)
+        client_id = request.data.get("client_id") or request.data.get("member_id")
+        FitnessClassEnrollment.objects.filter(session=session, client_id=client_id).delete()
+        return Response({"ok": True})
 
 
 class FitnessAbonementsView(APIView):

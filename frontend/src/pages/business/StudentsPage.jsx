@@ -456,7 +456,7 @@ export default function StudentsPage() {
       </Space>
 
       {hasEduAttendance ? (
-        <Card size="small" style={{ marginBottom: 16 }} loading={statsLoading}>
+        <Card size="small" className="cs-glass-list-card" style={{ marginBottom: 16 }} loading={statsLoading}>
           <Row gutter={[16, 16]} align="middle">
             <Col xs={24} sm={12} md={6}>
               <Statistic title="O‘quvchilar" value={stats?.totals?.students ?? students.length} />
@@ -499,7 +499,7 @@ export default function StudentsPage() {
           </Row>
         </Card>
       ) : (
-        <Card size="small" style={{ marginBottom: 16 }}>
+        <Card size="small" className="cs-glass-list-card" style={{ marginBottom: 16 }}>
           <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
             Davomat moduli joriy tarifda yo‘q.{" "}
             <Link to="/business/billing">Billing</Link> orqali Start yoki yuqori tarifga o‘ting.
@@ -514,7 +514,7 @@ export default function StudentsPage() {
               dataSource={stats.by_student}
               renderItem={(row) => (
                 <List.Item key={row.student_id} style={{ padding: "12px 0", display: "block" }}>
-                  <Card size="small" styles={{ body: { padding: 12 } }}>
+                  <Card size="small" className="cs-glass-list-card" styles={{ body: { padding: 12 } }}>
                     <Space direction="vertical" size={8} style={{ width: "100%" }}>
                       <Link to={`/business/students/${row.student_id}`}>
                         <Text strong style={{ fontSize: 16 }}>
@@ -603,7 +603,7 @@ export default function StudentsPage() {
                     const p = tuitionPaymentTagProps(row);
                     return (
                       <List.Item key={row.id} style={{ padding: "10px 0", display: "block" }}>
-                        <Card size="small" styles={{ body: { padding: 14 } }}>
+                        <Card size="small" className="cs-glass-list-card" styles={{ body: { padding: 14 } }}>
                           <Space direction="vertical" size={10} style={{ width: "100%" }}>
                             <div>
                               <Link to={`/business/students/${row.id}`}>
@@ -627,11 +627,6 @@ export default function StudentsPage() {
                               </Tag>
                               <Tag color={p.color}>{p.children}</Tag>
                             </Space>
-                            {row.hikvision_employee_no ? (
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                Face ID: {row.hikvision_employee_no}
-                              </Text>
-                            ) : null}
                             {hasEduPortals ? (
                               <Space direction="vertical" size={6} style={{ width: "100%" }}>
                                 {row.portal_username ? (
@@ -734,7 +729,7 @@ export default function StudentsPage() {
                           dataSource={students}
                           renderItem={(row) => (
                             <List.Item key={row.id} style={{ padding: "10px 0", display: "block" }}>
-                              <Card size="small" styles={{ body: { padding: 14 } }}>
+                              <Card size="small" className="cs-glass-list-card" styles={{ body: { padding: 14 } }}>
                                 <Space direction="vertical" size={10} style={{ width: "100%" }}>
                                   <Link to={`/business/students/${row.id}`}>
                                     <Text strong style={{ fontSize: 16 }}>

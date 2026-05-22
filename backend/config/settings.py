@@ -74,7 +74,6 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.teachers",
     "apps.students",
-    "apps.attendance",
     "apps.edu_quizzes",
     "apps.memberships",
 ]

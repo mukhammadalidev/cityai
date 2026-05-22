@@ -1,0 +1,87 @@
+/**
+ * Premium shaffof (glassmorphism) qatlam — barcha kabinet sahifalari uchun.
+ */
+
+:root {
+  --cs-glass-bg: rgba(255, 255, 255, 0.52);
+  --cs-glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --cs-glass-bg-soft: rgba(255, 255, 255, 0.35);
+  --cs-glass-border: rgba(255, 255, 255, 0.62);
+  --cs-glass-border-subtle: rgba(255, 255, 255, 0.38);
+  --cs-glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --cs-glass-shadow-hover: 0 16px 48px rgba(79, 70, 229, 0.12), 0 4px 16px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --cs-glass-blur: blur(22px) saturate(1.45);
+  --cs-glass-blur-lg: blur(32px) saturate(1.5);
+  --cs-glass-dark-bg: rgba(10, 14, 26, 0.72);
+  --cs-glass-dark-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Fon — premium mesh + yumshoq “orb”lar */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+  opacity: 0.55;
+}
+
+body::before {
+  width: min(520px, 90vw);
+  height: min(520px, 90vw);
+  top: -12%;
+  right: -8%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, transparent 70%);
+}
+
+body::after {
+  width: min(440px, 85vw);
+  height: min(440px, 85vw);
+  bottom: -10%;
+  left: -6%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.35) 0%, transparent 68%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Umumiy shaffof panel */
+.cs-glass,
+.cs-glass-surface {
+  background: var(--cs-glass-bg) !important;
+  backdrop-filter: var(--cs-glass-blur);
+  -webkit-backdrop-filter: var(--cs-glass-blur);
+  border: 1px solid var(--cs-glass-border) !important;
+  box-shadow: var(--cs-glass-shadow) !important;
+  border-radius: var(--cs-radius) !important;
+}
+
+.cs-glass-strong {
+  background: var(--cs-glass-bg-strong) !important;
+  backdrop-filter: var(--cs-glass-blur-lg);
+  -webkit-backdrop-filter: var(--cs-glass-blur-lg);
+}
+
+.cs-glass:hover {
+  box-shadow: var(--cs-glass-shadow-hover) !important;
+}
+
+/* Mobil ro‘yxat kartochkalari */
+.cs-glass-list-card.ant-card {
+  background: var(--cs-glass-bg-strong) !important;
+  backdrop-filter: var(--cs-glass-blur);
+  -webkit-backdrop-filter: var(--cs-glass-blur);
+  border: 1px solid var(--cs-glass-border) !important;
+  box-shadow: var(--cs-glass-shadow) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cs-glass-list-card.ant-card:active {
+  transform: scale(0.995);
+}

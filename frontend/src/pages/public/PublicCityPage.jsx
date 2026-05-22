@@ -58,10 +58,11 @@ export default function PublicCityPage() {
     <div>
       <section className="cs-public-hero cs-public-hero--city">
         <Typography.Title level={1} style={{ color: "#fff", marginBottom: 8 }}>
-          {city.name}
+          Shahardagi xizmatlarni tez va oson toping
         </Typography.Title>
-        <Typography.Paragraph style={{ color: "rgba(255,255,255,0.85)", maxWidth: 560 }}>
-          {city.description || "Shahar xizmatlari va bizneslarni qidiring."}
+        <Typography.Paragraph style={{ color: "rgba(255,255,255,0.9)", maxWidth: 620, fontSize: 16 }}>
+          Restoran, o&apos;quv markaz, fitness zal, avtosalon va boshqa xizmatlar bitta platformada.
+          {city.name ? ` · ${city.name}` : ""}
         </Typography.Paragraph>
         <Input
           className="cs-public-hero-search"

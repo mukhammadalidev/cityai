@@ -1,1 +1,0 @@
-# FaceID (Hikvision) davomat ilovasi

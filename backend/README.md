@@ -19,7 +19,7 @@
 | analytics | AIUsage, platform/biznes analitikasi |
 | marketing | Marketing kontent (demo generator) |
 | billing | Hisob-fakturalar |
-| attendance | Hikvision FaceID avtomatik davomat (`Attendance`), webhook |
+| memberships | Fitness CRM: a'zolar, abonementlar, to'lovlar, davomat, trenerlar, jadval |
 
 ## API (qisqacha)
 
@@ -31,6 +31,8 @@
 - `GET/POST /api/leads/` (yaratish ochiq — bot uchun)
 - `GET /api/analytics/platform/`, `GET /api/analytics/business/{id}/`
 - `GET /api/category-types/`
-- `POST /api/attendance/hikvision/event/` — Hikvision listener (FaceID) webhook; `AllowAny`, ixtiyoriy `X-Hikvision-Secret`
+- Fitness: `GET/POST /api/members/`, `/api/subscriptions/`, `/api/payments/`, `/api/debtors/`, `/api/trainers/`, `/api/schedules/`, `GET /api/reports/dashboard/`
 
 To‘liq ro‘yxat uchun `config/urls.py` ni ko‘ring.
+
+Demo: `python manage.py seed_fitness_data`

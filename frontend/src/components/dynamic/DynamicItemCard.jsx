@@ -79,21 +79,31 @@ export default function DynamicItemCard({ item, businessType, onClick }) {
 
   return (
     <Card
-      className="cs-card-hover"
+      className="cs-premium-item-card cs-card-hover"
       hoverable
       onClick={onClick}
       cover={
         cover ? (
-          <img
-            src={cover}
-            alt={item.title}
-            style={{ height: 160, objectFit: "cover" }}
-          />
-        ) : undefined
+          <img src={cover} alt={item.title} />
+        ) : (
+          <div
+            style={{
+              height: 180,
+              background: "var(--gradient-soft)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--muted)",
+              fontSize: 13,
+            }}
+          >
+            Rasm yo&apos;q
+          </div>
+        )
       }
-      title={item.title}
+      title={<span style={{ fontWeight: 700 }}>{item.title}</span>}
     >
-      <div style={{ fontWeight: 700, marginBottom: 8 }}>{formatPrice(item.price, item.currency)}</div>
+      <div className="cs-premium-item-card__price">{formatPrice(item.price, item.currency)}</div>
       {extra}
     </Card>
   );

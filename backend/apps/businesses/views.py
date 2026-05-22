@@ -13,6 +13,8 @@ from apps.bookings.models import Booking
 from apps.catalog.models import Item
 from apps.leads.models import Lead
 from apps.orders.models import Order
+from apps.students.models import Student, StudentGroup, StudentMonthlyPayment
+from apps.teachers.models import Teacher
 
 from .models import Business
 from .serializers import BusinessSerializer
@@ -114,9 +116,6 @@ class BusinessViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def dashboard(self, request, pk=None):
         from django.utils import timezone
-
-        from apps.students.models import Student, StudentGroup
-        from apps.teachers.models import Teacher
 
         business = self.get_object()
         if not can_edit_business(request.user, business) and request.user.role != User.Role.SUPER_ADMIN:
@@ -239,6 +238,31 @@ class BusinessViewSet(viewsets.ModelViewSet):
                 .first()
             )
             data["edu_parent_portal_last_login"] = parent_last_login
+
+            cur_year = now.year
+            cur_month = now.month
+            mp_qs = StudentMonthlyPayment.objects.filter(
+                business=business, year=cur_year, month=cur_month
+            )
+            active_count = active_st.count()
+            by_st = {row["status"]: row["c"] for row in mp_qs.values("status").annotate(c=Count("id"))}
+            paid_c = by_st.get(StudentMonthlyPayment.Status.PAID, 0)
+            partial_c = by_st.get(StudentMonthlyPayment.Status.PARTIAL, 0)
+            debt_c = by_st.get(StudentMonthlyPayment.Status.DEBT, 0)
+            unpaid_explicit = by_st.get(StudentMonthlyPayment.Status.UNPAID, 0)
+            with_record = paid_c + partial_c + debt_c + unpaid_explicit
+            data["edu_monthly_year"] = cur_year
+            data["edu_monthly_month"] = cur_month
+            data["edu_monthly_paid_count"] = paid_c
+            data["edu_monthly_partial_count"] = partial_c
+            data["edu_monthly_debt_count"] = debt_c
+            data["edu_monthly_unpaid_count"] = max(0, active_count - with_record) + unpaid_explicit
+            data["edu_monthly_income"] = str(
+                mp_qs.aggregate(s=Coalesce(Sum("paid_amount"), Decimal("0")))["s"]
+            )
+            data["edu_monthly_incomplete_count"] = (
+                data["edu_monthly_unpaid_count"] + partial_c + debt_c
+            )
         return Response(data)
 
     @action(detail=False, methods=["get"], url_path=r"slug/(?P<slug>[^/.]+)")

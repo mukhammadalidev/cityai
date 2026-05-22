@@ -1,6 +1,16 @@
 import { Card, Col, Row, Statistic, Typography } from "antd";
+import {
+  CalendarCheck,
+  Car,
+  GraduationCap,
+  MessageSquare,
+  Package,
+  ShoppingBag,
+  UtensilsCrossed,
+} from "lucide-react";
 import StatCard from "../ui/StatCard";
 import BotMenuPreview from "./BotMenuPreview";
+import { getBusinessTypeConfig } from "../../config/businessTypes";
 import { formatPrice } from "../../utils/formatters";
 
 function FitnessStatCard({ title, value, hint, color, suffix }) {
@@ -28,6 +38,7 @@ function fmtNum(v) {
 }
 
 export default function DynamicBusinessDashboard({ stats, businessType }) {
+  const cfg = getBusinessTypeConfig(businessType);
   const isRestaurant = businessType === "restaurant";
   const isAuto = businessType === "auto_salon";
   const isEducation = businessType === "education_center";
@@ -39,22 +50,22 @@ export default function DynamicBusinessDashboard({ stats, businessType }) {
       <>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Bugungi bronlar" value={stats?.bookings_today ?? 0} />
+            <StatCard title="Bugungi bronlar" value={stats?.bookings_today ?? 0} icon={CalendarCheck} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Yangi bronlar" value={stats?.bookings_new ?? 0} />
+            <StatCard title="Yangi bronlar" value={stats?.bookings_new ?? 0} icon={MessageSquare} iconColor="#2563EB" iconBg="rgba(37, 99, 235, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Tasdiqlangan bronlar" value={stats?.bookings_confirmed ?? 0} />
+            <StatCard title="Tasdiqlangan" value={stats?.bookings_confirmed ?? 0} icon={CalendarCheck} iconColor="#16A34A" iconBg="rgba(22, 163, 74, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Bekor qilingan bronlar" value={stats?.bookings_cancelled ?? 0} />
+            <StatCard title="Bekor qilingan" value={stats?.bookings_cancelled ?? 0} icon={CalendarCheck} iconColor="#DC2626" iconBg="rgba(220, 38, 38, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Menyu soni" value={stats?.items_total ?? stats?.items_active ?? 0} />
+            <StatCard title="Menyu" value={stats?.items_total ?? stats?.items_active ?? 0} icon={UtensilsCrossed} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Buyurtmalar" value={stats?.orders_total ?? stats?.orders_new ?? 0} />
+            <StatCard title="Buyurtmalar" value={stats?.orders_total ?? stats?.orders_new ?? 0} icon={ShoppingBag} iconColor="#F59E0B" iconBg="rgba(245, 158, 11, 0.12)" />
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
@@ -71,22 +82,22 @@ export default function DynamicBusinessDashboard({ stats, businessType }) {
       <>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Bugungi bronlar" value={stats?.bookings_today ?? 0} />
+            <StatCard title="Bugungi bronlar" value={stats?.bookings_today ?? 0} icon={CalendarCheck} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Test drive" value={stats?.bookings_test_drive ?? 0} />
+            <StatCard title={cfg.bookingsLabel || "Test drive"} value={stats?.bookings_test_drive ?? 0} icon={Car} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Kredit so‘rovlari" value={stats?.leads_credit ?? 0} />
+            <StatCard title="Kredit so'rovlari" value={stats?.leads_credit ?? 0} icon={MessageSquare} iconColor="#2563EB" iconBg="rgba(37, 99, 235, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Trade-in" value={stats?.leads_trade_in ?? 0} />
+            <StatCard title="Trade-in" value={stats?.leads_trade_in ?? 0} icon={MessageSquare} iconColor="#7C3AED" iconBg="rgba(124, 58, 237, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Faol mashinalar" value={stats?.items_active ?? 0} />
+            <StatCard title="Faol mashinalar" value={stats?.items_active ?? 0} icon={Car} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Sotilgan" value={stats?.items_sold ?? 0} />
+            <StatCard title="Sotilgan" value={stats?.items_sold ?? 0} icon={Car} iconColor="#64748B" iconBg="rgba(100, 116, 139, 0.12)" />
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
@@ -106,28 +117,28 @@ export default function DynamicBusinessDashboard({ stats, businessType }) {
       <>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Faol o‘quvchilar" value={stats?.edu_students_active ?? 0} />
+            <StatCard title="Faol o'quvchilar" value={stats?.edu_students_active ?? 0} icon={GraduationCap} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Jami o‘quvchilar" value={stats?.edu_students_total ?? 0} />
+            <StatCard title="Jami o'quvchilar" value={stats?.edu_students_total ?? 0} icon={GraduationCap} iconColor="#64748B" iconBg="rgba(100, 116, 139, 0.12)" />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="O‘quv guruhlari" value={stats?.edu_groups_total ?? 0} />
+            <StatCard title="Guruhlar" value={stats?.edu_groups_total ?? 0} icon={GraduationCap} iconColor="#2563EB" iconBg="rgba(37, 99, 235, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Faol ustozlar" value={stats?.edu_teachers_active ?? 0} />
+            <StatCard title="Ustozlar" value={stats?.edu_teachers_active ?? 0} icon={GraduationCap} iconColor="#16A34A" iconBg="rgba(22, 163, 74, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Faol kurslar (pozitsiya)" value={stats?.items_active ?? 0} />
+            <StatCard title={cfg.itemsLabel || "Kurslar"} value={stats?.items_active ?? 0} icon={Package} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Sinov darslar (bron)" value={stats?.bookings_trial_lesson ?? 0} />
+            <StatCard title={cfg.bookingsLabel || "Sinov darslar"} value={stats?.bookings_trial_lesson ?? 0} icon={CalendarCheck} iconColor="#06B6D4" iconBg="rgba(6, 182, 212, 0.12)" />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Yangi lidlar" value={stats?.leads_new ?? 0} />
+            <StatCard title={cfg.leadsLabel || "Yangi lidlar"} value={stats?.leads_new ?? 0} icon={MessageSquare} iconColor="#F59E0B" iconBg="rgba(245, 158, 11, 0.12)" />
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard title="Shu oyda yangi o‘quvchi" value={stats?.edu_students_new_month ?? 0} />
+            <StatCard title="Yangi o'quvchi (oy)" value={stats?.edu_students_new_month ?? 0} icon={GraduationCap} iconColor="#7C3AED" iconBg="rgba(124, 58, 237, 0.1)" />
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
@@ -327,16 +338,16 @@ export default function DynamicBusinessDashboard({ stats, businessType }) {
       <>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Yangi buyurtmalar" value={stats?.orders_new ?? 0} />
+            <StatCard title="Yangi buyurtmalar" value={stats?.orders_new ?? 0} icon={ShoppingBag} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Buyurtmalar (jami)" value={stats?.orders_total ?? 0} />
+            <StatCard title="Buyurtmalar (jami)" value={stats?.orders_total ?? 0} icon={ShoppingBag} iconColor="#2563EB" iconBg="rgba(37, 99, 235, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Faol mahsulotlar" value={stats?.items_active ?? 0} />
+            <StatCard title={cfg.itemsLabel || "Mahsulotlar"} value={stats?.items_active ?? 0} icon={Package} iconColor="#16A34A" iconBg="rgba(22, 163, 74, 0.1)" />
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard title="Tugagan" value={stats?.items_low_stock ?? 0} />
+            <StatCard title="Kam qolgan" value={stats?.items_low_stock ?? 0} icon={Package} iconColor="#DC2626" iconBg="rgba(220, 38, 38, 0.1)" />
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
@@ -352,16 +363,16 @@ export default function DynamicBusinessDashboard({ stats, businessType }) {
     <>
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Lidlar (jami)" value={stats?.leads_total ?? 0} />
+          <StatCard title={cfg.leadsLabel || "Lidlar"} value={stats?.leads_total ?? 0} icon={MessageSquare} iconColor={cfg.color} iconBg={`${cfg.color}18`} />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Yangi lidlar" value={stats?.leads_new ?? 0} />
+          <StatCard title="Yangi lidlar" value={stats?.leads_new ?? 0} icon={MessageSquare} iconColor="#F59E0B" iconBg="rgba(245, 158, 11, 0.12)" />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Faol pozitsiyalar" value={stats?.items_active ?? 0} />
+          <StatCard title={cfg.itemsLabel || "Faol"} value={stats?.items_active ?? 0} icon={Package} iconColor="#16A34A" iconBg="rgba(22, 163, 74, 0.1)" />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <StatCard title="Yangi bronlar" value={stats?.bookings_new ?? 0} />
+          <StatCard title={cfg.bookingsLabel || "Yangi bronlar"} value={stats?.bookings_new ?? 0} icon={CalendarCheck} iconColor="#2563EB" iconBg="rgba(37, 99, 235, 0.1)" />
         </Col>
       </Row>
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>

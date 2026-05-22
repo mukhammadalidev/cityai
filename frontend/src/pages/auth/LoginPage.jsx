@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Form, Input, Typography, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchMe, loginWithMe } from "../../services/authService";
 import BrandLogo from "../../components/ui/BrandLogo";
 import { getDashboardPathForRole } from "../../utils/authRouting";
@@ -8,6 +8,8 @@ import { clearSession, getAccessToken, getStoredUser, setSelectedBusinessId } fr
 
 export default function LoginPage() {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fitnessLogin = searchParams.get("fitness") === "1";
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -57,12 +59,16 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="cs-auth-card" bordered={false}>
+    <Card className={`cs-auth-card${fitnessLogin ? " cs-auth-card--fitness" : ""}`} bordered={false}>
       <div style={{ marginBottom: 12 }}>
         <BrandLogo height={64} />
       </div>
-      <div className="cs-auth-brand">City Services AI Platform</div>
-      <div className="cs-auth-tag">Shahar xizmatlari — bitta platformada. Login va parolingizni kiriting.</div>
+      <div className="cs-auth-brand">{fitnessLogin ? "Fitness CRM" : "CityBot tizimiga kirish"}</div>
+      <div className="cs-auth-tag">
+        {fitnessLogin
+          ? "Zal administratori paneliga kiring."
+          : "Biznesingizni boshqarish paneliga kiring."}
+      </div>
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item name="username" label="Login" rules={[{ required: true, message: "Login kiriting" }]}>
           <Input size="large" autoComplete="username" />

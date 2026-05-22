@@ -1,22 +1,10 @@
 :root {
-  --cs-bg: #eef1f8;
-  --cs-bg-elevated: #f8f9fd;
-  --cs-surface: #ffffff;
-  --cs-text: #0f1117;
-  --cs-muted: #5c6578;
-  --cs-primary: #4f46e5;
-  --cs-primary-hover: #4338ca;
-  --cs-accent: #0ea5e9;
-  --cs-sidebar: #0a0e1a;
-  --cs-sidebar-border: rgba(148, 163, 184, 0.1);
-  --cs-sidebar-text: rgba(226, 232, 240, 0.72);
-  --cs-sidebar-active: #a5b4fc;
-  --cs-radius: 16px;
-  --cs-radius-sm: 12px;
-  --cs-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 28px rgba(15, 23, 42, 0.07);
-  --cs-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.06), 0 20px 48px rgba(15, 23, 42, 0.11);
-  --cs-ring: rgba(79, 70, 229, 0.22);
-  --font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --cs-bg-elevated: #f8fafc;
+  --cs-premium-gold: rgba(251, 191, 36, 0.35);
+  --cs-sidebar-border: rgba(255, 255, 255, 0.1);
+  --cs-sidebar-text: rgba(226, 232, 240, 0.78);
+  --cs-sidebar-active: #93c5fd;
+  --cs-ring: rgba(37, 99, 235, 0.28);
 }
 
 * {
@@ -31,10 +19,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background-color: var(--cs-bg);
-  background-image: radial-gradient(ellipse 100% 80% at 100% -10%, rgba(79, 70, 229, 0.09), transparent 52%),
-    radial-gradient(ellipse 70% 60% at 0% 100%, rgba(14, 165, 233, 0.06), transparent 50%),
-    linear-gradient(180deg, var(--cs-bg-elevated) 0%, var(--cs-bg) 38%, #e8ecf6 100%);
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse 100% 80% at 100% 0%, rgba(37, 99, 235, 0.06), transparent 50%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(6, 182, 212, 0.05), transparent 45%),
+    linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
   background-attachment: fixed;
 }
 
@@ -82,28 +70,53 @@ video {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(ellipse 90% 70% at 15% 0%, rgba(79, 70, 229, 0.16), transparent 55%),
-    radial-gradient(ellipse 70% 55% at 95% 95%, rgba(14, 165, 233, 0.12), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(15, 23, 42, 0.03), transparent),
-    linear-gradient(165deg, #f0f2fa 0%, #e4e9f4 100%);
+  background: radial-gradient(ellipse 90% 70% at 10% 0%, rgba(37, 99, 235, 0.14), transparent 55%),
+    radial-gradient(ellipse 70% 55% at 95% 95%, rgba(6, 182, 212, 0.12), transparent 50%),
+    var(--bg);
+}
+
+.cs-auth-wrap::before,
+.cs-auth-wrap::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cs-auth-wrap::before {
+  width: 320px;
+  height: 320px;
+  top: -80px;
+  right: -40px;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.cs-auth-wrap::after {
+  width: 200px;
+  height: 200px;
+  bottom: 10%;
+  left: -60px;
+  background: rgba(6, 182, 212, 0.1);
 }
 
 .cs-auth-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 420px;
-  border-radius: var(--cs-radius) !important;
-  box-shadow: var(--cs-shadow-hover) !important;
-  border: 1px solid rgba(255, 255, 255, 0.65) !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  max-width: 440px;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  background: var(--card) !important;
+  padding: 8px 4px;
 }
 
 .cs-auth-brand {
   font-weight: 800;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   letter-spacing: -0.03em;
-  background: linear-gradient(115deg, #4f46e5 0%, #6366f1 38%, #0ea5e9 100%);
+  background: var(--gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

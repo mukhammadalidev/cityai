@@ -26,7 +26,7 @@ const ItemFormPage = lazy(() => import("../pages/business/ItemFormPage"));
 const ItemDetailPage = lazy(() => import("../pages/business/ItemDetailPage"));
 const LeadsPage = lazy(() => import("../pages/business/LeadsPage"));
 const StudentsPage = lazy(() => import("../pages/business/StudentsPage"));
-const FaceAttendancePage = lazy(() => import("../pages/business/FaceAttendancePage"));
+const StudentPaymentsPage = lazy(() => import("../pages/business/StudentPaymentsPage"));
 const StudentDetailPage = lazy(() => import("../pages/business/StudentDetailPage"));
 const StudentGroupsPage = lazy(() => import("../pages/business/StudentGroupsPage"));
 const StudentRatingsPage = lazy(() => import("../pages/business/StudentRatingsPage"));
@@ -40,6 +40,14 @@ const FitnessAttendancePage = lazy(() => import("../pages/business/FitnessAttend
 const FitnessPaymentsPage = lazy(() => import("../pages/business/FitnessPaymentsPage"));
 const FitnessAbonementsPage = lazy(() => import("../pages/business/FitnessAbonementsPage"));
 const FitnessGuidePage = lazy(() => import("../pages/business/FitnessGuidePage"));
+const FitnessDashboardPage = lazy(() => import("../pages/business/FitnessDashboardPage"));
+const FitnessMemberDetailPage = lazy(() => import("../pages/business/FitnessMemberDetailPage"));
+const FitnessSubscriptionsPage = lazy(() => import("../pages/business/FitnessSubscriptionsPage"));
+const FitnessDebtorsPage = lazy(() => import("../pages/business/FitnessDebtorsPage"));
+const FitnessTrainersPage = lazy(() => import("../pages/business/FitnessTrainersPage"));
+const FitnessSchedulePage = lazy(() => import("../pages/business/FitnessSchedulePage"));
+const FitnessReportsPage = lazy(() => import("../pages/business/FitnessReportsPage"));
+const FitnessSettingsPage = lazy(() => import("../pages/business/FitnessSettingsPage"));
 const OrdersPage = lazy(() => import("../pages/business/OrdersPage"));
 const KnowledgePage = lazy(() => import("../pages/business/KnowledgePage"));
 const ManagersPage = lazy(() => import("../pages/business/ManagersPage"));
@@ -52,6 +60,7 @@ const PortalTeacherStudentPage = lazy(() => import("../pages/portal/PortalTeache
 const PortalStudentPage = lazy(() => import("../pages/portal/PortalStudentPage"));
 const PortalParentPage = lazy(() => import("../pages/portal/PortalParentPage"));
 const PortalFitnessClientPage = lazy(() => import("../pages/portal/PortalFitnessClientPage"));
+const LandingPage = lazy(() => import("../pages/landing/LandingPage"));
 const PublicCityPage = lazy(() => import("../pages/public/PublicCityPage"));
 const PublicCategoryPage = lazy(() => import("../pages/public/PublicCategoryPage"));
 const PublicBusinessPage = lazy(() => import("../pages/public/PublicBusinessPage"));
@@ -160,15 +169,23 @@ export default function AppRoutes() {
         <Route path="leads" element={page(LeadsPage)} />
         <Route path="students/:id" element={page(StudentDetailPage)} />
         <Route path="students" element={page(StudentsPage)} />
-        <Route path="face-attendance" element={page(FaceAttendancePage)} />
+        <Route path="student-payments" element={page(StudentPaymentsPage)} />
         <Route path="student-ratings" element={page(StudentRatingsPage)} />
         <Route path="student-groups" element={page(StudentGroupsPage)} />
         <Route path="teachers/:id" element={page(TeacherDetailPage)} />
         <Route path="teachers" element={page(TeachersPage)} />
         <Route path="bookings" element={page(BookingsPage)} />
+        <Route path="fitness/dashboard" element={page(FitnessDashboardPage)} />
         <Route path="fitness/clients" element={page(FitnessClientsPage)} />
-        <Route path="fitness/attendance" element={page(FitnessAttendancePage)} />
+        <Route path="fitness/clients/:id" element={page(FitnessMemberDetailPage)} />
+        <Route path="fitness/subscriptions" element={page(FitnessSubscriptionsPage)} />
         <Route path="fitness/payments" element={page(FitnessPaymentsPage)} />
+        <Route path="fitness/debtors" element={page(FitnessDebtorsPage)} />
+        <Route path="fitness/attendance" element={page(FitnessAttendancePage)} />
+        <Route path="fitness/trainers" element={page(FitnessTrainersPage)} />
+        <Route path="fitness/schedule" element={page(FitnessSchedulePage)} />
+        <Route path="fitness/reports" element={page(FitnessReportsPage)} />
+        <Route path="fitness/settings" element={page(FitnessSettingsPage)} />
         <Route path="fitness/abonements" element={page(FitnessAbonementsPage)} />
         <Route path="fitness/guide" element={page(FitnessGuidePage)} />
         <Route path="orders" element={page(OrdersPage)} />
@@ -186,7 +203,7 @@ export default function AppRoutes() {
         <Route path="/b/:businessSlug" element={page(PublicBusinessPage)} />
       </Route>
 
-      <Route path="/" element={<Navigate to="/c/buxoro" replace />} />
+      <Route path="/" element={page(LandingPage)} />
       <Route path="*" element={page(NotFoundPage)} />
     </Routes>
   );

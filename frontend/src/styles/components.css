@@ -1,19 +1,23 @@
-/* Page header gradient strip */
+/* Page header — premium shaffof */
 .cs-page-header {
   margin-bottom: 28px;
   padding: 24px 28px;
   border-radius: var(--cs-radius);
   background: linear-gradient(
-      125deg,
-      rgba(79, 70, 229, 0.11) 0%,
-      rgba(99, 102, 241, 0.08) 45%,
-      rgba(14, 165, 233, 0.07) 100%
+      135deg,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(255, 255, 255, 0.38) 100%
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: var(--cs-shadow), 0 0 0 1px rgba(15, 23, 42, 0.04) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    linear-gradient(
+      125deg,
+      rgba(91, 82, 240, 0.14) 0%,
+      rgba(99, 102, 241, 0.08) 40%,
+      rgba(14, 165, 233, 0.1) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow: var(--cs-shadow);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
 }
 
 @media (max-width: 767px) {
@@ -60,9 +64,11 @@
 /* Stat cards */
 .cs-stat-card {
   border-radius: var(--cs-radius) !important;
-  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: var(--cs-shadow) !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #ffffff 100%) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
@@ -144,63 +150,6 @@
 
 .cs-business-card:hover {
   box-shadow: var(--cs-shadow-hover);
-}
-
-.cs-face-camera {
-  position: relative;
-  min-height: 360px;
-  overflow: hidden;
-  border-radius: 14px;
-  background: #0b1220;
-}
-
-.cs-face-camera__video {
-  display: block;
-  width: 100%;
-  min-height: 360px;
-  max-height: 62vh;
-  object-fit: cover;
-  transform: scaleX(-1);
-}
-
-.cs-face-camera__empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.cs-face-student {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.cs-face-student__photo,
-.cs-face-student__placeholder {
-  flex: 0 0 auto;
-  width: 86px !important;
-  height: 86px !important;
-  border-radius: 12px;
-  object-fit: cover;
-}
-
-.cs-face-student__placeholder {
-  display: grid;
-  place-items: center;
-  color: var(--cs-muted);
-  background: rgba(15, 23, 42, 0.06);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.cs-face-student__meta {
-  margin: 3px 0;
-  color: var(--cs-muted);
-  font-size: 13px;
 }
 
 .cs-pwa-install {
@@ -370,19 +319,25 @@
   font-weight: 600;
 }
 
-/* Standart kartalar — sahifa ichida izchillik */
+/* Standart kartalar — premium shaffof */
 .cs-page .ant-card {
   border-radius: var(--cs-radius);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.62);
   box-shadow: var(--cs-shadow);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, #ffffff 100%);
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(20px) saturate(1.45);
+  -webkit-backdrop-filter: blur(20px) saturate(1.45);
   overflow: hidden;
 }
 
 .cs-page .ant-card-head {
-  border-bottom-color: rgba(15, 23, 42, 0.06);
+  border-bottom-color: rgba(255, 255, 255, 0.45);
   min-height: 52px;
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.65) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  ) !important;
 }
 
 .cs-page .ant-card-head-title {
@@ -418,9 +373,107 @@
   font-weight: 700;
 }
 
-/* Tabs */
+/* Tabs — shaffof panel */
+.cs-page .ant-tabs-nav {
+  margin-bottom: 16px !important;
+  padding: 6px 8px;
+  border-radius: var(--cs-radius-sm);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
 .cs-page .ant-tabs-nav::before {
-  border-color: rgba(15, 23, 42, 0.06);
+  border-color: transparent !important;
+}
+
+.cs-page .ant-tabs-tab {
+  border-radius: 10px !important;
+  transition: background 0.2s ease;
+}
+
+.cs-page .ant-tabs-tab-active {
+  background: rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+}
+
+/* Input / Select shaffof */
+.cs-page .ant-input,
+.cs-page .ant-input-affix-wrapper,
+.cs-page .ant-select-selector,
+.cs-page .ant-picker {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.cs-page .ant-input-affix-wrapper:focus,
+.cs-page .ant-input-affix-wrapper-focused,
+.cs-page .ant-select-focused .ant-select-selector,
+.cs-page .ant-picker-focused {
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 0 0 2px var(--cs-ring) !important;
+}
+
+/* Jadval — shaffof sarlavha */
+.cs-page .ant-table {
+  background: transparent !important;
+}
+
+.cs-page .ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.cs-page .ant-table-tbody > tr > td {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.cs-page .ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.55) !important;
+}
+
+.cs-page .ant-table-wrapper .ant-table-container {
+  border-radius: var(--cs-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  box-shadow: var(--cs-shadow);
+}
+
+/* Tugmalar */
+.cs-page .ant-btn-default {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(8px);
+}
+
+.cs-page .ant-btn-primary {
+  box-shadow: 0 4px 20px rgba(91, 82, 240, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Drawer / Modal shaffof */
+.ant-drawer .ant-drawer-content {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+}
+
+.ant-modal-content {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--cs-shadow-hover) !important;
+}
+
+/* List items */
+.cs-page .ant-list-item {
+  border-block-end-color: rgba(255, 255, 255, 0.35) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

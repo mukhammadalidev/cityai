@@ -1,0 +1,753 @@
+/* Business dashboard, items, leads, bookings, public business */
+
+.cs-page-header--accent {
+  position: relative;
+  padding-left: 16px;
+}
+
+.cs-page-header--accent::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--page-accent, var(--primary));
+}
+
+.cs-page-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+}
+
+.cs-view-toggle .ant-segmented {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.cs-item-grid-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-item-grid-card__actions {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cs-premium-item-card.ant-card {
+  border-radius: var(--radius) !important;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cs-premium-item-card.ant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.cs-premium-item-card .ant-card-cover img {
+  height: 180px;
+  object-fit: cover;
+}
+
+.cs-premium-item-card__price {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--gradient-soft);
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+}
+
+/* Kanban */
+.cs-kanban-board {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-kanban-col {
+  flex: 0 0 280px;
+  max-width: 300px;
+  min-width: 260px;
+  background: rgba(15, 23, 42, 0.03);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.cs-kanban-col__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--kanban-accent, var(--primary));
+}
+
+.cs-kanban-col__title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.cs-kanban-col__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--card);
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.cs-kanban-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cs-kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.cs-kanban-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cs-lead-drawer .ant-drawer-header {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cs-drawer-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cs-drawer-section:last-child {
+  border-bottom: none;
+}
+
+.cs-drawer-section__title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* Bookings */
+.cs-booking-card.ant-card {
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.cs-booking-card.ant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.cs-booking-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cs-booking-card__name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.cs-booking-card__datetime {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.cs-booking-card__meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.cs-bookings-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* Public business */
+.cs-public-biz {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.cs-public-biz-cover {
+  height: 240px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.cs-public-biz-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(15, 23, 42, 0.55) 100%);
+}
+
+.cs-public-biz-body {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px 48px;
+}
+
+.cs-public-biz-profile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+  margin-top: -56px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24px;
+}
+
+.cs-public-biz-logo {
+  width: 112px;
+  height: 112px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 4px solid var(--card);
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+
+.cs-public-biz-logo--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: var(--gradient-soft);
+}
+
+.cs-public-biz-info {
+  flex: 1;
+  min-width: 200px;
+  padding-bottom: 8px;
+}
+
+.cs-public-biz-info h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.cs-public-biz-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cs-public-biz-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.cs-public-biz-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 28px;
+}
+
+.cs-public-biz-section {
+  margin-top: 36px;
+}
+
+.cs-public-biz-section__title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-public-biz-section__title::before {
+  content: "";
+  width: 4px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--section-accent, var(--primary));
+}
+
+.cs-public-form-card {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: var(--shadow) !important;
+  margin-top: 32px;
+}
+
+.cs-dash-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cs-table-scroll {
+  overflow-x: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+  padding: 4px;
+}
+
+.cs-premium-table .ant-table {
+  background: transparent;
+}
+
+.cs-dash-section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 24px 0 12px;
+}
+
+/* Oylik to'lovlar matritsasi */
+.cs-pay-cell {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cs-pay-cell:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-sm);
+}
+
+.cs-pay-cell--paid {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+.cs-pay-cell--unpaid {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
+.cs-pay-cell--partial {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.cs-pay-cell--debt {
+  background: rgba(15, 23, 42, 0.08);
+  color: #475569;
+}
+
+.cs-payments-matrix-wrap {
+  margin-top: 8px;
+}
+
+/* ——— Oylik to‘lovlar sahifasi ——— */
+
+.cs-pay-filters {
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+}
+
+.cs-pay-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px 16px;
+  align-items: end;
+}
+
+.cs-pay-filters__field--search {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 900px) {
+  .cs-pay-filters__grid {
+    grid-template-columns: 100px 140px 1fr 1fr minmax(200px, 1.4fr);
+  }
+
+  .cs-pay-filters__field--search {
+    grid-column: auto;
+  }
+}
+
+.cs-pay-filters__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.cs-pay-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1100px) {
+  .cs-pay-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .cs-pay-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cs-pay-kpi {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cs-pay-kpi--green {
+  border-left: 3px solid var(--success);
+}
+.cs-pay-kpi--red {
+  border-left: 3px solid var(--danger);
+}
+.cs-pay-kpi--orange {
+  border-left: 3px solid var(--warning);
+}
+.cs-pay-kpi--purple {
+  border-left: 3px solid #7c3aed;
+}
+.cs-pay-kpi--blue {
+  border-left: 3px solid var(--primary);
+}
+.cs-pay-kpi--gray {
+  border-left: 3px solid #94a3b8;
+}
+
+.cs-pay-kpi__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.cs-pay-kpi__value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-pay-kpi__value--money {
+  font-size: 1.05rem;
+}
+
+.cs-pay-panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
+  padding: 8px 20px 24px;
+  margin-bottom: 32px;
+}
+
+.cs-pay-panel__head {
+  margin-bottom: 16px;
+  padding-top: 8px;
+}
+
+.cs-pay-panel__title {
+  margin: 0 0 4px !important;
+  font-weight: 800 !important;
+}
+
+.cs-pay-panel__hint {
+  margin-bottom: 16px !important;
+}
+
+.cs-payments-tabs > .ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding: 12px 0 0;
+}
+
+.cs-payments-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+.cs-payments-tabs .ant-tabs-tab {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  padding: 10px 18px !important;
+  margin: 0 4px 0 0 !important;
+}
+
+.cs-payments-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--primary) !important;
+}
+
+.cs-payments-tabs .ant-tabs-ink-bar {
+  height: 3px !important;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary) !important;
+}
+
+.cs-payments-table-wrap {
+  margin-top: 8px;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.cs-payments-table .ant-table {
+  background: transparent;
+}
+
+.cs-payments-table .ant-table-thead > tr > th {
+  background: rgba(37, 99, 235, 0.05) !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted) !important;
+  padding: 14px 12px !important;
+  white-space: nowrap;
+}
+
+.cs-payments-table .ant-table-tbody > tr > td {
+  padding: 14px 12px !important;
+  vertical-align: middle !important;
+  font-size: 14px;
+}
+
+.cs-payments-table .ant-table-tbody > tr:hover > td {
+  background: rgba(37, 99, 235, 0.03) !important;
+}
+
+.cs-pay-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cs-pay-status--paid {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+.cs-pay-status--unpaid {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+.cs-pay-status--partial {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+.cs-pay-status--debt {
+  background: rgba(15, 23, 42, 0.08);
+  color: #475569;
+}
+
+.cs-pay-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.cs-pay-action-btn {
+  height: 30px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.cs-pay-action-btn--ghost {
+  background: #fff !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: var(--text) !important;
+}
+
+.cs-pay-action-btn--ghost:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.cs-pay-action-bar .ant-btn-primary {
+  min-width: 88px;
+}
+
+.cs-pay-debtor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 12px;
+}
+
+.cs-pay-chip {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cs-pay-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.cs-pay-chip--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.cs-stat-card-v2--compact .ant-card-body {
+  padding: 14px 16px !important;
+}
+
+.cs-stat-card-v2--compact .cs-stat-card-v2__value {
+  font-size: 1.2rem;
+}
+
+.cs-stat-card-v2--compact .cs-stat-card-v2__icon {
+  width: 40px;
+  height: 40px;
+}
+
+.cs-payments-matrix .ant-table-cell {
+  padding: 8px 6px !important;
+}
+
+@media (max-width: 767px) {
+  .cs-pay-filters__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cs-pay-action-bar {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 767px) {
+  .cs-kanban-col {
+    flex: 0 0 85vw;
+    min-width: 260px;
+  }
+
+  .cs-public-biz-cover {
+    height: 180px;
+  }
+
+  .cs-public-biz-profile {
+    margin-top: -40px;
+  }
+
+  .cs-public-biz-logo {
+    width: 88px;
+    height: 88px;
+  }
+}

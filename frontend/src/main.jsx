@@ -4,9 +4,13 @@ import { ConfigProvider, theme } from "antd";
 import uzUZ from "antd/locale/uz_UZ";
 import App from "./App";
 import { registerServiceWorker } from "./pwa/registerServiceWorker";
+import "./styles/design-system.css";
 import "./styles/global.css";
 import "./styles/layouts.css";
 import "./styles/components.css";
+import "./styles/business-pages.css";
+import "./styles/glass.css";
+import "./styles/landing.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -15,20 +19,21 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       theme={{
         algorithm: theme.defaultAlgorithm,
         token: {
-          colorPrimary: "#4f46e5",
-          colorInfo: "#0ea5e9",
-          colorSuccess: "#059669",
-          colorWarning: "#d97706",
-          colorError: "#dc2626",
-          colorText: "#0f1117",
-          colorTextSecondary: "#5c6578",
-          colorTextTertiary: "#8b94a8",
-          colorBorder: "rgba(15, 23, 42, 0.09)",
-          colorBorderSecondary: "rgba(15, 23, 42, 0.055)",
-          colorBgLayout: "transparent",
-          colorBgContainer: "#ffffff",
+          colorPrimary: "#2563EB",
+          colorInfo: "#06B6D4",
+          colorSuccess: "#16A34A",
+          colorWarning: "#F59E0B",
+          colorError: "#DC2626",
+          colorText: "#111827",
+          colorTextSecondary: "#64748B",
+          colorTextTertiary: "#94A3B8",
+          colorBorder: "rgba(15, 23, 42, 0.08)",
+          colorBorderSecondary: "rgba(15, 23, 42, 0.05)",
+          colorBgLayout: "#F5F7FB",
+          colorBgContainer: "#FFFFFF",
+          colorBgElevated: "#FFFFFF",
           borderRadius: 12,
-          borderRadiusLG: 16,
+          borderRadiusLG: 18,
           borderRadiusSM: 10,
           fontFamily: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif',
           fontSizeHeading1: 34,
@@ -47,32 +52,34 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             headerFontSize: 15,
             headerFontSizeSM: 14,
             paddingLG: 24,
-            borderRadiusLG: 16,
-            boxShadowTertiary:
-              "0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 32px rgba(15, 23, 42, 0.07)",
+            borderRadiusLG: 18,
+            colorBgContainer: "#FFFFFF",
+            colorBorderSecondary: "rgba(15, 23, 42, 0.06)",
+            boxShadowTertiary: "0 10px 30px rgba(15, 23, 42, 0.06)",
           },
           Table: {
-            headerBg: "rgba(79, 70, 229, 0.05)",
+            headerBg: "rgba(37, 99, 235, 0.04)",
             headerSplitColor: "rgba(15, 23, 42, 0.06)",
-            rowHoverBg: "rgba(79, 70, 229, 0.045)",
+            rowHoverBg: "rgba(37, 99, 235, 0.04)",
             borderColor: "rgba(15, 23, 42, 0.06)",
             borderRadius: 14,
           },
           Button: {
-            primaryShadow: "0 2px 8px rgba(79, 70, 229, 0.35)",
+            primaryShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
             fontWeight: 600,
-            controlHeight: 38,
+            controlHeight: 40,
+            borderRadius: 10,
           },
           Menu: {
             itemBorderRadius: 12,
             subMenuItemBorderRadius: 10,
-            itemSelectedBg: "rgba(165, 180, 252, 0.14)",
-            itemHoverBg: "rgba(148, 163, 184, 0.1)",
+            itemSelectedBg: "rgba(59, 130, 246, 0.2)",
+            itemHoverBg: "rgba(148, 163, 184, 0.12)",
           },
           Form: { labelFontSize: 14, verticalLabelPadding: "0 0 6px", labelFontWeight: 600 },
-          Input: { activeBorderColor: "#4f46e5", hoverBorderColor: "#6366f1" },
-          Select: { optionSelectedBg: "rgba(79, 70, 229, 0.08)" },
-          Tabs: { inkBarColor: "#4f46e5", itemSelectedColor: "#4f46e5", titleFontSize: 15 },
+          Input: { activeBorderColor: "#2563EB", hoverBorderColor: "#3B82F6", borderRadius: 10 },
+          Select: { optionSelectedBg: "rgba(37, 99, 235, 0.08)" },
+          Tabs: { inkBarColor: "#2563EB", itemSelectedColor: "#2563EB", titleFontSize: 15 },
           Statistic: { titleFontSize: 13 },
         },
       }}

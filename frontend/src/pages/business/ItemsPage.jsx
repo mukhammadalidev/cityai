@@ -1,4 +1,4 @@
-import { Button, Col, Row, Select, Space, Table, message } from "antd";
+import { Button, Col, Row, Segmented, Select, Skeleton, Space, Table, message } from "antd";
 import { AppstoreOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
@@ -12,8 +12,17 @@ import { getItems, deleteItem } from "../../services/itemService";
 import { ITEM_STATUS } from "../../config/statusConfigs";
 import { getBusinessTypeConfig } from "../../config/businessTypes";
 import StatusTag from "../../components/ui/StatusTag";
+import { formatPrice } from "../../utils/formatters";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import { BUSINESS_DATA_CHANGED, notifyBusinessDataChanged } from "../../utils/businessEvents";
+
+const ITEM_DESCRIPTIONS = {
+  restaurant: "Restoran menyusi — taomlar, narxlar va mavjudlik.",
+  education_center: "Kurslar katalogi. Kitob va mahsulotlar «Materiallar» bo'limida.",
+  auto_salon: "Avtosalon vitrinasi — mashinalar va xususiyatlar.",
+  fitness_center: "Abonementlar va mashg'ulot paketlari.",
+  shop: "Do'kon mahsulotlari va narxlar.",
+};
 
 export default function ItemsPage() {
   const { businessId, business } = useOutletContext();
@@ -51,6 +60,7 @@ export default function ItemsPage() {
   const cfg = getBusinessTypeConfig(bt);
   const itemsLabel = cfg.itemsLabel || "Pozitsiyalar";
   const itemLabel = cfg.itemLabel || "Pozitsiya";
+  const desc = ITEM_DESCRIPTIONS[bt] || "Katalogdagi mahsulot va xizmatlar.";
 
   if (!businessId) return null;
   if (loading && !rows.length) return <LoadingScreen />;
@@ -58,102 +68,140 @@ export default function ItemsPage() {
   return (
     <>
       <PageHeader
-        title={business?.name ? `${business.name} — ${itemsLabel}` : itemsLabel}
-        description={
-          bt === "restaurant"
-            ? "Restoran menyusi."
-            : bt === "education_center"
-              ? "Faqat kurslar. Kitob va mahsulotlar «Materiallar» bo‘limida."
-              : "Katalogdagi mahsulot va xizmatlar."
-        }
+        eyebrow={cfg.label}
+        title={itemsLabel}
+        description={desc}
+        accent={cfg.color}
         extra={
-          <Space>
-            <Button icon={view === "cards" ? <UnorderedListOutlined /> : <AppstoreOutlined />} onClick={() => setView(view === "cards" ? "table" : "cards")}>
-              {view === "cards" ? "Jadval" : "Kartalar"}
+          <Link to="/business/items/new">
+            <Button type="primary" size="large" icon={<PlusOutlined />}>
+              {itemLabel} qo&apos;shish
             </Button>
-            <Link to="/business/items/new">
-              <Button type="primary" icon={<PlusOutlined />}>
-                Qo‘shish
-              </Button>
-            </Link>
-          </Space>
+          </Link>
         }
       />
-      <SearchFilterBar
-        placeholder="Qidiruv"
-        value={search}
-        onChange={setSearch}
-        extra={
-          <Select
-            allowClear
-            placeholder="Holat"
-            style={{ width: 160 }}
-            value={status}
-            onChange={setStatus}
-            options={Object.keys(ITEM_STATUS).map((k) => ({ value: k, label: ITEM_STATUS[k].label }))}
+
+      <div className="cs-page-toolbar">
+        <SearchFilterBar
+          embedded
+          placeholder={`${itemLabel} qidirish…`}
+          value={search}
+          onChange={setSearch}
+          extra={
+            <Select
+              allowClear
+              placeholder="Holat"
+              style={{ width: 160 }}
+              value={status}
+              onChange={setStatus}
+              options={Object.keys(ITEM_STATUS).map((k) => ({ value: k, label: ITEM_STATUS[k].label }))}
+            />
+          }
+        />
+        <div className="cs-view-toggle">
+          <Segmented
+            value={view}
+            onChange={setView}
+            options={[
+              { label: "Kartalar", value: "cards", icon: <AppstoreOutlined /> },
+              { label: "Jadval", value: "table", icon: <UnorderedListOutlined /> },
+            ]}
           />
-        }
-      />
-      {!rows.length ? (
-        <EmptyState description={`${itemsLabel} hozircha yo‘q.`} />
+        </div>
+      </div>
+
+      {loading ? (
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Col xs={24} sm={12} lg={8} key={i}>
+              <Skeleton active paragraph={{ rows: 4 }} />
+            </Col>
+          ))}
+        </Row>
+      ) : !rows.length ? (
+        <EmptyState
+          description={`${itemsLabel} hozircha yo'q.`}
+          action={
+            <Link to="/business/items/new">
+              <Button type="primary">Birinchi {itemLabel.toLowerCase()}ni qo&apos;shish</Button>
+            </Link>
+          }
+        />
       ) : view === "cards" ? (
         <Row gutter={[16, 16]}>
           {rows.map((item) => (
-            <Col xs={24} sm={12} lg={8} key={item.id}>
-              <DynamicItemCard item={item} businessType={bt} onClick={() => nav(`/business/items/${item.id}`)} />
-              <Space style={{ marginTop: 8 }}>
-                <Link to={`/business/items/${item.id}/edit`}>
-                  <Button size="small">Tahrirlash</Button>
-                </Link>
-                <Button
-                  size="small"
-                  danger
-                  onClick={() =>
-                    confirmDelete({
-                      title: "O‘chirilsinmi?",
-                      onOk: async () => {
-                        await deleteItem(item.id);
-                        message.success("O‘chirildi.");
-                        load();
-                        notifyBusinessDataChanged();
-                      },
-                    })
-                  }
-                >
-                  O‘chirish
-                </Button>
-              </Space>
+            <Col xs={24} sm={12} lg={8} xl={6} key={item.id}>
+              <div className="cs-item-grid-card">
+                <DynamicItemCard item={item} businessType={bt} onClick={() => nav(`/business/items/${item.id}`)} />
+                <div className="cs-item-grid-card__actions">
+                  <Link to={`/business/items/${item.id}/edit`}>
+                    <Button size="small">Tahrirlash</Button>
+                  </Link>
+                  <Button size="small" onClick={() => nav(`/business/items/${item.id}`)}>
+                    Batafsil
+                  </Button>
+                  <Button
+                    size="small"
+                    danger
+                    onClick={() =>
+                      confirmDelete({
+                        title: "O'chirilsinmi?",
+                        onOk: async () => {
+                          await deleteItem(item.id);
+                          message.success("O'chirildi.");
+                          load();
+                          notifyBusinessDataChanged();
+                        },
+                      })
+                    }
+                  >
+                    O&apos;chirish
+                  </Button>
+                </div>
+              </div>
             </Col>
           ))}
         </Row>
       ) : (
-        <Table
-          rowKey="id"
-          dataSource={rows}
-          pagination={{ pageSize: 12 }}
-          columns={[
-            { title: itemLabel, dataIndex: "title" },
-            { title: "Narx", dataIndex: "price" },
-            {
-              title: "Holat",
-              dataIndex: "status",
-              render: (v) => <StatusTag map={ITEM_STATUS} value={v} />,
-            },
-            {
-              title: "",
-              render: (_, r) => (
-                <Space>
-                  <Button size="small" onClick={() => nav(`/business/items/${r.id}`)}>
-                    Ko‘rish
-                  </Button>
-                  <Link to={`/business/items/${r.id}/edit`}>
-                    <Button size="small">Tahrirlash</Button>
-                  </Link>
-                </Space>
-              ),
-            },
-          ]}
-        />
+        <div className="cs-table-scroll">
+          <Table
+            className="cs-premium-table"
+            rowKey="id"
+            dataSource={rows}
+            pagination={{ pageSize: 12, showSizeChanger: false }}
+            scroll={{ x: 720 }}
+            columns={[
+              { title: itemLabel, dataIndex: "title", ellipsis: true },
+              {
+                title: "Narx",
+                dataIndex: "price",
+                width: 140,
+                render: (v, r) => formatPrice(v, r.currency),
+              },
+              {
+                title: "Holat",
+                dataIndex: "status",
+                width: 120,
+                render: (v) => <StatusTag map={ITEM_STATUS} value={v} />,
+              },
+              {
+                title: "",
+                width: 200,
+                fixed: "right",
+                render: (_, r) => (
+                  <Space wrap>
+                    <Button size="small" onClick={() => nav(`/business/items/${r.id}`)}>
+                      Ko&apos;rish
+                    </Button>
+                    <Link to={`/business/items/${r.id}/edit`}>
+                      <Button size="small">Tahrirlash</Button>
+                    </Link>
+                  </Space>
+                ),
+              },
+            ]}
+          />
+        </div>
       )}
     </>
   );

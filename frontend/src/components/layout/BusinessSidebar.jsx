@@ -1,10 +1,10 @@
 import { Menu, Space, Tag } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  BarChart3,
   BadgeCheck,
   BookOpen,
   Brain,
-  Camera,
   Calendar,
   CalendarCheck,
   CreditCard,
@@ -75,13 +75,17 @@ export default function BusinessSidebar({ collapsed, businessType, plan, onNavig
         { key: "/business/settings", icon: Settings, label: "Sozlamalar" },
       ]
     : [
-        { key: "/business/dashboard", icon: LayoutDashboard, label: "Boshqaruv" },
+        {
+          key: businessType === "fitness_center" ? "/business/fitness/dashboard" : "/business/dashboard",
+          icon: LayoutDashboard,
+          label: "Boshqaruv",
+        },
         { key: "/business/items", icon: Package, label: cfg.itemsLabel },
         { key: "/business/leads", icon: Users, label: cfg.leadsLabel },
         ...(businessType === "education_center"
           ? [
               { key: "/business/students", icon: GraduationCap, label: "O‘quvchilar va davomat" },
-              { key: "/business/face-attendance", icon: Camera, label: "Face davomat" },
+              { key: "/business/student-payments", icon: CreditCard, label: "To'lovlar" },
               { key: "/business/student-ratings", icon: Trophy, label: "Baholar va reyting" },
               { key: "/business/student-groups", icon: Layers, label: "O‘quv guruhlari" },
               { key: "/business/teachers", icon: IdCard, label: "Ustozlar" },
@@ -96,11 +100,16 @@ export default function BusinessSidebar({ collapsed, businessType, plan, onNavig
           : []),
         ...(businessType === "fitness_center"
           ? [
-              { key: "/business/fitness/guide", icon: HelpCircle, label: "Qo‘llanma" },
-              { key: "/business/fitness/abonements", icon: BadgeCheck, label: "Abonementlar (hisob)" },
-              { key: "/business/fitness/clients", icon: Dumbbell, label: "Klientlar" },
+              { key: "/business/fitness/clients", icon: Dumbbell, label: "A'zolar" },
+              { key: "/business/fitness/subscriptions", icon: BadgeCheck, label: "Abonementlar" },
+              { key: "/business/fitness/payments", icon: CreditCard, label: "To'lovlar" },
+              { key: "/business/fitness/debtors", icon: Receipt, label: "Qarzdorlar" },
               { key: "/business/fitness/attendance", icon: CalendarCheck, label: "Davomat" },
-              { key: "/business/fitness/payments", icon: CreditCard, label: "To‘lovlar" },
+              { key: "/business/fitness/trainers", icon: IdCard, label: "Trenerlar" },
+              { key: "/business/fitness/schedule", icon: Calendar, label: "Jadval" },
+              { key: "/business/fitness/reports", icon: BarChart3, label: "Hisobotlar" },
+              { key: "/business/fitness/settings", icon: Settings, label: "Sozlamalar" },
+              { key: "/business/fitness/guide", icon: HelpCircle, label: "Qo'llanma" },
             ]
           : []),
         { key: "/business/bookings", icon: Calendar, label: cfg.bookingsLabel || "Bronlar" },

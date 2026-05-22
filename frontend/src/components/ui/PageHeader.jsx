@@ -1,13 +1,15 @@
-export default function PageHeader({ eyebrow, title, description, extra }) {
+export default function PageHeader({ eyebrow, title, description, extra, accent }) {
+  const style = accent ? { "--page-accent": accent } : undefined;
   return (
     <div
-      className={`cs-page-header cs-page-header--split${extra ? "" : " cs-page-header--no-extra"}`}
+      className={`cs-page-header cs-page-header--split${accent ? " cs-page-header--accent" : ""}${extra ? "" : " cs-page-header--no-extra"}`}
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "flex-start",
         gap: 16,
         flexWrap: "wrap",
+        ...style,
       }}
     >
       <div style={{ flex: "1 1 220px", minWidth: 0 }}>

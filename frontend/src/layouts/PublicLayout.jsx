@@ -13,7 +13,7 @@ export default function PublicLayout() {
   return (
     <div className="cs-public-shell">
       <nav className="cs-public-nav" aria-label="Asosiy navigatsiya">
-        <Link to="/c/buxoro" className="cs-public-nav__brand" title="Bosh sahifa">
+        <Link to="/" className="cs-public-nav__brand" title="CityBot CRM">
           <BrandLogo height={34} className="cs-brand-img--public" />
         </Link>
         <Space wrap className="cs-public-nav__actions" size="middle">
@@ -56,7 +56,9 @@ export default function PublicLayout() {
             <span className="cs-public-footer__dot" aria-hidden>
               ·
             </span>
-            <Link to="/c/buxoro">Bosh sahifa</Link>
+            <Link to="/">CityBot CRM</Link>
+            <span className="cs-public-footer__dot" aria-hidden>·</span>
+            <Link to="/c/buxoro">Shahar katalogi</Link>
             <span className="cs-public-footer__dot" aria-hidden>
               ·
             </span>

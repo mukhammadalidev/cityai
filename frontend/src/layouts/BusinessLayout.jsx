@@ -89,7 +89,7 @@ export default function BusinessLayout() {
     );
   }
 
-  return (
+  const layout = (
     <Layout className="cs-app-layout">
       <Sider width={260} collapsedWidth={0} collapsed={collapsed} breakpoint="lg" className="cs-sider" trigger={null}>
         <div className="cs-sider-inner">
@@ -139,4 +139,6 @@ export default function BusinessLayout() {
       </Layout>
     </Layout>
   );
+
+  return layout;
 }

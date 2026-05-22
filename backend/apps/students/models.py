@@ -52,12 +52,7 @@ class Student(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="students")
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=30, blank=True)
-    # Hikvision FaceID / turniketdagi "employeeNo" — CRM dagi o‘quvchi bilan bog‘lash uchun.
-    hikvision_employee_no = models.CharField(max_length=50, unique=True, null=True, blank=True)
     notes = models.TextField(blank=True)
-    face_photo = models.ImageField(upload_to="students/faces/", null=True, blank=True)
-    face_consent = models.BooleanField(default=False)
-    face_registered_at = models.DateTimeField(null=True, blank=True)
     # Abonement: shu sanagacha (shu kun boshqacha) to‘langan deb hisoblanadi.
     tuition_paid_until = models.DateField(null=True, blank=True, db_index=True)
     tuition_payment_note = models.CharField(max_length=500, blank=True)
@@ -92,6 +87,51 @@ class StudentAttendance(models.Model):
 
     def __str__(self) -> str:
         return f"{self.student_id} {self.date} {self.status}"
+
+
+class StudentMonthlyPayment(models.Model):
+    """O'quv markaz — oyma-oy to'lov (aniq sana talab qilinmaydi)."""
+
+    class Status(models.TextChoices):
+        PAID = "paid", "To'landi"
+        UNPAID = "unpaid", "To'lanmagan"
+        PARTIAL = "partial", "Qisman to'landi"
+        DEBT = "debt", "Qarzdor"
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name="student_monthly_payments")
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="monthly_payments")
+    group = models.ForeignKey(
+        StudentGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="monthly_payments"
+    )
+    course = models.ForeignKey(
+        Item, on_delete=models.SET_NULL, null=True, blank=True, related_name="student_monthly_payments"
+    )
+    year = models.PositiveSmallIntegerField(db_index=True)
+    month = models.PositiveSmallIntegerField(db_index=True)  # 1–12
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.UNPAID, db_index=True
+    )
+    note = models.CharField(max_length=500, blank=True)
+    paid_at = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-year", "-month", "student_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["student", "year", "month"],
+                name="students_monthly_payment_student_year_month_uniq",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["business", "year", "month"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.student_id} {self.year}-{self.month:02d} {self.status}"
 
 
 class StudentRating(models.Model):
