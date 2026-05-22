@@ -1,5 +1,12 @@
-import logo from "../../assets/project-logo.png";
+import logo from "../../assets/citybot-logo.png";
 
 export default function BrandLogo({ height = 40, className = "" }) {
-  return <img src={logo} alt="Shahar Xizmatlari AI" style={{ height, width: "auto" }} className={className} />;
+  return (
+    <img
+      src={logo}
+      alt="CityBot CRM"
+      style={{ height, width: "auto", maxWidth: "100%", objectFit: "contain" }}
+      className={`cs-brand-logo ${className}`.trim()}
+    />
+  );
 }

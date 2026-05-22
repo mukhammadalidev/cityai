@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import BrandLogo from "../ui/BrandLogo";
 
 const LINKS = [
   { href: "#bosh", label: "Bosh sahifa" },
@@ -24,8 +25,7 @@ export default function LandingNavbar() {
     <header className="lp-nav">
       <div className="lp-container lp-nav__inner">
         <a href="#bosh" className="lp-nav__brand" onClick={(e) => { e.preventDefault(); scrollTo("#bosh"); }}>
-          <span className="lp-nav__logo">CB</span>
-          CityBot CRM
+          <BrandLogo height={44} className="lp-nav__brand-img" />
         </a>
 
         <ul className="lp-nav__links">

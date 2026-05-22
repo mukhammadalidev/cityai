@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import BrandLogo from "../ui/BrandLogo";
 
 export default function LandingFooter() {
   const scrollTo = (id) => document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
@@ -9,8 +10,7 @@ export default function LandingFooter() {
         <div className="lp-footer__grid">
           <div>
             <a href="#bosh" className="lp-nav__brand" onClick={(e) => { e.preventDefault(); scrollTo("#bosh"); }}>
-              <span className="lp-nav__logo">CB</span>
-              CityBot CRM
+              <BrandLogo height={40} className="lp-nav__brand-img" />
             </a>
             <p style={{ color: "var(--lp-muted)", marginTop: 12, fontSize: "0.9rem", lineHeight: 1.6 }}>
               O&apos;quv markazlar, fitness zallar va bizneslar uchun zamonaviy boshqaruv platformasi.

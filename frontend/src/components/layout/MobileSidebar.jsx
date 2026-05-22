@@ -1,5 +1,6 @@
 import { Drawer } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
+import BrandLogo from "../ui/BrandLogo";
 
 export default function MobileSidebar({ open, onClose, title, subtitle, children }) {
   return (
@@ -31,6 +32,7 @@ export default function MobileSidebar({ open, onClose, title, subtitle, children
     >
       <div className="cs-mobile-sidebar__head">
         <div className="cs-mobile-sidebar__head-text">
+          <BrandLogo height={36} className="cs-mobile-sidebar__logo" />
           {title ? <div className="cs-mobile-sidebar__title">{title}</div> : null}
           {subtitle ? <div className="cs-mobile-sidebar__sub">{subtitle}</div> : null}
         </div>

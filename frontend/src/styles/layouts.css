@@ -24,9 +24,22 @@
   border-bottom: 1px solid var(--cs-sidebar-border);
 }
 
-.cs-sider-brand__logo {
+.cs-sider-brand__logo,
+.cs-brand-logo {
   display: block;
   margin-bottom: 8px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 6px 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.cs-brand-img--public {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 .cs-sider-brand__title {
@@ -127,6 +140,13 @@
   padding-top: max(16px, env(safe-area-inset-top));
   border-bottom: 1px solid var(--cs-sidebar-border);
   flex-shrink: 0;
+}
+
+.cs-mobile-sidebar__logo {
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 6px;
+  border-radius: 10px;
 }
 
 .cs-mobile-sidebar__title {
