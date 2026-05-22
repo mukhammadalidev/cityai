@@ -6,13 +6,31 @@ import { logout } from "../../services/authService";
 import { PUBLIC_SITE_HOME } from "../../utils/authRouting";
 import { getSelectedBusinessId, setSelectedBusinessId } from "../../utils/storage";
 
-export default function Topbar({ title, subtitle, businesses = [], onMenuClick, showBizSelect, adminOverride = false }) {
+export default function Topbar({
+  title,
+  subtitle,
+  businesses = [],
+  onMenuClick,
+  onSidebarToggle,
+  sidebarCollapsed = false,
+  showBizSelect,
+  adminOverride = false,
+}) {
   const nav = useNavigate();
   const bid = getSelectedBusinessId();
 
   return (
     <header className="cs-topbar">
       <Space align="start" size={12}>
+        {onSidebarToggle ? (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onSidebarToggle}
+            className="desktop-only cs-topbar__sidebar-btn"
+            aria-label={sidebarCollapsed ? "Menyuni ochish" : "Menyuni yig‘ish"}
+          />
+        ) : null}
         {onMenuClick ? (
           <Button
             type="text"

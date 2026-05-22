@@ -1,3 +1,4 @@
+import { MenuOutlined } from "@ant-design/icons";
 import { Layout } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
@@ -94,7 +95,7 @@ export default function BusinessLayout() {
   }
 
   const layout = (
-    <Layout className="cs-app-layout">
+    <Layout className={`cs-app-layout${collapsed ? " cs-app-layout--sider-collapsed" : ""}`}>
       <Sider width={260} collapsedWidth={0} collapsed={collapsed} breakpoint="lg" className="cs-sider" trigger={null}>
         <div className="cs-sider-inner">
           <div className="cs-sider-brand">
@@ -111,6 +112,16 @@ export default function BusinessLayout() {
           </div>
         </div>
       </Sider>
+      {collapsed ? (
+        <button
+          type="button"
+          className="cs-sider-open-fab"
+          onClick={() => setCollapsed(false)}
+          aria-label="Menyuni ochish"
+        >
+          <MenuOutlined />
+        </button>
+      ) : null}
       <Layout className="cs-content">
         <Topbar
           title={biz?.name || "Kabinet"}
@@ -118,6 +129,8 @@ export default function BusinessLayout() {
           businesses={list}
           showBizSelect
           adminOverride={isSuperAdmin}
+          sidebarCollapsed={collapsed}
+          onSidebarToggle={() => setCollapsed((c) => !c)}
           onMenuClick={() => setMobileOpen(true)}
         />
         <MobileSidebar
